@@ -1,0 +1,9 @@
+resources floatnotes resources/
+
+content floatnotes content/
+content floatnotes content/  contentaccessible=yes
+overlay chrome://browser/content/browser.xul chrome://floatnotes/content/overlay.xul
+
+skin floatnotes default skin/
+style chrome://browser/content/browser.xul chrome://floatnotes/skin/toolbar.css
+style chrome://global/content/customizeToolbar.xul chrome://floatnotes/skin/toolbar.css

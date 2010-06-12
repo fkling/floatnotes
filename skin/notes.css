@@ -1,0 +1,132 @@
+.floatnotes-note.note-edit {
+    border-color: red;
+    border-width:2px;
+}
+
+.floatnotes-note {
+    border: 1px solid black;
+    font-family: sans-serif;
+    text-align:left;
+    color: black;
+    min-height: 30px;
+    min-width:30px;
+    background-color: #FCFACF;
+    z-index: 100000;
+    opacity:1;
+}
+
+.floatnotes-note * {
+    padding:0;
+    margin:0;
+    font-size: 12px !important;
+}
+
+.floatnotes-note ul, .floatnotes-note ol {
+    padding-left:30px;
+}
+
+.floatnotes-note .floatnotes-drag{
+    background-color: #706C6C;
+    height: 15px;
+    cursor: move;
+    margin-top:-17px;
+    margin-left:-1px;
+    border:1px solid black;
+    width: 100%;
+
+}
+
+.floatnotes-note.note-edit .floatnotes-drag {
+    border-color: red;
+    border-width:2px;
+    margin-left:-2px;
+    margin-top:-19px;
+    border-bottom:none;
+    background-color: red;
+}
+
+.floatnotes-note.note-edit .floatnotes-resize {
+    border-color: red;
+}
+
+.floatnotes-note .floatnotes-resize{
+
+    border-right: 5px solid #706C6C;
+    border-bottom: 5px solid #706C6C;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    cursor: se-resize;
+}
+
+
+
+.floatnotes-note .floatnotes-content{
+    padding: 5px;
+    overflow:auto;
+    position:absolute;
+    top: 0;
+    bottom: 0;
+    left:0;
+    right:0;
+}
+
+.floatnotes-note textarea {
+    position: absolute;
+    border: none;
+    background-color: transparent;
+    padding: 5px;
+}
+
+.floatnotes-note .floatnotes-toggle {
+    width:10px;
+    height: 10px;
+    background-color:blue;
+    position:absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.floatnotes-note.small {
+    min-height:16px;
+    max-height:16px;
+    max-width:16px;
+    min-height:16px;
+    -moz-border-radius: 7px;
+    -moz-border-radius-bottomright: 0;
+    opacity: 0.8;
+}
+
+.floatnotes-note.small > * {
+    display:none !important;
+
+}
+.floatnotes-indicator {
+    font-family: Verdana,Arial,sans-serif !important;
+    font-size: 12px;
+    text-align: left !important;
+    max-width: 200px;
+    opacity: .9;
+    border: 1px solid black;
+    z-index: 1000000;
+    background-color: #CCC;
+    color: black !important;
+}
+
+.floatnotes-indicator .floatnotes-label {
+    padding: 10px;
+}
+
+.floatnotes-indicator .floatnotes-text {
+    max-height: 50px;
+    overflow: hidden;
+    border-top: 1px solid black;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.floatnotes-indicator .floatnotes-text:hover {
+    background-color: #FCFACF;
+}

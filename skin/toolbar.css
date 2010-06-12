@@ -1,0 +1,7 @@
+#floatnotes-hide-button {
+  list-style-image: url("chrome://floatnotes/skin/hide_note_big.png");
+}
+
+toolbar[iconsize="small"] #floatnotes-hide-button {
+  list-style-image: url("chrome://floatnotes/skin/hide_note_small.png");
+}

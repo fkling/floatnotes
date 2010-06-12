@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <!-- Unique ID for extension. Can be in e-mail address format or GUID format -->
+    <em:id>floatnotes@felix-kling.de</em:id>
+    <!-- Indicates that this add-on is an extension -->
+    <em:type>2</em:type>
+    <!-- Extension name displayed in Add-on Manager -->
+    <em:name>FloatNotes</em:name>
+    <!-- Extension version number. There is a version numbering scheme you must follow -->
+    <em:version>0.3</em:version>
+    <!-- Brief description displayed in Add-on Manager -->
+    <em:description>Creates floating notes on every website.</em:description>
+    <!-- Name of extension's primary developer. Change to your name -->
+    <em:creator>Felix Kling</em:creator>
+    <!-- Web page address through which extension is distributed -->
+    <em:homepageURL>http://www.felix-kling.de/floatnotes</em:homepageURL>
+    <!-- This section gives details of the target application for the extension (in this case: Firefox 2) -->
+    <em:optionsURL>chrome://floatnotes/content/preferences.xul</em:optionsURL>
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>3.6</em:minVersion>
+        <em:maxVersion>3.6.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+  </Description>
+</RDF>

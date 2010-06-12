@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+
+<prefwindow type="prefwindow" id="FloatnotesPreferences"
+  windowtype="Browser:Preferences" title="Floatnotes Preferences"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  style="">
+
+  <script type="application/x-javascript">
+
+  </script>
+  <prefpane id="floatnotes-option-pane" label="Floatnotes settings">
+
+    <preferences>
+      <preference id="pref-width"
+        name="extensions.floatnotes.width" type="int"/>
+      <preference id="pref-height"
+        name="extensions.floatnotes.height" type="int"/>
+      <preference id="pref-color"
+        name="extensions.floatnotes.color" type="string"/>
+      <preference id="pref-location"
+        name="extensions.floatnotes.location" type="int"/>
+      <preference id="pref-indicator"
+        name="extensions.floatnotes.showIndicator" type="bool"/>
+      <preference id="pref-fadeout"
+        name="extensions.floatnotes.fadeOutAfter" type="int"/>
+
+    </preferences>
+    <vbox>
+    <groupbox>
+        <caption label="Default dimensions"/>
+        <hbox>
+            <label value="Width:" style="padding-top:5px" />
+            <spacer size="5" />
+            <textbox  id="floatnotes-width" size="2" maxlength="3" preference="pref-width"/>
+            <label value="px" style="padding-top:5px" />
+        </hbox>
+        <hbox>
+            <label value="Height:" style="padding-top:5px" />
+            <textbox id="floatnotes-height" size="2" maxlength="3" preference="pref-height"/>
+            <label value="px" style="padding-top:5px" />
+        </hbox>
+    </groupbox>
+    <groupbox>
+        <caption label="Default location"/>
+        <radiogroup id="floatnotes-location" preference="pref-location">
+            <radio label="URL with query string, EXAMPLE: www.example.com/foo/bar?search=floatnotes" value="-1"/>
+            <radio label="URL, EXAMPLE: www.example.com/foo/bar" value="-2"/>
+            <radio label="Wildcard URL, EXAMPLE: www.example.com/foo/bar*" value="-3"/>
+            <radio label="Wildcard host, EXAMPLE: www.example.com*" value="0"/>
+        </radiogroup>
+    </groupbox>
+    <groupbox>
+        <caption label="Misc"/>
+        <checkbox id="floatnotes-indicator"
+            label="Show info if notes are outside the current view on the website"
+            preference="pref-indicator" />
+        <hbox>
+            <label value="Time after the info fades out (0 = don't fade out):" style="padding-top:3px;" />
+            <textbox id="floatnotes-fadeout" size="2" maxlength="2" preference="pref-fadeout" />
+            <label value="seconds" style="padding-top:3px;" />
+        </hbox>
+    </groupbox>
+    </vbox>
+  </prefpane>
+</prefwindow>

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--<?xml-stylesheet href="chrome://floatnotes/skin/toolbar.css" type="text/css"?>-->
+<overlay id="floatnotesOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="floatnotes-hide-button"
+                   class="toolbarbutton-1"
+                   label="Show-Hide Notes"
+                   oncommand="gFloatNotes.showHideNotes();"/>
+ </toolbarpalette>
+
+  <popup id="contentAreaContextMenu">
+    <menuseparator />
+    <menuitem id="floatnotes-hide-note"
+              label='Hide notes'
+              oncommand='gFloatNotes.showHideNotes();'
+              class="menuitem-iconic"
+              image='chrome://floatnotes/skin/hide_note_small.png'/>
+
+
+    <menu id="floatnotes-edit-note"
+            label="Edit Note"
+            onpopupshowing='gFloatNotes.updateMenuLocations()'
+            onpopuphiding='gFloatNotes.removeMenuLocations()'>
+          <menupopup id="floatnotes-edit-note-menu" >
+
+          </menupopup>
+      </menu>
+    <menuitem id="floatnotes-delete-note"
+              label='Delete Note'
+              oncommand='gFloatNotes.deleteNote();'
+              class="menuitem-iconic"
+              image='chrome://floatnotes/skin/delete_note16.png'/>
+    <menuitem id="floatnotes-new-note"
+              label='Create Note...'
+              oncommand='gFloatNotes.newNote();'
+              class="menuitem-iconic"
+              image='chrome://floatnotes/skin/new_note16.png'/>
+  </popup>
+  <!--
+   <statusbar id="status-bar">
+   <statusbarpanel id="floatnotes-statusbar"
+     label="0 note(s)"
+     tooltiptext="Number of notes on this site."
+   />
+ </statusbar>
+-->
+  <script type="text/javascript" src="chrome://floatnotes/content/jquery.js" />
+  <script type="text/javascript" src="chrome://floatnotes/content/jqDnR.js" />
+  <script type="text/javascript" src="chrome://floatnotes/content/showdown.js" />
+  <script type="text/javascript" src="chrome://floatnotes/content/jQuery.scrollTo-1.4.2.js" />
+  <script type="application/javascript" src="chrome://floatnotes/content/ifloatnotes.js"/>
+</overlay>

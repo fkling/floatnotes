@@ -27,13 +27,25 @@
 
 .floatnotes-note .floatnotes-drag{
     background-color: #706C6C;
-    height: 15px;
+    height: 20px;
     cursor: move;
     margin-top:-17px;
     margin-left:-1px;
     border:1px solid black;
     width: 100%;
+}
 
+.floatnotes-note .floatnotes-resize{
+
+    /*border-right: 5px solid #706C6C;*/
+    /*border-bottom: 5px solid #706C6C;*/
+    background-color: #706C6C;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    cursor: se-resize;
 }
 
 .floatnotes-note.note-edit .floatnotes-drag {
@@ -47,18 +59,6 @@
 
 .floatnotes-note.note-edit .floatnotes-resize {
     border-color: red;
-}
-
-.floatnotes-note .floatnotes-resize{
-
-    border-right: 5px solid #706C6C;
-    border-bottom: 5px solid #706C6C;
-    width: 15px;
-    height: 15px;
-    position: absolute;
-    right: -5px;
-    bottom: -5px;
-    cursor: se-resize;
 }
 
 

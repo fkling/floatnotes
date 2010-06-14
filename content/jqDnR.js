@@ -1,9 +1,19 @@
+/*
+ * jqDnR - Minimalistic Drag'n'Resize for jQuery.
+ *
+ * Copyright (c) 2007 Brice Burgess <bhb@iceburg.net>, http://www.iceburg.net
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ * 
+ * $Version: 2007.08.19 +r2
+ */
+
 (function ($) {
-    $.fn.jqDrag = function (h, ic, c) {
-        return i(this, h, 'd', c, ic);
+    $.fn.jqDrag = function (h, pc, ic, c) {
+        return i(this, h, 'd', c, ic, pc);
     };
-    $.fn.jqResize = function (h, ic, c) {
-        return i(this, h, 'r', c, ic);
+    $.fn.jqResize = function (h, pc, ic, c) {
+        return i(this, h, 'r', c, ic, pc);
     };
     $.jqDnR = {
         dnr: {},
@@ -55,14 +65,15 @@
     var J = $.jqDnR,
         M = J.dnr,
         E = J.e,
-        i = function (e, h, k, c, ic) {
+        i = function (e, h, k, c, ic, pc) {
         return e.each(function () {
             h = (h) ? $(h, e) : e;
             h.bind('mousedown', {
                 e: e,
                 k: k,
                 c: c,
-                ic:ic
+                ic:ic,
+                pc:pc
             }, function (v) {
                 var d = v.data,
                     p = {};
@@ -74,9 +85,10 @@
                     } catch (e) {}
                 }
                 if(!d.c) {
-                    d.c = d.ic;
-                    d.ic = undefined;
+                    d.c = (d.ic) ? d.ic : d.pc;
+                    d.ic = (d.ic) ? d.pc : undefined;
                 }
+                
                 M = {
                     X: p.left || f('left') || 0,
                     Y: p.top || f('top') || 0,
@@ -90,6 +102,8 @@
                     ic: d.ic
                 };
                 E.css('opacity',0.8);
+                if(d.pc)
+                	$.proxy(d.pc, E)();
                 $(window.content.document).mousemove($.jqDnR.drag).mouseup($.jqDnR.stop);
                 return false;
             });

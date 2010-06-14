@@ -1,5 +1,11 @@
 /**
  * jQuery.ScrollTo
+ * 
+ * Made two small changes to make this plugin work as a Firefox extension.
+ * Copyright (c) 2007-2009 Felix Kling - sprinterl@gmx.de | http://thoughts.felix-kling.de
+ * Dual licensed under MIT and GPL.
+ * Date: 6/15/2010
+ * 
  * Copyright (c) 2007-2009 Ariel Flesler - aflesler(at)gmail(dot)com | http://flesler.blogspot.com
  * Dual licensed under MIT and GPL.
  * Date: 5/25/2009

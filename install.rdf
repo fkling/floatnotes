@@ -8,7 +8,7 @@
     <!-- Extension name displayed in Add-on Manager -->
     <em:name>FloatNotes</em:name>
     <!-- Extension version number. There is a version numbering scheme you must follow -->
-    <em:version>0.3</em:version>
+    <em:version>0.5</em:version>
     <!-- Brief description displayed in Add-on Manager -->
     <em:description>Creates floating notes on every website.</em:description>
     <!-- Name of extension's primary developer. Change to your name -->

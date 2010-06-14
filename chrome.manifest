@@ -1,6 +1,5 @@
-resources floatnotes resources/
+resource floatnotes resources/
 
-content floatnotes content/
 content floatnotes content/  contentaccessible=yes
 overlay chrome://browser/content/browser.xul chrome://floatnotes/content/overlay.xul
 

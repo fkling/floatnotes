@@ -12,7 +12,7 @@
     <menuseparator />
     <menuitem id="floatnotes-hide-note"
               label='Hide notes'
-              oncommand='gFloatNotes.showHideNotes();'
+              oncommand='gFloatNotes.toggleNotes();'
               class="menuitem-iconic"
               image='chrome://floatnotes/skin/hide_note_small.png'/>
 
@@ -32,7 +32,7 @@
               image='chrome://floatnotes/skin/delete_note16.png'/>
     <menuitem id="floatnotes-new-note"
               label='Create Note...'
-              oncommand='gFloatNotes.newNote();'
+              oncommand='gFloatNotes.addNote();'
               class="menuitem-iconic"
               image='chrome://floatnotes/skin/new_note16.png'/>
   </popup>
@@ -44,9 +44,10 @@
    />
  </statusbar>
 -->
-  <script type="text/javascript" src="chrome://floatnotes/content/jquery.js" />
-  <script type="text/javascript" src="chrome://floatnotes/content/jqDnR.js" />
-  <script type="text/javascript" src="chrome://floatnotes/content/showdown.js" />
-  <script type="text/javascript" src="chrome://floatnotes/content/jQuery.scrollTo-1.4.2.js" />
+  <script type="text/javascript" src="resource://floatnotes/jquery.js" />
+  <script type="text/javascript" src="resource://floatnotes/jqDnR.js" />
+  <script type="text/javascript" src="resource://floatnotes/showdown.js" />
+  <script type="text/javascript" src="resource://floatnotes/jQuery.dotimeout.js" />
+  <script type="text/javascript" src="resource://floatnotes/jQuery.scrollTo-1.4.2.js" />
   <script type="application/javascript" src="chrome://floatnotes/content/ifloatnotes.js"/>
 </overlay>

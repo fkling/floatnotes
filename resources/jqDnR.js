@@ -1,6 +1,15 @@
 /*
  * jqDnR - Minimalistic Drag'n'Resize for jQuery.
  *
+ * Added various callback methods and make it work as part of an Firefox 
+ * extension.
+ *  
+ * Copyright (c) 2010 Felix Kling <sprinterl@gmx.de>, http://thoughts.felix-kling.de
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ * 
+ * Original version:
+ *
  * Copyright (c) 2007 Brice Burgess <bhb@iceburg.net>, http://www.iceburg.net
  * Licensed under the MIT License:
  * http://www.opensource.org/licenses/mit-license.php

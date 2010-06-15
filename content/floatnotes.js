@@ -36,7 +36,11 @@ FloatNotes.prototype = {
         this._locationsMenu = document.getElementById('floatnotes-edit-note');
         this._editMenuItem = document.getElementById('floatnotes-edit-note');
         this._hideMenuItem = document.getElementById('floatnotes-hide-note');
-
+        
+    // load string bundle
+        this.stringsBundle = document.getElementById("floatnotes-stringbundle");
+        
+    // attach load handler
         gBrowser.addEventListener("load", function(e){gFloatNotes.onPageLoad(e);}, true);
 
     },
@@ -55,95 +59,7 @@ FloatNotes.prototype = {
 
 	    // enable indicators
 	    if(this.pref.getBoolPref('showIndicator')) {
-	    	
-	    	var $above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
-	    	.css({position: 'fixed', top: 0, left: 0})
-	    	.find('.floatnotes-texts').hide().end()
-	    	.hover(function(){
-	    			$(this).trigger('reset').find('.floatnotes-texts').show();
-	    			$.doTimeout('fade-' + this.id);
-	    		}, function() {
-	    			$(this).trigger('fade').find('.floatnotes-texts').hide();
-	    		})
-	    	.hide()
-	    	.delegate('.floatnotes-text', 'click', {doc: doc}, function(event) {
-	    			$(this).closest('.floatnotes-texts').hide();
-	    			$(event.data.doc).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
-	    		})
-	    	.data('count', 0)
-	    	.bind('reset', {doc: doc}, function() {
-	    		$(this, doc).stop(true, true).show().css('opacity', 1);
-	    	})
-	    	.appendTo(doc.body);
-
-	    	var fadeout;
-	    	if((fadeout = this.pref.getIntPref('fadeOutAfter')) > 0) {
-	    		$above.bind('fade', {doc: doc}, function(event) {
-	    			var that = this;
-	    			$.doTimeout('fade-' + this.id, fadeout*1000, function() {
-	    				$(that, event.data.doc).fadeOut(800);
-	    			});
-	    			
-	    		});
-	    	}
-
-	    	var $below = $above.clone(true)
-	    	.attr('id', 'floatnotes-below')
-	    	.css({bottom: 0, top: ''})
-	    	.appendTo(doc.body);
-
-	    	$(doc).bind('scroll', function(e) {
-	    		var doc = this;
-	    		$.doTimeout('scroll', 75, function(){
-	    			var wintop = parseInt($(doc).scrollTop()),
-	    				winheight = parseInt($(win).height());
-		    		$above.trigger('reset');
-		    		$below.trigger('reset');
-		    		$('.floatnotes-note:visible', doc)
-		    		.filter(function(){return $(this).data('id');})
-		    		.each(function() {	
-		    				var id = 'floatnotes-text-' + $(this).data('id'),
-		    					top = parseInt($(this).css('top')),
-		    					bottom = parseInt($(this).css('top')) + parseInt($(this).height());
-	
-		    				var $position = null;
-		    				if (wintop > bottom) {
-		    					$position = $above;
-		    				}
-		    				else if(wintop + winheight < top) {
-		    					$position = $below;
-		    				}
-		    				if($position) {	    				
-		    					if($position.find('#' + id).length == 0) {
-				    				var ele = $('<div class="floatnotes-text"></div>', doc).attr('id', id)
-			    					.text($(this).find('.floatnotes-content').text())
-			    					.data('top', $(this).css('top'));
-		    						$position.data('count', $position.data('count') + 1);
-		    						ele.appendTo($position.children('.floatnotes-texts'));
-		    					}
-		    				}
-		    				else {
-		    					$position = $('#' + id, doc).closest('.floatnotes-indicator');
-		    					$position.data('count', $position.data('count') -1);
-		    					$('#' + id, doc).remove();
-		    				}
-		    			});
-		    			
-		    			$.each({'above': $above, 'below': $below}, function(i, val) {
-		    				var count = val.data('count');
-		    				if(count > 0) {
-		    					val
-		    					.find('.floatnotes-label')
-		    					.text(count + ' note'  + (count > 1 ? 's ': ' ') +  i)
-		    					.end()
-		    					.show().trigger('fade');
-		    				}
-		    				else {
-		    					val.hide();
-		    				}			
-		    			});
-		    	});
-	    	});
+	    	this._attachScrollHandler(win, doc);
 	    }
 
 	    // Get notes for this site
@@ -203,6 +119,101 @@ FloatNotes.prototype = {
 		    });
 		}
     },
+    
+    _attachScrollHandler: function(win, doc) {
+    	var $above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
+    	.css({position: 'fixed', top: 0, left: 0})
+    	.find('.floatnotes-texts').hide().end()
+    	.hover(function(){
+    			alert(1);
+    			$(this).trigger('reset').find('.floatnotes-texts').show();
+    			$.doTimeout('fade-' + this.id);
+    		}, function() {
+    			$(this).trigger('fade').find('.floatnotes-texts').hide();
+    		})
+    	.hide()
+    	.delegate('.floatnotes-text', 'click', {doc: doc}, function(event) {
+    			$(this).parent().hide();
+    			$(event.data.doc).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
+    		})
+    	.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
+    	.bind('reset', {doc: doc}, function(event) {
+    		$(this, event.data.doc).stop(true, true).show().css('opacity', 1);
+    	})
+    	.appendTo(doc.body);
+
+    	var fadeout;
+    	if((fadeout = this.pref.getIntPref('fadeOutAfter')) > 0) {
+    		$above.bind('fade', {doc: doc}, function(event) {
+    			var that = this;
+    			$.doTimeout('fade-' + this.id, fadeout*1000, function() {
+    				$(that, event.data.doc).fadeOut(800);
+    			});
+    			
+    		});
+    	}
+
+    	var $below = $above.clone(true)
+    	.attr('id', 'floatnotes-below')
+    	.data('label', this.stringsBundle.getString('belowIndicatorString'))
+    	.css({bottom: 0, top: ''})
+    	.appendTo(doc.body);
+    	
+    	
+    	$(doc).bind('scroll', function(e) {
+    		var doc = this;
+    		$.doTimeout('scroll', 75, function(){
+    			var wintop = parseInt($(doc).scrollTop()),
+    				winheight = parseInt($(win).height());
+	    		$above.trigger('reset');
+	    		$below.trigger('reset');
+	    		$('.floatnotes-note:visible', doc)
+	    		.filter(function(){return $(this).data('id');})
+	    		.each(function() {	
+	    				var id = 'floatnotes-text-' + $(this).data('id'),
+	    					top = parseInt($(this).css('top')),
+	    					bottom = parseInt($(this).css('top')) + parseInt($(this).height());
+	    				var $position = null;
+	    				if (wintop > bottom) {
+	    					$position = $above;
+	    				}
+	    				else if(wintop + winheight < top) {
+	    					$position = $below;
+	    				}
+	    				if($position) {	    				
+	    					if($position.find('#' + id).length == 0) {
+	    						var ele = $('<div class="floatnotes-text"></div>', doc).attr('id', id)
+		    					.text($(this).find('.floatnotes-content').text())
+		    					.data('top', $(this).css('top'));
+	    						$position.data('count', $position.data('count') + 1);
+	    						ele.appendTo($position.children('.floatnotes-texts'));
+	    					}
+	    				}
+	    				else {
+	    					$position = $('#' + id, doc).closest('.floatnotes-indicator');
+	    					$position.data('count', $position.data('count') -1);
+	    					$('#' + id, doc).remove();
+	    				}
+	    			});
+	    			
+	    			
+	    			$.each([$above, $below], function() {
+	    				var data = this.data();
+	    				if(data.count > 0) {
+	    					this
+	    					.find('.floatnotes-label')
+	    					.text(data.count + ' ' + (data.count > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + data.label)
+	    					.end()
+	    					.show().trigger('fade');
+	    				}
+	    				else {
+	    					this.hide();
+	    				}			
+	    			});
+	    	});
+    	});
+    },
+    
     /* Inject the JS stylesheet to style the notes */
     _injectStylesheet: function(doc) {
     	var style = doc.getElementById("floatnotes-style");
@@ -439,10 +450,6 @@ FloatNotes.prototype = {
                 }
                 t.contextNote.remove();
                 t.contextNote = null;
-                var id = 'floatnotes-text-' + $(this).data('id'),
-				$position = $('#floatnotes-text-' + $(this).data('id'), doc).closest('.floatnotes-indicator');
-				$position.data('count', $position.data('count') -1);
-				$('#' + id, doc).remove();
             }
         });
     },
@@ -563,14 +570,14 @@ FloatNotes.prototype = {
     },
     
     _updateMenuText: function(hide) {
-		var el = document.getElementById('floatnotes-hide-note');
+    	
 		if(!hide) {
-		    el.setAttribute('label', 'Hide notes');
-		    el.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
+			this._hideMenuItem.setAttribute('label', this.stringsBundle.getString('hideNotesString'));
+			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
 		}
 		else {
-		    el.setAttribute('label', 'Show notes (' + jQuery('.floatnotes-note', window.content.document).length +')');
-		    el.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
+			this._hideMenuItem.setAttribute('label', this.stringsBundle.getFormattedString('showNotesString', [jQuery('.floatnotes-note', window.content.document).length ]));
+			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
 		}
     }
 };
@@ -580,4 +587,4 @@ FloatNotes.prototype = {
 var gFloatNotes = new FloatNotes();
 window.addEventListener("load", function(){gFloatNotes.init(); }, false);
 window.addEventListener("contextmenu", function(e) {gFloatNotes.updateContext(e);}, true);
-window.addEventListener("popupshowing", function(e) {gFloatNotes.updateMenuItems(e);}, false);
+window.addEventListener("contextmenu", function(e) {gFloatNotes.updateMenuItems(e);}, false);

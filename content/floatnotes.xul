@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://floatnotes/locale/floatnotes.dtd">
+<overlay id="floatnotesOverlay"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<popup id="contentAreaContextMenu">
+		<menuseparator />
+		<menuitem id="floatnotes-hide-note" label='&floatnotes.hide;'
+			oncommand='gFloatNotes.toggleNotes();' class="menuitem-iconic"
+			image='chrome://floatnotes/skin/hide_note_small.png' />
+
+
+		<menu id="floatnotes-edit-note" label="&floatnotes.edit;"
+			onpopupshowing='gFloatNotes.updateMenuLocations()' onpopuphiding='gFloatNotes.removeMenuLocations()'>
+			<menupopup id="floatnotes-edit-note-menu"></menupopup>
+		</menu>
+		<menuitem id="floatnotes-delete-note" label='&floatnotes.delete;'
+			oncommand='gFloatNotes.deleteNote();' class="menuitem-iconic"
+			image='chrome://floatnotes/skin/delete_note16.png' />
+		<menuitem id="floatnotes-new-note" label='&floatnotes.new;'
+			oncommand='gFloatNotes.addNote();' class="menuitem-iconic"
+			image='chrome://floatnotes/skin/new_note16.png' />
+	</popup>
+	
+	<stringbundleset id="stringbundleset">
+        <stringbundle id="floatnotes-stringbundle" src="chrome://floatnotes/locale/floatnotes.properties"/>
+    </stringbundleset>
+	
+	<script type="text/javascript" src="resource://floatnotes/jquery.js" />
+	<script type="text/javascript" src="resource://floatnotes/jqDnR.js" />
+	<script type="text/javascript" src="resource://floatnotes/showdown.js" />
+	<script type="text/javascript" src="resource://floatnotes/jQuery.dotimeout.js" />
+	<script type="text/javascript" src="resource://floatnotes/jQuery.scrollTo-1.4.2.js" />
+	<script type="application/javascript" src="chrome://floatnotes/content/floatnotes.js" />
+</overlay>

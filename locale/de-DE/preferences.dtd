@@ -1,0 +1,16 @@
+<!ENTITY preferences.title "Floatnotes Einstellungen" >
+
+<!ENTITY preferences_dimensions.title "Standard-Größe" >
+<!ENTITY preferences_dimensions.width "Höhe:" >
+<!ENTITY preferences_dimensions.height "Breite:" >
+
+<!ENTITY preferences_location.title "Standard-URL " >
+<!ENTITY preferences_location.query "URL mit Parametern, BEISPIEL: www.example.com/foo/bar?search=floatnotes" >
+<!ENTITY preferences_location.url "URL, BEISPIEL: www.example.com/foo/bar" >
+<!ENTITY preferences_location.wild_url "Platzhalter URL, BEISPIEL: www.example.com/foo/bar*" >
+<!ENTITY preferences_location.wild_host "Platzhalter Server, BEISPIEL: www.example.com*" >
+
+<!ENTITY preferences_misc.title "Verschiedenes" >
+<!ENTITY preferences_misc.show_indicator "Zeige Information wenn sich Notizen außerhalb des sichtbaren Bereichs befinden" >
+<!ENTITY preferences_misc.indicator_timeout "Dauer, wie lange die Information angezeigt werden soll (0 = immer sichtbar):" >
+<!ENTITY preferences_misc.indicator_timeout_unit "Sekunden" >

@@ -1,0 +1,16 @@
+<!ENTITY preferences.title "Floatnotes Settings" >
+
+<!ENTITY preferences_dimensions.title "Default Dimensions" >
+<!ENTITY preferences_dimensions.width "Width:" >
+<!ENTITY preferences_dimensions.height "Height:" >
+
+<!ENTITY preferences_location.title "Default Location" >
+<!ENTITY preferences_location.query "URL with query string, EXAMPLE: www.example.com/foo/bar?search=floatnotes" >
+<!ENTITY preferences_location.url "URL, EXAMPLE: www.example.com/foo/bar" >
+<!ENTITY preferences_location.wild_url "Wildcard URL, EXAMPLE: www.example.com/foo/bar*" >
+<!ENTITY preferences_location.wild_host "Wildcard host, EXAMPLE: www.example.com*" >
+
+<!ENTITY preferences_misc.title "Misc" >
+<!ENTITY preferences_misc.show_indicator "Show info if notes are outside the current view on the website" >
+<!ENTITY preferences_misc.indicator_timeout "Time after the info fades out (0 = don't fade out):" >
+<!ENTITY preferences_misc.indicator_timeout_unit "seconds" >

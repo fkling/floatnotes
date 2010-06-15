@@ -1,7 +1,9 @@
-.floatnotes-note.note-edit {
-    border-color: red;
-    border-width:2px;
-}
+/* 
+ * This stylesheet is used by the FloatNotes extension for Firefox.
+ */
+
+
+/*  ----- Note style ----- */
 
 .floatnotes-note {
     border: 1px solid black;
@@ -21,6 +23,26 @@
     font-size: 12px !important;
 }
 
+.floatnotes-note.small {
+    min-height:16px;
+    max-height:16px;
+    max-width:16px;
+    min-height:16px;
+    -moz-border-radius: 7px;
+    -moz-border-radius-bottomright: 0;
+    opacity: 0.8;
+}
+
+.floatnotes-note.small > * {
+    display:none !important;
+
+}
+
+.floatnotes-note.note-edit {
+    border-color: red;
+    border-width:2px;
+}
+
 .floatnotes-note ul, .floatnotes-note ol {
     padding-left:30px;
 }
@@ -36,7 +58,6 @@
 }
 
 .floatnotes-note .floatnotes-resize{
-
     /*border-right: 5px solid #706C6C;*/
     /*border-bottom: 5px solid #706C6C;*/
     background-color: #706C6C;
@@ -58,10 +79,8 @@
 }
 
 .floatnotes-note.note-edit .floatnotes-resize {
-    border-color: red;
+    background-color: red;
 }
-
-
 
 .floatnotes-note .floatnotes-content{
     padding: 5px;
@@ -80,29 +99,8 @@
     padding: 5px;
 }
 
-.floatnotes-note .floatnotes-toggle {
-    width:10px;
-    height: 10px;
-    background-color:blue;
-    position:absolute;
-    top: 0;
-    bottom: 0;
-}
+/*  ----- Indicator styles ----- */
 
-.floatnotes-note.small {
-    min-height:16px;
-    max-height:16px;
-    max-width:16px;
-    min-height:16px;
-    -moz-border-radius: 7px;
-    -moz-border-radius-bottomright: 0;
-    opacity: 0.8;
-}
-
-.floatnotes-note.small > * {
-    display:none !important;
-
-}
 .floatnotes-indicator {
     font-family: Verdana,Arial,sans-serif !important;
     font-size: 12px;
@@ -116,7 +114,7 @@
 }
 
 .floatnotes-indicator .floatnotes-label {
-    padding: 10px;
+    padding: 5px;
 }
 
 .floatnotes-indicator .floatnotes-text {

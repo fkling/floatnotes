@@ -42,7 +42,7 @@ FloatNotes.prototype = {
     },
 
     onPageLoad: function(event) {
-	if (event.originalTarget instanceof HTMLDocument) {
+    	if (event.originalTarget instanceof HTMLDocument) {
             var win = event.originalTarget.defaultView;
             if (win.frameElement) {
             	// Frame within a tab was loaded. win should be the top window of
@@ -94,34 +94,32 @@ FloatNotes.prototype = {
 
 	    	$(doc).bind('scroll', function(e) {
 	    		var doc = this;
-	    		$.doTimeout('scroll', 75, function(wintop){     		
+	    		$.doTimeout('scroll', 75, function(){
+	    			var wintop = parseInt($(doc).scrollTop()),
+	    				winheight = parseInt($(win).height());
 		    		$above.trigger('reset');
 		    		$below.trigger('reset');
-		    		var $above_texts = $('.floatnotes-texts', $above),
-				    	$below_texts = $('.floatnotes-texts', $below);
-		    			$('.floatnotes-note:visible', doc)
-		    			.filter(function(){return $(this).data('id');})
-		    			.each(function() {
-	
+		    		$('.floatnotes-note:visible', doc)
+		    		.filter(function(){return $(this).data('id');})
+		    		.each(function() {	
 		    				var id = 'floatnotes-text-' + $(this).data('id'),
 		    					top = parseInt($(this).css('top')),
 		    					bottom = parseInt($(this).css('top')) + parseInt($(this).height());
-		    				var ele = $('<div class="floatnotes-text"></div>', doc).attr('id', id)
-		    					.text($(this).find('.floatnotes-content').text())
-		    					.data('top', $(this).css('top'));
 	
 		    				var $position = null;
 		    				if (wintop > bottom) {
 		    					$position = $above;
 		    				}
-		    				else if(wintop + $(win).height() < top) {
+		    				else if(wintop + winheight < top) {
 		    					$position = $below;
 		    				}
-		    				
 		    				if($position) {	    				
 		    					if($position.find('#' + id).length == 0) {
+				    				var ele = $('<div class="floatnotes-text"></div>', doc).attr('id', id)
+			    					.text($(this).find('.floatnotes-content').text())
+			    					.data('top', $(this).css('top'));
 		    						$position.data('count', $position.data('count') + 1);
-		    						ele.appendTo($position.find('.floatnotes-texts'));
+		    						ele.appendTo($position.children('.floatnotes-texts'));
 		    					}
 		    				}
 		    				else {
@@ -144,7 +142,7 @@ FloatNotes.prototype = {
 		    					val.hide();
 		    				}			
 		    			});
-		    	}, [$(doc).scrollTop()]);
+		    	});
 	    	});
 	    }
 
@@ -186,10 +184,10 @@ FloatNotes.prototype = {
 			    // hide notes for this domain if previously hidden
 			    var domain = doc.location;
 			    if(gFloatNotes.status[domain] && gFloatNotes.status[domain]['hidden'] == true) {
-			    	gFloatNotes.updateContextText(true);
+			    	gFloatNotes._updateMenuText(true);
 			    }
 			    else {
-			    	gFloatNotes.updateContextText(false);
+			    	gFloatNotes._updateMenuText(false);
 			    }
 			    $(doc).trigger('scroll');
 			},
@@ -244,7 +242,7 @@ FloatNotes.prototype = {
     	    function() {
         		$('.floatnotes-drag, .floatnotes-resize', this).hide();
     	    	if($(this).data('collapsed'))
-    	    		$(this).trigger('collapse');
+    	    		$(this).trigger('collapse', [false, true]);
     	    });
         };
         // create the divs, set and bind all necessary handlers
@@ -254,15 +252,14 @@ FloatNotes.prototype = {
         .find('.floatnotes-drag')
 	    	.dblclick(function(){ // note collapses on dblclick if not editing
 	    		if(!$(this).parent().hasClass('note-edit'))
-	    			$(this).hide().trigger('collapse',[true]);
+	    			$(this).hide().trigger('collapse',[true, true]);
 	    		})
 	    		.hide()
 	    .end()
 	    .find('.floatnotes-resize').hide().end()
 	    .find('.floatnotes-content')
-	    	.bind('dblclick', {docs: doc}, function(event) { // dblclick enables editing
-	    		var doc = event.data.docs;
-	    		$(this).trigger('start-edit', [doc]);
+	    	.bind('dblclick', function() { // dblclick enables editing
+	    		$(this).trigger('start-edit');
 	    	})
 	    	.html(gFloatNotes.converter.makeHtml(data.content))
 	    	.end()
@@ -276,60 +273,64 @@ FloatNotes.prototype = {
 	    		e.stopPropagation();
 	    	}
 	    })
-	    .mousedown(function() {
-	    	// bring note to front
+	    .mousedown(function() {   	 // bring note to front
 	    	var maxz = Math.max.apply(this, $(this).siblings('.floatnotes-note').map(function(){return parseInt($(this).css('z-index'));}).get());
 	    	if(maxz)
 	    		$(this).css('z-index', maxz+1);
 	    })
         .jqResize('.floatnotes-resize', function() {
-        	$(this).unbind('mouseenter mouseleave');
-        }, function(w, h) {
-        	$(this).unbind('mouseenter mouseleave');
-        	if($(this).hasClass('note-edit')) {
-        		resizeTextarea(this, w, h);
-        	}
-        },
-        function() {
-	        var data = $(this).data();
-	        data.w = parseInt($(this).css('width'));
-            data.h = parseInt($(this).css('height'));
-            $(this).addClass('needs-save').trigger('save');
-            $(this).removeClass('floatnotes-resizing');
-            set_hover($(this));
-            //$(this).mouseout();
+        		$(this).unbind('mouseenter mouseleave');
+        	}, function(w, h) {
+	        	$(this).unbind('mouseenter mouseleave');
+	        	if($(this).hasClass('note-edit')) {
+	        		resizeTextarea(this, w, h);
+	        	}
+	        },
+	        function() {
+		        var data = $(this).data();
+		        data.w = parseInt($(this).css('width'));
+	            data.h = parseInt($(this).css('height'));
+	            $(this).addClass('needs-save').trigger('save');
+	            $(this).removeClass('floatnotes-resizing');
+	            set_hover($(this));
         })
         .jqDrag('.floatnotes-drag', function() {
-        	$(this).unbind('mouseenter mouseleave');
-	    },null,
-	    function() {
-	    	var data = $(this).data();
-             	data.x = parseInt($(this).css('left'));
-             	data.y = parseInt($(this).css('top'));
-             	$(this).addClass('needs-save').trigger('save');
-             	$(this).removeClass('floatnotes-dragging');
-             	set_hover($(this));
-             	//$(this).mouseout();
+	        	$(this).unbind('mouseenter mouseleave');
+		    },
+		    null,
+		    function() {
+		    	var data = $(this).data();
+	             	data.x = parseInt($(this).css('left'));
+	             	data.y = parseInt($(this).css('top'));
+	             	$(this).addClass('needs-save').trigger('save');
+	             	$(this).removeClass('floatnotes-dragging');
+	             	set_hover($(this));
         })
         .css({'width': data.w, 'height': data.h, 'top': data.y, 'left': data.x, 'position': 'absolute'})
         .bind({
-        	'collapse': function(save) {
+        	'collapse': function(event, save, animate) {
         		var data = $(this).data();
         		if(!data.collapsed) {
         			data.collapsed = true;
         		}
-        		$(this).animate({height: '16px',width:'16px'}, 'fast', function() {
+        		if(animate) {
+        			$(this).animate({height: '16px',width:'16px'}, 'fast', function() {
+            			$(this).addClass('small needs-save');
+            			if(save) $(this).trigger('save');
+            		});
+        		}
+        		else {
         			$(this).addClass('small needs-save');
         			if(save) $(this).trigger('save');
-        		});
+        		}
 	    	},
-	    	'uncollapse': function(save) {
+	    	'uncollapse': function() {
 	    		if($(this).hasClass('small')) {
     	    		var data = $(this).data();
     	    		$(this).removeClass('small').css({width: data.w, height: data.h});
     	    	}
 	    	},
-	    	'start-edit': function(doc) {
+	    	'start-edit': function() {
 	    		var $note = $(this);
 	    		$('.floatnotes-content', this).hide();
 	    		$('textarea', this).show().html($note.data('content')).focus();

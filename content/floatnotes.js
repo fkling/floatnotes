@@ -123,9 +123,9 @@ FloatNotes.prototype = {
     _attachScrollHandler: function(win, doc) {
     	var $above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
     	.css({position: 'fixed', top: 0, left: 0})
+    	.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
     	.find('.floatnotes-texts').hide().end()
     	.hover(function(){
-    			alert(1);
     			$(this).trigger('reset').find('.floatnotes-texts').show();
     			$.doTimeout('fade-' + this.id);
     		}, function() {
@@ -136,7 +136,6 @@ FloatNotes.prototype = {
     			$(this).parent().hide();
     			$(event.data.doc).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
     		})
-    	.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
     	.bind('reset', {doc: doc}, function(event) {
     		$(this, event.data.doc).stop(true, true).show().css('opacity', 1);
     	})
@@ -424,7 +423,7 @@ FloatNotes.prototype = {
 			y:this.Y,
 			w: this.pref.getIntPref('width'),
 			h: this.pref.getIntPref('height'),
-			content: ":)",
+			content: "",
 			url: this._getDefaultUrl(),
 			color: '#AAA',
 			collapsed: false}, doc);

@@ -23,18 +23,18 @@ Libraries
 
 This extension uses the following libraries:
 
-- jQuery
-- jQuery plugin: doTimeout  
+- [jQuery](http://jquery.com/)
+- jQuery plugin: [doTimeout](http://benalman.com/projects/jquery-dotimeout-plugin/)  
   It was adjusted such that it works in a Firefox extension.
-- jQuery plugin: jqDnR
+- jQuery plugin: [jqDnR](http://dev.iceburg.net/jquery/jqDnR/)
   This plugin was extended in several ways:  
       - It was adjusted such that it works in a Firefox extension.
       - It now takes callback functions that are called before, during and after
         resizing or dragging.
       - If an element is dragged out of view, the view scrolls with it.
-- jQuery plugin: ScrollTo
+- jQuery plugin: [scrollTo](http://flesler.blogspot.com/2007/10/jqueryscrollto.html)
   It was adjusted such that it works in a Firefox extension.
-- Showdown: A JavaScript Markdown parser
+- [Showdown](http://attacklab.net/showdown/): A JavaScript Markdown parser
 
 
 Usage instructions

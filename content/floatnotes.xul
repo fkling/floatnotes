@@ -27,7 +27,7 @@
 	
 	<script type="text/javascript" src="resource://floatnotes/jquery.js" />
 	<script type="text/javascript" src="resource://floatnotes/jqDnR.js" />
-	<script type="text/javascript" src="resource://floatnotes/showdown.js" />
+	<script type="text/javascript" src="resource://floatnotes/showdown/showdown.js" />
 	<script type="text/javascript" src="resource://floatnotes/jQuery.dotimeout.js" />
 	<script type="text/javascript" src="resource://floatnotes/jQuery.scrollTo-1.4.2.js" />
 	<script type="application/javascript" src="chrome://floatnotes/content/floatnotes.js" />

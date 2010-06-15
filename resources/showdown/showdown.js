@@ -1,3 +1,9 @@
+/*
+   A A L        Source code at:
+   T C A   <http://www.attacklab.net/>
+   T K B
+*/
+
 var Showdown={};
 Showdown.converter=function(){
 var _1;

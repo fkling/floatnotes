@@ -59,6 +59,42 @@ FloatNotes.prototype = {
 
 	    // enable indicators
 	    if(this.pref.getBoolPref('showIndicator')) {
+      	    var $above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
+          	.css({position: 'fixed', top: 0, left: 0})
+          	.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
+          	.find('.floatnotes-texts').hide().end()
+          	.hover(function(){
+          			$(this).trigger('reset').find('.floatnotes-texts').show();
+          			$.doTimeout('fade-' + this.id);
+          		}, function() {
+          			$(this).trigger('fade').find('.floatnotes-texts').hide();
+          		})
+          	.hide()
+          	.delegate('.floatnotes-text', 'click', {doc: doc}, function(event) {
+          			$(this).parent().hide();
+          			$(event.data.doc).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
+          		})
+          	.bind('reset', {doc: doc}, function(event) {
+          		$(this, event.data.doc).stop(true, true).show().css('opacity', 1);
+          	})
+          	.appendTo(doc.body);
+      
+          	var fadeout;
+          	if((fadeout = this.pref.getIntPref('fadeOutAfter')) > 0) {
+          		$above.bind('fade', {doc: doc}, function(event) {
+          			var that = this;
+          			$.doTimeout('fade-' + this.id, fadeout*1000, function() {
+          				$(that, event.data.doc).fadeOut(800);
+          			});
+          			
+          		});
+          	}
+      
+          	var $below = $above.clone(true)
+          	.attr('id', 'floatnotes-below')
+          	.data('label', this.stringsBundle.getString('belowIndicatorString'))
+          	.css({bottom: 0, top: ''})
+          	.appendTo(doc.body);
 	    	this._attachScrollHandler(win, doc);
 	    }
 
@@ -121,53 +157,17 @@ FloatNotes.prototype = {
     },
     
     _attachScrollHandler: function(win, doc) {
-    	var $above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
-    	.css({position: 'fixed', top: 0, left: 0})
-    	.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
-    	.find('.floatnotes-texts').hide().end()
-    	.hover(function(){
-    			$(this).trigger('reset').find('.floatnotes-texts').show();
-    			$.doTimeout('fade-' + this.id);
-    		}, function() {
-    			$(this).trigger('fade').find('.floatnotes-texts').hide();
-    		})
-    	.hide()
-    	.delegate('.floatnotes-text', 'click', {doc: doc}, function(event) {
-    			$(this).parent().hide();
-    			$(event.data.doc).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
-    		})
-    	.bind('reset', {doc: doc}, function(event) {
-    		$(this, event.data.doc).stop(true, true).show().css('opacity', 1);
-    	})
-    	.appendTo(doc.body);
-
-    	var fadeout;
-    	if((fadeout = this.pref.getIntPref('fadeOutAfter')) > 0) {
-    		$above.bind('fade', {doc: doc}, function(event) {
-    			var that = this;
-    			$.doTimeout('fade-' + this.id, fadeout*1000, function() {
-    				$(that, event.data.doc).fadeOut(800);
-    			});
-    			
-    		});
-    	}
-
-    	var $below = $above.clone(true)
-    	.attr('id', 'floatnotes-below')
-    	.data('label', this.stringsBundle.getString('belowIndicatorString'))
-    	.css({bottom: 0, top: ''})
-    	.appendTo(doc.body);
-    	
-    	
-    	$(doc).bind('scroll', function(e) {
+    	var $above = $('#floatnotes-above', doc);
+    	var $below = $('#floatnotes-below', doc);
+    	$(doc).bind('scroll.floatnotes', function(e) {
     		var doc = this;
     		$.doTimeout('scroll', 75, function(){
     			var wintop = parseInt($(doc).scrollTop()),
     				winheight = parseInt($(win).height());
 	    		$above.trigger('reset');
 	    		$below.trigger('reset');
-	    		$('.floatnotes-note:visible', doc)
-	    		.filter(function(){return $(this).data('id');})
+	    		$('.floatnotes-note', doc)
+	    		//.filter(function(){return $(this).data('id');})
 	    		.each(function() {	
 	    				var id = 'floatnotes-text-' + $(this).data('id'),
 	    					top = parseInt($(this).css('top')),
@@ -193,22 +193,22 @@ FloatNotes.prototype = {
 	    					$position.data('count', $position.data('count') -1);
 	    					$('#' + id, doc).remove();
 	    				}
-	    			});
+	    		});
 	    			
 	    			
-	    			$.each([$above, $below], function() {
-	    				var data = this.data();
-	    				if(data.count > 0) {
-	    					this
-	    					.find('.floatnotes-label')
-	    					.text(data.count + ' ' + (data.count > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + data.label)
-	    					.end()
-	    					.show().trigger('fade');
-	    				}
-	    				else {
-	    					this.hide();
-	    				}			
-	    			});
+	    		$.each([$above, $below], function() {
+	    			var data = this.data();
+	    			if(data.count > 0) {
+	    				this
+	   					.find('.floatnotes-label')
+	   					.text(data.count + ' ' + (data.count > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + data.label)
+	   					.end()
+	   					.show().trigger('fade');
+    				}	    				
+    				else {
+	    				this.hide();
+	    			}			
+	    		});
 	    	});
     	});
     },
@@ -464,11 +464,14 @@ FloatNotes.prototype = {
 		if(!this.status[domain]['hidden']) {
 		    $('.floatnotes-note', window.content.document).hide();
 		    this.status[domain]['hidden'] = true;
+		    $(window.content.document).unbind("scroll.floatnotes");
 		}
 		else {
 		    this.status[domain]['hidden'] = false;
 		    $('.floatnotes-note', window.content.document).show();
+		    this._attachScrollHandler(window.content, window.content.document);
 		    $(window.content.document).trigger('scroll');
+		    
 		}
 
     },

@@ -4,12 +4,12 @@ function FloatNotes() {
     this.status = {};
 }
 
-(function($){
+(function ($) {
 $.support.opacity = true;
 
 FloatNotes.prototype = {
     /* Initial startup */
-    init: function() {
+    init: function () {
 
 	// --- Load and create database
         var file = Components.classes["@mozilla.org/file/directory_service;1"]
@@ -45,7 +45,7 @@ FloatNotes.prototype = {
 
     },
 
-    onPageLoad: function(event) {
+    onPageLoad: function (event) {
     	if (event.originalTarget instanceof HTMLDocument) {
             var win = event.originalTarget.defaultView;
             if (win.frameElement) {
@@ -135,11 +135,8 @@ FloatNotes.prototype = {
 			    }
 			    // hide notes for this domain if previously hidden
 			    var domain = doc.location;
-			    if(gFloatNotes.status[domain] && gFloatNotes.status[domain]['hidden'] == true) {
-			    	gFloatNotes._updateMenuText(true);
-			    }
-			    else {
-			    	gFloatNotes._updateMenuText(false);
+			    if(gFloatNotes.status[domain]) {
+			    	gFloatNotes._updateMenuText(gFloatNotes.status[domain]['hidden']);
 			    }
 			    $(doc).trigger('scroll');
 			},
@@ -241,22 +238,20 @@ FloatNotes.prototype = {
 		          - 2*parseInt($ta.css('padding-left')));
         };
         
-        var set_hover = function($element) {
-        	$element.hover(function() {
-        		if($(this).data('collapsed')) {
-        			$(this).trigger('uncollapse');
-        		}
-
-    	    	$('.floatnotes-drag, .floatnotes-resize', this).show();
-    	    },
-    	    function() {
-        		$('.floatnotes-drag, .floatnotes-resize', this).hide();
-    	    	if($(this).data('collapsed'))
-    	    		$(this).trigger('collapse', [false, true]);
-    	    });
+        var inf = function() {
+        	if($(this).data('collapsed')) {
+        		$(this).trigger('uncollapse');
+        	}
+        	$('.floatnotes-drag, .floatnotes-resize', this).show();
         };
+        var outf = function() {
+        	$('.floatnotes-drag, .floatnotes-resize', this).hide();
+        	if($(this).data('collapsed'))
+        		$(this).trigger('collapse', [false, true]);
+        };
+        
         // create the divs, set and bind all necessary handlers
-        var note = $('<div class="floatnotes-note"><div class="floatnotes-drag"></div><div class="floatnotes-content"></div><textarea></textarea><div class="floatnotes-resize"></div></div>', doc)
+        return $('<div class="floatnotes-note"><div class="floatnotes-drag"></div><div class="floatnotes-content"></div><textarea></textarea><div class="floatnotes-resize"></div></div>', doc)
         .data(data)
         .find('textarea').hide().end()
         .find('.floatnotes-drag')
@@ -302,7 +297,7 @@ FloatNotes.prototype = {
 	            data.h = parseInt($(this).css('height'));
 	            $(this).addClass('needs-save').trigger('save');
 	            $(this).removeClass('floatnotes-resizing');
-	            set_hover($(this));
+	            $(this).hover(inf, outf);
         })
         .jqDrag('.floatnotes-drag', function() {
 	        	$(this).unbind('mouseenter mouseleave');
@@ -314,9 +309,10 @@ FloatNotes.prototype = {
 	             	data.y = parseInt($(this).css('top'));
 	             	$(this).addClass('needs-save').trigger('save');
 	             	$(this).removeClass('floatnotes-dragging');
-	             	set_hover($(this));
+	             	 $(this).hover(inf, outf);
         })
         .css({'width': data.w, 'height': data.h, 'top': data.y, 'left': data.x, 'position': 'absolute'})
+        .hover(inf, outf)
         .bind({
         	'collapse': function(event, save, animate) {
         		var data = $(this).data();
@@ -411,8 +407,6 @@ FloatNotes.prototype = {
 	    	}
         })
         .appendTo(doc.body);
-        set_hover(note);
-        return note;
     },
     
     addNote: function() {
@@ -465,13 +459,14 @@ FloatNotes.prototype = {
 		    $('.floatnotes-note', window.content.document).hide();
 		    this.status[domain]['hidden'] = true;
 		    $(window.content.document).unbind("scroll.floatnotes");
+		    this._updateMenuText(true);
 		}
 		else {
 		    this.status[domain]['hidden'] = false;
 		    $('.floatnotes-note', window.content.document).show();
 		    this._attachScrollHandler(window.content, window.content.document);
 		    $(window.content.document).trigger('scroll');
-		    
+		    this._updateMenuText(false);
 		}
 
     },
@@ -501,8 +496,8 @@ FloatNotes.prototype = {
 		        var url_with_search = url;
 		        url = url_with_search.replace(location.search, '');
 		    }
-		    parts = url.split('/');
-		    path = '';
+		    var parts = url.split('/');
+		    var path = '';
 		    if(parts[parts.length-1] == '') parts.pop();
 		    for (var i in parts) {
 		        path += parts[i];
@@ -510,9 +505,9 @@ FloatNotes.prototype = {
 		        path += '/';
 		    }
 		    var last = urls[urls.length-1];
+	        last = last.substring(0,last.length-1);
+	        if(last.charAt(last.length-1) == '/')
 	            last = last.substring(0,last.length-1);
-	            if(last.charAt(last.length-1) == '/')
-	                last = last.substring(0,last.length-1);
 		    urls.push(last);
 		    if(location.search)
 		        urls.push(url_with_search);
@@ -541,12 +536,6 @@ FloatNotes.prototype = {
 		var domain = window.content.document.location;
 		if($('.floatnotes-note', window.content.document).length) {
 			this._hideMenuItem.hidden = false;
-		    if(this.status[domain] && this.status[domain]['hidden'] == true) {
-		    	this._updateMenuText(true);
-		    }
-		    else {
-		    	this._updateMenuText(false);
-		    }
 		}
 		else {
 			this._hideMenuItem.hidden = true;

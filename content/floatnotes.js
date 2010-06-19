@@ -73,6 +73,7 @@ FloatNotes.prototype = {
           	.delegate('.floatnotes-text', 'click', {doc: doc}, function(event) {
           			$(this).parent().hide();
           			$(event.data.doc).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
+          			//doc.getElementById($(this).attr('rel')).scrollIntoView(true);
           		})
           	.bind('reset', {doc: doc}, function(event) {
           		$(this, event.data.doc).stop(true, true).show().css('opacity', 1);
@@ -129,8 +130,9 @@ FloatNotes.prototype = {
 					};
 		
 					var note = gFloatNotes._createNote(data, doc);
+					note.attr('id', 'floatnotes-note-' + data.id);
 					if(note.data('collapsed') == true) {
-					    note.trigger('collapse');
+					    note.trigger('collapse');			    
 					}
 			    }
 			    // hide notes for this domain if previously hidden
@@ -163,7 +165,7 @@ FloatNotes.prototype = {
     				winheight = parseInt($(win).height());
 	    		$above.trigger('reset');
 	    		$below.trigger('reset');
-	    		$('.floatnotes-note', doc)
+	    		$('.floatnotes-note[id]', doc)
 	    		//.filter(function(){return $(this).data('id');})
 	    		.each(function() {	
 	    				var id = 'floatnotes-text-' + $(this).data('id'),
@@ -396,6 +398,7 @@ FloatNotes.prototype = {
 							 print("Query canceled or aborted!");
 						    if(insert) {
 						    	data.id = gFloatNotes.db.lastInsertRowID;
+						    	note.attr('id', 'floatnotes-note-' + data.id);
 						    }
 						    note.removeClass('needs-save');
 						}

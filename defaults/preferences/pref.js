@@ -1,6 +1,6 @@
 pref("extensions.floatnotes.width", 150);
 pref("extensions.floatnotes.height", 200);
-pref("extensions.floatnotes.color", "#FFCC66");
+pref("extensions.floatnotes.color", "#FCFACF");
 
 /*
  Default URL for notes:
@@ -12,3 +12,5 @@ pref("extensions.floatnotes.color", "#FFCC66");
 pref("extensions.floatnotes.location", -2);
 pref("extensions.floatnotes.showIndicator", true);
 pref("extensions.floatnotes.fadeOutAfter", 3);
+
+pref("extensions.floatnotes.scrolltimer", 50);

@@ -52,7 +52,7 @@ Note.prototype = {
 	},
 
 	getDomElement: function(doc) {
-        
+        var note = this;
         // create the divs, set and bind all necessary handlers
         return $('<div class="floatnotes-note"><div class="floatnotes-drag"></div><div class="floatnotes-content"></div><textarea></textarea><div class="floatnotes-resize"></div></div>', doc)
         .data(this.data)
@@ -114,7 +114,12 @@ Note.prototype = {
 	             	$(this).removeClass('floatnotes-dragging');
 	             	$(this).hover(inf, outf);
         })
-        .css({'width': this.data.w, 'height': this.data.h, 'top': this.data.y, 'left': this.data.x, 'position': 'absolute'})
+        .css({'width': this.data.w, 
+              'height': this.data.h, 
+              'top': this.data.y, 
+              'left': this.data.x, 
+              'position': 'absolute',
+              'background-color': this.data.color})
         .hover(inf, outf)
         .bind({
         	'collapse': function(event, save, animate) {
@@ -166,10 +171,10 @@ Note.prototype = {
 	    		.trigger('save');
 	    	},
 	    	'save.floatnotes': function() {
-	    		gFloatNotes.saveNote($(this));
+	    		gFloatNotes.saveNote(note);
 	    	},
 	    	'contextmenu': function(e){
-	    		gFloatNotes.contextNote = $(this);
+	    		gFloatNotes.contextNote = note;
 	    	}
         });
 	}
@@ -232,43 +237,46 @@ FloatNotes.prototype = {
 
 	    // enable indicators
 	    if(this.pref.getBoolPref('showIndicator')) {
-      	    var $above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
-          	.css({position: 'fixed', top: 0, left: 0})
-          	.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
-          	.find('.floatnotes-texts').hide().end()
-          	.hover(function(){
-          			$(this).trigger('reset').find('.floatnotes-texts').show();
-          			$.doTimeout('fade-' + this.id);
-          		}, function() {
-          			$(this).trigger('fade').find('.floatnotes-texts').hide();
-          		})
-          	.hide()
-          	.delegate('.floatnotes-text', 'click', {doc: doc}, function(event) {
-          			$(this).parent().hide();
-          			$(event.data.doc).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
-          			//doc.getElementById($(this).attr('rel')).scrollIntoView(true);
-          		})
-          	.bind('reset', {doc: doc}, function(event) {
-          		$(this, event.data.doc).stop(true, true).show().css('opacity', 1);
-          	})
-          	.appendTo(doc.body);
-      
-          	var fadeout;
-          	if((fadeout = this.pref.getIntPref('fadeOutAfter')) > 0) {
-          		$above.bind('fade', {doc: doc}, function(event) {
-          			var that = this;
-          			$.doTimeout('fade-' + this.id, fadeout*1000, function() {
-          				$(that, event.data.doc).fadeOut(800);
-          			});
-          			
-          		});
-          	}
-      
-          	var $below = $above.clone(true)
-          	.attr('id', 'floatnotes-below')
-          	.data('label', this.stringsBundle.getString('belowIndicatorString'))
-          	.css({bottom: 0, top: ''})
-          	.appendTo(doc.body);
+	    	this._scrolltimer = this.pref.getIntPref('scrolltimer');
+	    	if(!this.indicator_above && !this.indicator_below) {
+	    		this.indicator_above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
+	    		.css({position: 'fixed', top: 0, left: 0})
+	    		.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
+	    		.find('.floatnotes-texts').hide().end()
+	    		.hover(function(){
+	    			$(this).trigger('reset').find('.floatnotes-texts').show();
+	    			$.doTimeout('fade-' + this.id);
+	    		}, function() {
+	    			$(this).trigger('fade').find('.floatnotes-texts').hide();
+	    		})
+	    		.hide()
+	    		.delegate('.floatnotes-text', 'click', function(event) {
+	    			$(this).parent().hide();
+	    			$(gBrowser.contentDocument).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
+	    			//doc.getElementById($(this).attr('rel')).scrollIntoView(true);
+	    		})
+	    		.bind('reset', function(event) {
+	    			$(this).stop(true, true).show().css('opacity', 1);
+	    		})
+	    		.appendTo(doc.body);
+
+	    		var fadeout;
+	    		if((fadeout = this.pref.getIntPref('fadeOutAfter')) > 0) {
+	    			this.indicator_above.bind('fade', function(event) {
+	    				var that = this;
+	    				$.doTimeout('fade-' + this.id, fadeout*1000, function() {
+	    					$(that).fadeOut(800);
+	    				});
+
+	    			});
+	    		}
+
+	    		this.indicator_below = this.indicator_above.clone(true)
+	    		.attr('id', 'floatnotes-below')
+	    		.data('label', this.stringsBundle.getString('belowIndicatorString'))
+	    		.css({bottom: 0, top: ''});
+	    		
+	    	}
 	    	this._attachScrollHandler(win, doc);
 	    }
 	    
@@ -315,6 +323,11 @@ FloatNotes.prototype = {
 			    }
 			    if(doc == gBrowser.contentDocument) {
 			    	gFloatNotes._attachNotesTo(gBrowser.contentDocument);
+			    	$.each([gFloatNotes.indicator_below, gFloatNotes.indicator_above], function() {
+				    	this.children('.floatnotes-texts').empty();
+					    this.detach();
+					    $(doc.body).append(this);
+				    });
 			    }
 			    
 			    // hide notes for this domain if previously hidden
@@ -339,6 +352,12 @@ FloatNotes.prototype = {
 	    if(gFloatNotes.status[domain]) {
 	    	gFloatNotes._updateMenuText(gFloatNotes.status[domain]['hidden']);
 	    }
+	    
+	    $.each([this.indicator_below, this.indicator_above], function() {
+	    	this.children('.floatnotes-texts').empty();
+		    this.detach();
+		    $(doc.body).append(this);
+	    });
 	    $(doc).trigger('scroll');
     },
     
@@ -346,33 +365,33 @@ FloatNotes.prototype = {
     	var notes = this.docs[doc.location];
     	if (notes) {
     		for(var i in notes) {
+    			if (notes[i].deleted) delete notes[i]; 
     			notes[i].attachTo(doc);	
     		}	
     	}
     },
     
     _attachScrollHandler: function(win, doc) {
-    	var $above = $('#floatnotes-above', doc);
-    	var $below = $('#floatnotes-below', doc);
     	$(doc).bind('scroll.floatnotes', function(e) {
     		if(this.location == gBrowser.contentDocument.location) {
     		var doc = this;
-    		$.doTimeout('scroll', 50, function(){
+    		$.doTimeout('scroll', gFloatNotes._scrolltimer, function(){
     			var wintop = parseInt($(doc).scrollTop()),
     				winheight = parseInt($(win).height());
-	    		$above.trigger('reset');
-	    		$below.trigger('reset');
-	    		$.each(gFloatNotes.docs[doc.location], function() {
-	    				var $element = this.dom;
-	    				var id = 'floatnotes-text-' + this.data.id,
+	    		gFloatNotes.indicator_below.trigger('reset');
+	    		gFloatNotes.indicator_above.trigger('reset');
+	    		gFloatNotes.docs[doc.location].forEach(function(obj) {
+	    				if(obj) {
+	    				var $element = obj.dom;
+	    				var id = 'floatnotes-text-' + obj.data.id,
 	    					top = parseInt($element.css('top')),
 	    					bottom = parseInt($element.css('top')) + parseInt($element.height());
 	    				var $position = null;
 	    				if (wintop > bottom) {
-	    					$position = $above;
+	    					$position = gFloatNotes.indicator_above;
 	    				}
 	    				else if(wintop + winheight < top) {
-	    					$position = $below;
+	    					$position = gFloatNotes.indicator_below;
 	    				}
 	    				if($position) {	    				
 	    					if($position.find('#' + id).length == 0) {
@@ -388,21 +407,22 @@ FloatNotes.prototype = {
 	    					//$position.data('count', $position.data('count') -1);
 	    					$('#' + id, doc).remove();
 	    				}
+	    				}
 	    		});
 	    			
 	    			
-	    		$.each([$above, $below], function() {
-	    			var data = this.data();
-	    			var count = $(this).children('.floatnotes-texts:first').children().length
+	    		[gFloatNotes.indicator_above, gFloatNotes.indicator_below].forEach( function(obj) {
+	    			var data = obj.data();
+	    			var count = $(obj).children('.floatnotes-texts:first').children().length;
 	    			if(count > 0) {
-	    				this
+	    				obj
 	   					.children('.floatnotes-label')
 	   					.text(count + ' ' + (count > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + data.label)
 	   					.end()
 	   					.show().trigger('fade');
     				}	    				
     				else {
-	    				this.hide();
+    					obj.hide();
 	    			}			
 	    		});
 	    	});
@@ -426,8 +446,8 @@ FloatNotes.prototype = {
     
 
     saveNote: function(note) {
-		if(!note.hasClass('note-edit')) {
-			var data = note.data();
+		if(!note.dom.hasClass('note-edit')) {
+			var data = note.dom.data();
 			// new or update ?
 			if(data.id) {
 				var statement = gFloatNotes.db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, collapse=:collapse, color=:color, url=:url WHERE id = :id");
@@ -458,32 +478,36 @@ FloatNotes.prototype = {
 					 print("Query canceled or aborted!");
 				    if(insert) {
 				    	data.id = gFloatNotes.db.lastInsertRowID;
-				    	note.attr('id', 'floatnotes-note-' + data.id);
+				    	note.dom.attr('id', 'floatnotes-note-' + data.id);
+						note.data = data;
+				    	gFloatNotes.notes[data.id] = note;
 				    }
-				    note.removeClass('needs-save');
+				    note.dom.removeClass('needs-save');
 				}
 		    });
 		}
     },
     
     addNote: function() {
-        var doc = window.content.document;
+        var doc = gBrowser.contentDocument;
         this._injectStylesheet(doc);
-        var note = this._createNote({
+        var note = new Note({
 			x:this.X,
 			y:this.Y,
 			w: this.pref.getIntPref('width'),
 			h: this.pref.getIntPref('height'),
 			content: "",
 			url: this._getDefaultUrl(),
-			color: '#AAA',
-			collapsed: false}, doc);
-        note.trigger('start-edit', [doc]);
+			color: this.pref.getCharPref('color'),
+			collapsed: false});
+        this.docs[doc.location].push(note);
+        note.attachTo(doc);
+        note.dom.trigger('start-edit');
     },
     
     deleteNote: function() {
         var statement = this.db.createStatement("DELETE FROM floatnotes WHERE id = :id");
-        statement.params.id = this.contextNote.data('id');
+        statement.params.id = this.contextNote.data.id;
         var t = this;
         statement.executeAsync({
             handleResult: function(aResultSet) {
@@ -498,8 +522,10 @@ FloatNotes.prototype = {
                     print("Query canceled or aborted!");
                     return;
                 }
-                t.contextNote.remove();
-                t.contextNote = null;
+                t.contextNote.dom.detach();
+                t.contextNote.dom.remove();
+                t.contextNote.deleted = true;
+                delete gFloatNotes.notes[t.contextNote.data.id];
             }
         });
     },
@@ -515,14 +541,14 @@ FloatNotes.prototype = {
 		if(!this.status[domain]['hidden']) {
 		    $('.floatnotes-note', window.content.document).hide();
 		    this.status[domain]['hidden'] = true;
-		    $(window.content.document).unbind("scroll.floatnotes");
+		    $(gBrowser.contentDocument).unbind("scroll.floatnotes");
 		    this._updateMenuText(true);
 		}
 		else {
 		    this.status[domain]['hidden'] = false;
 		    $('.floatnotes-note', window.content.document).show();
 		    this._attachScrollHandler(window.content, window.content.document);
-		    $(window.content.document).trigger('scroll');
+		    $(gBrowser.contentDocument).trigger('scroll');
 		    this._updateMenuText(false);
 		}
 
@@ -606,8 +632,8 @@ FloatNotes.prototype = {
 		    var item = this._locationsMenu.appendItem(loc[i], loc[i]);
 		    item.setAttribute('type','radio');
 		    item.setAttribute('name', 'floatnotes-menu-location');
-		    item.setAttribute('checked', (this.contextNote.data('url') == loc[i]));
-		    item.setAttribute('oncommand', "gFloatNotes.contextNote.data('url',this.value).addClass('needs-save').trigger('save');");
+		    item.setAttribute('checked', (this.contextNote.data.url == loc[i]));
+		    item.setAttribute('oncommand', "gFloatNotes.contextNote.dom.data('url',this.value).addClass('needs-save').trigger('save');");
 		}
     },
     

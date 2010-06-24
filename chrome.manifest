@@ -4,8 +4,7 @@ content floatnotes content/  contentaccessible=yes
 overlay chrome://browser/content/browser.xul chrome://floatnotes/content/floatnotes.xul
 
 skin floatnotes default skin/
-style chrome://browser/content/browser.xul chrome://floatnotes/skin/toolbar.css
-style chrome://global/content/customizeToolbar.xul chrome://floatnotes/skin/toolbar.css
+style chrome://browser/content/browser.xul chrome://floatnotes/skin/notes.css
 
 locale floatnotes en-US locale/en-US/
 locale floatnotes de-DE locale/de-DE/

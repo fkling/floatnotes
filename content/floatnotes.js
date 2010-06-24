@@ -2,15 +2,183 @@ function FloatNotes() {
     this.db = null;
     this.converter = new Showdown.converter();
     this.status = {};
+    this.docs = {};
+    this.notes = {};
 }
 
 (function ($) {
 $.support.opacity = true;
 
+function Note(data) {
+	this.data = data;
+	this.dom = null;
+}
+
+//small function to compute the size of the textarea properly
+var resizeTextarea = function(context, width, height) {
+	var $ta = $('textarea', context);
+	var $context = $(context);
+	$ta.css('height', parseInt(height)
+          - 2*$context.css('border-width')
+          - 2*parseInt($ta.css('padding-left')))
+    .css('width', parseInt(width)
+          - 2*$context.css('border-width')
+          - 2*parseInt($ta.css('padding-left')));
+};
+
+var inf = function() {
+	if($(this).data('collapsed')) {
+		$(this).trigger('uncollapse');
+	}
+	$('.floatnotes-drag, .floatnotes-resize', this).show();
+};
+var outf = function() {
+	$('.floatnotes-drag, .floatnotes-resize', this).hide();
+	if($(this).data('collapsed'))
+		$(this).trigger('collapse', [false, true]);
+};
+
+Note.prototype = {
+	attachTo: function(doc) {
+		if(this.dom == null) {
+			this.dom = this.getDomElement(doc);
+			this.dom.attr('id', 'floatnotes-note-' + this.data.id);
+		}
+		this.dom.detach();
+		this.dom.appendTo(doc.body);
+		if(this.data.collapsed == true) {
+		    this.dom.trigger('collapse');			    
+		}
+	},
+
+	getDomElement: function(doc) {
+        
+        // create the divs, set and bind all necessary handlers
+        return $('<div class="floatnotes-note"><div class="floatnotes-drag"></div><div class="floatnotes-content"></div><textarea></textarea><div class="floatnotes-resize"></div></div>', doc)
+        .data(this.data)
+        .find('textarea').hide().end()
+        .find('.floatnotes-drag')
+	    	.dblclick(function(){ // note collapses on dblclick if not editing
+	    		if(!$(this).parent().hasClass('note-edit'))
+	    			$(this).hide().trigger('collapse',[true, true]);
+	    		})
+	    		.hide()
+	    .end()
+	    .find('.floatnotes-resize').hide().end()
+	    .find('.floatnotes-content')
+	    	.bind('dblclick', function() { // dblclick enables editing
+	    		$(this).trigger('start-edit');
+	    	})
+	    	.html(gFloatNotes.converter.makeHtml(this.data.content))
+	    	.end()
+	    .click(function(e) { // if clicked in the context area, the note stays uncollapsed
+	    	if(e.target.className != 'floatnotes-drag' && e.target.className != 'floatnotes-resize' && $(this).data('collapsed')) {
+	    		var data = $(this).data();
+                data.collapsed = false;
+                $(this).addClass('needs-save').trigger('save');
+            }
+	    	if($(this).hasClass('note-edit')) {
+	    		e.stopPropagation();
+	    	}
+	    })
+	    .mousedown(function() {   	 // bring note to front
+	    	var maxz = Math.max.apply(this, $(this).siblings('.floatnotes-note').map(function(){return parseInt($(this).css('z-index'));}).get());
+	    	if(maxz)
+	    		$(this).css('z-index', maxz+1);
+	    })
+        .jqResize('.floatnotes-resize', function() {
+        		$(this).unbind('mouseenter mouseleave');
+        	}, function(w, h) {
+	        	$(this).unbind('mouseenter mouseleave');
+	        	if($(this).hasClass('note-edit')) {
+	        		resizeTextarea(this, w, h);
+	        	}
+	        },
+	        function() {
+		        var data = $(this).data();
+		        data.w = parseInt($(this).css('width'));
+	            data.h = parseInt($(this).css('height'));
+	            $(this).addClass('needs-save').trigger('save');
+	            $(this).removeClass('floatnotes-resizing');
+	            $(this).hover(inf, outf);
+        })
+        .jqDrag('.floatnotes-drag', function() {
+	        	$(this).unbind('mouseenter mouseleave');
+		    },
+		    null,
+		    function() {
+		    	var data = $(this).data();
+	             	data.x = parseInt($(this).css('left'));
+	             	data.y = parseInt($(this).css('top'));
+	             	$(this).addClass('needs-save').trigger('save');
+	             	$(this).removeClass('floatnotes-dragging');
+	             	$(this).hover(inf, outf);
+        })
+        .css({'width': this.data.w, 'height': this.data.h, 'top': this.data.y, 'left': this.data.x, 'position': 'absolute'})
+        .hover(inf, outf)
+        .bind({
+        	'collapse': function(event, save, animate) {
+        		var data = $(this).data();
+        		if(!data.collapsed) {
+        			data.collapsed = true;
+        		}
+        		if(animate) {
+        			$(this).animate({height: '16px',width:'16px'}, 'fast', function() {
+            			$(this).addClass('small needs-save');
+            			if(save) $(this).trigger('save');
+            		});
+        		}
+        		else {
+        			$(this).addClass('small needs-save');
+        			if(save) $(this).trigger('save');
+        		}
+	    	},
+	    	'uncollapse': function() {
+	    		if($(this).hasClass('small')) {
+    	    		var data = $(this).data();
+    	    		$(this).removeClass('small').css({width: data.w, height: data.h});
+    	    	}
+	    	},
+	    	'start-edit': function() {
+	    		var $note = $(this);
+	    		$('.floatnotes-content', this).hide();
+	    		$('textarea', this).show().html($note.data('content')).focus();
+	    		$note.addClass('note-edit');
+	    		resizeTextarea(this, $note.width(), $note.height());
+	    		$(window).bind('click.floatnotes', {note: $note}, function(e) {
+	    			$(this).unbind('click.floatnotes');
+	    			e.data.note.trigger('end-edit');
+	    		});
+	    	},
+	    	'end-edit': function() {
+	    		var data = $(this).data();
+	    		$(this)
+	    		.find('textarea')
+	    			.each(function(){data.content = $(this).val();})
+	    			.hide()
+	    		.end()
+	    		.find('.floatnotes-content')
+	    			.html(gFloatNotes.converter.makeHtml(data.content))
+	    			.show()
+	    		.end()
+	    		.removeClass('note-edit')
+	    		.addClass('needs-save')
+	    		.trigger('save');
+	    	},
+	    	'save.floatnotes': function() {
+	    		gFloatNotes.saveNote($(this));
+	    	},
+	    	'contextmenu': function(e){
+	    		gFloatNotes.contextNote = $(this);
+	    	}
+        });
+	}
+	
+};
+
 FloatNotes.prototype = {
     /* Initial startup */
     init: function () {
-
 	// --- Load and create database
         var file = Components.classes["@mozilla.org/file/directory_service;1"]
                      .getService(Components.interfaces.nsIProperties)
@@ -39,9 +207,14 @@ FloatNotes.prototype = {
         
     // load string bundle
         this.stringsBundle = document.getElementById("floatnotes-stringbundle");
-        
     // attach load handler
-        gBrowser.addEventListener("load", function(e){gFloatNotes.onPageLoad(e);}, true);
+
+        	// During initialisation
+        	gBrowser.addEventListener("load", function(e){gFloatNotes.onPageLoad(e);}, true);
+        	var container = gBrowser.tabContainer;
+        	container.addEventListener("TabSelect", function(e){gFloatNotes.onTabSelect(e);}, false);
+        	
+
 
     },
 
@@ -98,7 +271,11 @@ FloatNotes.prototype = {
           	.appendTo(doc.body);
 	    	this._attachScrollHandler(win, doc);
 	    }
-
+	    
+	    
+	    var notes = Array();
+	    this.docs[doc.location] = notes;
+	    
 	    // Get notes for this site
 	    var statement = this.db.createStatement("SELECT * FROM floatnotes WHERE url = :url");
 	    var urls = this._getLocations(doc, true);
@@ -128,19 +305,19 @@ FloatNotes.prototype = {
 					    collapsed: row.getResultByName("collapse"),
 					    color: row.getResultByName("color")
 					};
-		
-					var note = gFloatNotes._createNote(data, doc);
-					note.attr('id', 'floatnotes-note-' + data.id);
-					if(note.data('collapsed') == true) {
-					    note.trigger('collapse');			    
+					var note;
+					if(gFloatNotes.notes[data.id] == undefined) {
+						note = new Note(data);
+						gFloatNotes.notes[data.id] = note;
 					}
+					note = gFloatNotes.notes[data.id];
+					notes.push(note);
 			    }
+			    if(doc == gBrowser.contentDocument) {
+			    	gFloatNotes._attachNotesTo(gBrowser.contentDocument);
+			    }
+			    
 			    // hide notes for this domain if previously hidden
-			    var domain = doc.location;
-			    if(gFloatNotes.status[domain]) {
-			    	gFloatNotes._updateMenuText(gFloatNotes.status[domain]['hidden']);
-			    }
-			    $(doc).trigger('scroll');
 			},
 	
 			handleError: function(aError) {
@@ -155,22 +332,41 @@ FloatNotes.prototype = {
 		}
     },
     
+    onTabSelect: function(e) {
+    	var doc = gBrowser.contentDocument;
+    	this._attachNotesTo(doc);
+    	var domain = doc.location;
+	    if(gFloatNotes.status[domain]) {
+	    	gFloatNotes._updateMenuText(gFloatNotes.status[domain]['hidden']);
+	    }
+	    $(doc).trigger('scroll');
+    },
+    
+    _attachNotesTo: function(doc) {
+    	var notes = this.docs[doc.location];
+    	if (notes) {
+    		for(var i in notes) {
+    			notes[i].attachTo(doc);	
+    		}	
+    	}
+    },
+    
     _attachScrollHandler: function(win, doc) {
     	var $above = $('#floatnotes-above', doc);
     	var $below = $('#floatnotes-below', doc);
     	$(doc).bind('scroll.floatnotes', function(e) {
+    		if(this.location == gBrowser.contentDocument.location) {
     		var doc = this;
-    		$.doTimeout('scroll', 75, function(){
+    		$.doTimeout('scroll', 50, function(){
     			var wintop = parseInt($(doc).scrollTop()),
     				winheight = parseInt($(win).height());
 	    		$above.trigger('reset');
 	    		$below.trigger('reset');
-	    		$('.floatnotes-note[id]', doc)
-	    		//.filter(function(){return $(this).data('id');})
-	    		.each(function() {	
-	    				var id = 'floatnotes-text-' + $(this).data('id'),
-	    					top = parseInt($(this).css('top')),
-	    					bottom = parseInt($(this).css('top')) + parseInt($(this).height());
+	    		$.each(gFloatNotes.docs[doc.location], function() {
+	    				var $element = this.dom;
+	    				var id = 'floatnotes-text-' + this.data.id,
+	    					top = parseInt($element.css('top')),
+	    					bottom = parseInt($element.css('top')) + parseInt($element.height());
 	    				var $position = null;
 	    				if (wintop > bottom) {
 	    					$position = $above;
@@ -181,15 +377,15 @@ FloatNotes.prototype = {
 	    				if($position) {	    				
 	    					if($position.find('#' + id).length == 0) {
 	    						var ele = $('<div class="floatnotes-text"></div>', doc).attr('id', id)
-		    					.text($(this).find('.floatnotes-content').text())
-		    					.data('top', $(this).css('top'));
-	    						$position.data('count', $position.data('count') + 1);
+		    					.text($element.children('.floatnotes-content').text())
+		    					.data('top', $element.css('top'));
+	    						//$position.data('count', $position.data('count') + 1);
 	    						ele.appendTo($position.children('.floatnotes-texts'));
 	    					}
 	    				}
 	    				else {
 	    					$position = $('#' + id, doc).closest('.floatnotes-indicator');
-	    					$position.data('count', $position.data('count') -1);
+	    					//$position.data('count', $position.data('count') -1);
 	    					$('#' + id, doc).remove();
 	    				}
 	    		});
@@ -197,10 +393,11 @@ FloatNotes.prototype = {
 	    			
 	    		$.each([$above, $below], function() {
 	    			var data = this.data();
-	    			if(data.count > 0) {
+	    			var count = $(this).children('.floatnotes-texts:first').children().length
+	    			if(count > 0) {
 	    				this
-	   					.find('.floatnotes-label')
-	   					.text(data.count + ' ' + (data.count > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + data.label)
+	   					.children('.floatnotes-label')
+	   					.text(count + ' ' + (count > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + data.label)
 	   					.end()
 	   					.show().trigger('fade');
     				}	    				
@@ -209,6 +406,7 @@ FloatNotes.prototype = {
 	    			}			
 	    		});
 	    	});
+        	}
     	});
     },
     
@@ -225,191 +423,47 @@ FloatNotes.prototype = {
 		    doc.getElementsByTagName('head')[0].appendChild(style);
 		}
     },
-    /* Create a new note */
-    _createNote: function(data, doc) {
-    	
-    	// small function to compute the size of the textarea properly
-        var resizeTextarea = function(context, width, height) {
-        	var $ta = $('textarea', context);
-        	var $context = $(context);
-        	$ta.css('height', parseInt(height)
-		          - 2*$context.css('border-width')
-		          - 2*parseInt($ta.css('padding-left')))
-		    .css('width', parseInt(width)
-		          - 2*$context.css('border-width')
-		          - 2*parseInt($ta.css('padding-left')));
-        };
-        
-        var inf = function() {
-        	if($(this).data('collapsed')) {
-        		$(this).trigger('uncollapse');
-        	}
-        	$('.floatnotes-drag, .floatnotes-resize', this).show();
-        };
-        var outf = function() {
-        	$('.floatnotes-drag, .floatnotes-resize', this).hide();
-        	if($(this).data('collapsed'))
-        		$(this).trigger('collapse', [false, true]);
-        };
-        
-        // create the divs, set and bind all necessary handlers
-        return $('<div class="floatnotes-note"><div class="floatnotes-drag"></div><div class="floatnotes-content"></div><textarea></textarea><div class="floatnotes-resize"></div></div>', doc)
-        .data(data)
-        .find('textarea').hide().end()
-        .find('.floatnotes-drag')
-	    	.dblclick(function(){ // note collapses on dblclick if not editing
-	    		if(!$(this).parent().hasClass('note-edit'))
-	    			$(this).hide().trigger('collapse',[true, true]);
-	    		})
-	    		.hide()
-	    .end()
-	    .find('.floatnotes-resize').hide().end()
-	    .find('.floatnotes-content')
-	    	.bind('dblclick', function() { // dblclick enables editing
-	    		$(this).trigger('start-edit');
-	    	})
-	    	.html(gFloatNotes.converter.makeHtml(data.content))
-	    	.end()
-	    .click(function(e) { // if clicked in the context area, the note stays uncollapsed
-	    	if(e.target.className != 'floatnotes-drag' && e.target.className != 'floatnotes-resize' && $(this).data('collapsed')) {
-	    		var data = $(this).data();
-                data.collapsed = false;
-                $(this).addClass('needs-save').trigger('save');
-            }
-	    	if($(this).hasClass('note-edit')) {
-	    		e.stopPropagation();
-	    	}
-	    })
-	    .mousedown(function() {   	 // bring note to front
-	    	var maxz = Math.max.apply(this, $(this).siblings('.floatnotes-note').map(function(){return parseInt($(this).css('z-index'));}).get());
-	    	if(maxz)
-	    		$(this).css('z-index', maxz+1);
-	    })
-        .jqResize('.floatnotes-resize', function() {
-        		$(this).unbind('mouseenter mouseleave');
-        	}, function(w, h) {
-	        	$(this).unbind('mouseenter mouseleave');
-	        	if($(this).hasClass('note-edit')) {
-	        		resizeTextarea(this, w, h);
-	        	}
-	        },
-	        function() {
-		        var data = $(this).data();
-		        data.w = parseInt($(this).css('width'));
-	            data.h = parseInt($(this).css('height'));
-	            $(this).addClass('needs-save').trigger('save');
-	            $(this).removeClass('floatnotes-resizing');
-	            $(this).hover(inf, outf);
-        })
-        .jqDrag('.floatnotes-drag', function() {
-	        	$(this).unbind('mouseenter mouseleave');
-		    },
-		    null,
-		    function() {
-		    	var data = $(this).data();
-	             	data.x = parseInt($(this).css('left'));
-	             	data.y = parseInt($(this).css('top'));
-	             	$(this).addClass('needs-save').trigger('save');
-	             	$(this).removeClass('floatnotes-dragging');
-	             	 $(this).hover(inf, outf);
-        })
-        .css({'width': data.w, 'height': data.h, 'top': data.y, 'left': data.x, 'position': 'absolute'})
-        .hover(inf, outf)
-        .bind({
-        	'collapse': function(event, save, animate) {
-        		var data = $(this).data();
-        		if(!data.collapsed) {
-        			data.collapsed = true;
-        		}
-        		if(animate) {
-        			$(this).animate({height: '16px',width:'16px'}, 'fast', function() {
-            			$(this).addClass('small needs-save');
-            			if(save) $(this).trigger('save');
-            		});
-        		}
-        		else {
-        			$(this).addClass('small needs-save');
-        			if(save) $(this).trigger('save');
-        		}
-	    	},
-	    	'uncollapse': function() {
-	    		if($(this).hasClass('small')) {
-    	    		var data = $(this).data();
-    	    		$(this).removeClass('small').css({width: data.w, height: data.h});
-    	    	}
-	    	},
-	    	'start-edit': function() {
-	    		var $note = $(this);
-	    		$('.floatnotes-content', this).hide();
-	    		$('textarea', this).show().html($note.data('content')).focus();
-	    		$note.addClass('note-edit');
-	    		resizeTextarea(this, $note.width(), $note.height());
-	    		$(window).bind('click.floatnotes', {note: $note}, function(e) {
-	    			$(this).unbind('click.floatnotes');
-	    			e.data.note.trigger('end-edit');
-	    		});
-	    	},
-	    	'end-edit': function() {
-	    		var data = $(this).data();
-	    		$(this)
-	    		.find('textarea')
-	    			.each(function(){data.content = $(this).val();})
-	    			.hide()
-	    		.end()
-	    		.find('.floatnotes-content')
-	    			.html(gFloatNotes.converter.makeHtml(data.content))
-	    			.show()
-	    		.end()
-	    		.removeClass('note-edit')
-	    		.addClass('needs-save')
-	    		.trigger('save');
-	    	},
-	    	'save.floatnotes': function() {
-	    		var note = $(this);
-	    		if(!note.hasClass('note-edit')) {
-	    			var data = note.data();
-	    			// new or update ?
-	    			if(data.id) {
-	    				var statement = gFloatNotes.db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, collapse=:collapse, color=:color, url=:url WHERE id = :id");
-	    				statement.params.id = data.id;
-	    			}
-	    			else {
-	    				var statement = gFloatNotes.db.createStatement("INSERT INTO floatnotes  (url, content, h, w, x, y, collapse, color) VALUES ( :url, :content, :h, :w, :x, :y, :collapse, :color)");
-	    				var insert = true;
-	    			}
-				    statement.params.url = data.url;
-				    statement.params.content = data.content;
-				    statement.params.h = data.h;
-				    statement.params.w = data.w;
-				    statement.params.x = data.x;
-				    statement.params.y = data.y;
-				    statement.params.collapse = data.collapsed;
-				    statement.params.color = data.color;
-		
-				    statement.executeAsync({
-						handleResult: function(aResultSet) {
-						    alert(aResultSet);
-						},
-						handleError: function(aError) {
-						    print("Error: " + aError.message);
-						},
-						handleCompletion: function(aReason) {
-						    if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED)
-							 print("Query canceled or aborted!");
-						    if(insert) {
-						    	data.id = gFloatNotes.db.lastInsertRowID;
-						    	note.attr('id', 'floatnotes-note-' + data.id);
-						    }
-						    note.removeClass('needs-save');
-						}
-				    });
-	    		}
-	    	},
-	    	'contextmenu': function(e){
-	    		gFloatNotes.contextNote = $(this);
-	    	}
-        })
-        .appendTo(doc.body);
+    
+
+    saveNote: function(note) {
+		if(!note.hasClass('note-edit')) {
+			var data = note.data();
+			// new or update ?
+			if(data.id) {
+				var statement = gFloatNotes.db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, collapse=:collapse, color=:color, url=:url WHERE id = :id");
+				statement.params.id = data.id;
+			}
+			else {
+				var statement = gFloatNotes.db.createStatement("INSERT INTO floatnotes  (url, content, h, w, x, y, collapse, color) VALUES ( :url, :content, :h, :w, :x, :y, :collapse, :color)");
+				var insert = true;
+			}
+		    statement.params.url = data.url;
+		    statement.params.content = data.content;
+		    statement.params.h = data.h;
+		    statement.params.w = data.w;
+		    statement.params.x = data.x;
+		    statement.params.y = data.y;
+		    statement.params.collapse = data.collapsed;
+		    statement.params.color = data.color;
+
+		    statement.executeAsync({
+				handleResult: function(aResultSet) {
+				    alert(aResultSet);
+				},
+				handleError: function(aError) {
+				    print("Error: " + aError.message);
+				},
+				handleCompletion: function(aReason) {
+				    if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED)
+					 print("Query canceled or aborted!");
+				    if(insert) {
+				    	data.id = gFloatNotes.db.lastInsertRowID;
+				    	note.attr('id', 'floatnotes-note-' + data.id);
+				    }
+				    note.removeClass('needs-save');
+				}
+		    });
+		}
     },
     
     addNote: function() {

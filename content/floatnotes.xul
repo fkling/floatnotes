@@ -24,5 +24,6 @@
 	<stringbundleset id="stringbundleset">
         <stringbundle id="floatnotes-stringbundle" src="chrome://floatnotes/locale/floatnotes.properties"/>
     </stringbundleset>
+    <script type="application/javascript" src="resource://floatnotes/showdown/showdown.js" />
 	<script type="application/javascript" src="chrome://floatnotes/content/floatnotes.js" />
 </overlay>

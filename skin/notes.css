@@ -54,6 +54,11 @@
     margin-left:-1px;
     border:1px solid black;
     width: 100%;
+    display:block;
+}
+
+.floatnotes-note:hover .floatnotes-drag{
+    display:block;
 }
 
 .floatnotes-note .floatnotes-resize{

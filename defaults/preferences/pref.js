@@ -13,4 +13,4 @@ pref("extensions.floatnotes.location", -2);
 pref("extensions.floatnotes.showIndicator", true);
 pref("extensions.floatnotes.fadeOutAfter", 3);
 
-pref("extensions.floatnotes.scrolltimer", 50);
+pref("extensions.floatnotes.scrolltimer", 100);

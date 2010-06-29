@@ -3,10 +3,22 @@ if(!de) var de = {};
 if(!de.felixkling) de.felixkling = {};
 
 de.felixkling.util = {
-	css: function(node, style) {
-		if(node && node.style) {
-			for (var key in style) {
-				node.style[key] = style[key];
+	css: {
+		set: function(node, style) {
+				if(node && node.style) {
+					for (var key in style) {
+						node.style[key] = style[key];
+					}
+				}
+		},
+		show: function(node) {
+			if(node && node.style) {
+				node.style.display = "block";
+			}
+		},
+		hide: function(node) {
+			if(node && node.style) {
+				node.style.display = "none";
 			}
 		}
 	},
@@ -30,13 +42,6 @@ de.felixkling.util = {
 	}
 };
 
-
-function FloatNote(data) {
-	this.data = data;
-	this.dom = null;
-	this.ele = {};
-}
-
 function FloatNotes() {
 	this.db = null;
 	this.converter = new Showdown.converter();
@@ -46,15 +51,137 @@ function FloatNotes() {
 }
 
 (function() {
-	var status = {
-			SAVED: 0,
-			EDITING: 1,
-			DRAGGING: 2,
-			RESIZING: 3,
-			NEEDS_SAVE: 4,
-			COLLAPSED: 5
-	};
 	
+	function FloatNote(data) {
+		this.data = data;
+		this.dom = null;
+		this.ele = {};
+		this.status = 0;
+	}
+	
+	function Indicator(type) {
+		this.ABOVE = 1;
+		this.BELOW = -1;
+		
+		var doc = gBrowser.contentDocument;
+		var css;
+		if(type == this.BELOW) {
+			this.label = gFloatNotes.stringsBundle.getString('belowIndicatorString');
+			css = {"position": 'fixed', "bottom": "0px", "left": "5px", 'display': 'none'};
+		}
+		else if(type == this.ABOVE) {
+			this.label = gFloatNotes.stringsBundle.getString('aboveIndicatorString');
+			css = {"position": 'fixed', "top": "0px", "left": "5px", 'display': 'none'};
+		}
+		this.type = type;
+		
+		var indicator = doc.createElement('div');
+  		indicator.id = "floatnotes-above";
+  		indicator.className = "floatnotes-indicator";
+  			
+  		var label = doc.createElement('div');
+  		label.className = "floatnotes-indicator-label";
+  		
+  		var container = doc.createElement('div');
+  		container.className = "floatnotes-inidcator-container";
+  		
+  		de.felixkling.util.css.set(indicator, css);
+  		de.felixkling.util.css.set(container, {"display": 'none'});
+  			
+  		indicator.addEventListener('mouseover', function(e) {
+  			gFloatNotes.indicator_above.container.style.display = 'block';
+  		
+  		}, false);
+  		
+  		indicator.addEventListener('mouseout', function(e) {
+  			gFloatNotes.indicator_above.container.style.display = 'none';
+  		
+  		}, false);
+  		
+  		indicator.appendChild(label);
+  		indicator.appendChild(container);
+  		
+  		
+  		this.ele = {
+  				"indicator": indicator,
+  				"label": label,
+  				"container": container
+  		};
+	}
+	
+	var status = {
+			SAVED: 1,
+			EDITING: 2,
+			DRAGGING: 4,
+			RESIZING: 8,
+			NEEDS_SAVE: 16,
+			COLLAPSED: 32
+		},
+		ZINDEX = 100000;
+	
+	var resizeTextarea = function(note) {
+		de.felixkling.util.css.set(note.ele.text, {
+			'height': (parseInt(note.dom.style.height) - 2 - 10) + 'px',
+			'width': (parseInt(note.dom.style.width) - 2 - 10) + 'px'
+		});
+	  };
+	
+	var moveResize = function(e, note, X, Y) {
+		  e.stopPropagation();
+		  e.preventDefault();
+		  
+		  var newX = Math.max(X + e.pageX,0) + 'px';
+		  var newY = Math.max(Y + e.pageY,0) + 'px';
+		  
+		  if(note.status & status.DRAGGING) {
+			  note.dom.style.left = newX;
+			  note.dom.style.top =  newY;
+		  }
+		  else if(note.status & status.RESIZING) {
+			  note.dom.style.width = newX;
+			  note.dom.style.height = newY;
+		  }
+		  
+		  if(e.pageY < window.content.pageYOffset) {
+			  var y = e.pageY - window.content.pageYOffset;
+		  }
+		  else if (e.pageY > window.content.innerHeight + window.content.pageYOffset) {
+			  var y = e.pageY - (window.content.innerHeight + window.content.pageYOffset);
+		  }
+
+		  if(e.pageX < window.content.pageXOffset) {
+			  var x = e.pageX - window.content.pageXOffset;
+		  }
+		  else if (e.pageX > window.content.innerWidth + window.content.pageXOffset) {
+			  var x = e.pageX - (window.content.innerWidth + window.content.pageXOffset);
+		  }
+
+		  if(x || y) {
+			  window.content.scrollBy(x,y);
+		  }
+
+		  return false;
+	  };
+	  
+	  var scoller = function() {
+		  if(gFloatNotes.pref.getBoolPref('showIndicator')) {
+			  gFloatNotes.startScrollTimer();
+		  }
+	  };
+	  
+	  function fireEvent(element,event) {
+		   if (document.createEvent) {
+		       // dispatch for firefox + others
+		       var evt = document.createEvent("HTMLEvents");
+		       evt.initEvent(event, true, true ); // event type,bubbling,cancelable
+		       return !element.dispatchEvent(evt);
+		   } else {
+		       // dispatch for IE
+		       var evt = document.createEventObject();
+		       return element.fireEvent('on'+event,evt)
+		   }
+		}
+
 	
 	FloatNotes.prototype = {
 	      /* Initial startup */
@@ -87,15 +214,11 @@ function FloatNotes() {
 	          
 	      // load string bundle
 	          this.stringsBundle = document.getElementById("floatnotes-stringbundle");
+	          
 	      // attach load handler
-
-	          	// During initialisation
-	          	gBrowser.addEventListener("load", function(e){gFloatNotes.onPageLoad(e);}, true);
-	          	var container = gBrowser.tabContainer;
-	          	container.addEventListener("TabSelect", function(e){gFloatNotes.onTabSelect(e);}, false);
-	          	
-
-
+	          gBrowser.addEventListener("load", function(e){gFloatNotes.onPageLoad(e);}, true);
+	          var container = gBrowser.tabContainer;
+	          container.addEventListener("TabSelect", function(e){gFloatNotes.onTabSelect(e);}, false);
 	      },
 
 	      onPageLoad: function (event) {
@@ -109,52 +232,32 @@ function FloatNotes() {
 	              }
 
 	  	    var doc = win.document; // doc is document that triggered "onload" event
-	  	    /*
+	  	    
+	  	    this._scrolltimeout = this.pref.getIntPref('scrolltimer');
+	  	    this.indicator_timeout = this.pref.getIntPref('fadeOutAfter');
+	  	    
 	  	    // enable indicators
 	  	    if(this.pref.getBoolPref('showIndicator')) {
-	  	    	this._scrolltimer = this.pref.getIntPref('scrolltimer');
+	  	    	
 	  	    	if(!this.indicator_above && !this.indicator_below) {
-	  	    		this.indicator_above = $('<div id="floatnotes-above" class="floatnotes-indicator" ><div class="floatnotes-label"></div><div class="floatnotes-texts"></div></div>', doc)
-	  	    		.css({position: 'fixed', top: 0, left: 0})
-	  	    		.data({'count': 0, 'label': this.stringsBundle.getString('aboveIndicatorString')})
-	  	    		.find('.floatnotes-texts').hide().end()
-	  	    		.hover(function(){
-	  	    			$(this).trigger('reset').find('.floatnotes-texts').show();
-	  	    			$.doTimeout('fade-' + this.id);
-	  	    		}, function() {
-	  	    			$(this).trigger('fade').find('.floatnotes-texts').hide();
-	  	    		})
-	  	    		.hide()
-	  	    		.delegate('.floatnotes-text', 'click', function(event) {
-	  	    			$(this).parent().hide();
-	  	    			$(gBrowser.contentDocument).scrollTo(Math.max(parseInt($(this).data('top')) - 20,0),  {easing:'swing', duration: 500});
-	  	    			//doc.getElementById($(this).attr('rel')).scrollIntoView(true);
-	  	    		})
-	  	    		.bind('reset', function(event) {
-	  	    			$(this).stop(true, true).show().css('opacity', 1);
-	  	    		})
-	  	    		.appendTo(doc.body);
-
-	  	    		var fadeout;
-	  	    		if((fadeout = this.pref.getIntPref('fadeOutAfter')) > 0) {
-	  	    			this.indicator_above.bind('fade', function(event) {
-	  	    				var that = this;
-	  	    				$.doTimeout('fade-' + this.id, fadeout*1000, function() {
-	  	    					$(that).fadeOut(800);
-	  	    				});
-
-	  	    			});
-	  	    		}
-
-	  	    		this.indicator_below = this.indicator_above.clone(true)
-	  	    		.attr('id', 'floatnotes-below')
-	  	    		.data('label', this.stringsBundle.getString('belowIndicatorString'))
-	  	    		.css({bottom: 0, top: ''});
 	  	    		
+	  	    		this.indicator_above = new Indicator(1);
+	  	    		this.indicator_below = new Indicator(-1);
+	  	    		/*
+	  	    		indicator.addEventListener('click', function(e) {
+	  	    			e.preventDefault();
+	  	    			e.stopPropagation();
+	  	    			if(e.target.className == 'floatnotes-indicator-text') {
+	  	    				var node = gBrowser.contentDocument.getElementById(e.target.getAttribute('rel'));
+	  	    				gBrowser.contentDocument.defaultView.scrollTo(0, Math.max(parseInt(node.style.top) - 20,0));
+	  	    			}   		
+	  	    		}, true);
+	  	    		
+	  	    		*/
 	  	    	}
-	  	    	this._attachScrollHandler(win, doc);
+	  	    	this._attachScrollHandler(doc);
+	  	    	
 	  	    }
-	  	    */
 	  	    
 	  	    var notes = Array();
 	  	    this.docs[doc.location] = notes;
@@ -188,23 +291,18 @@ function FloatNotes() {
 	  					    collapsed: row.getResultByName("collapse"),
 	  					    color: row.getResultByName("color")
 	  					};
-	  					var note;
-	  					if(gFloatNotes.notes[data.id] == undefined) {
-	  						note = new FloatNote(data);
-	  						gFloatNotes.notes[data.id] = note;
-	  					}
-	  					note = gFloatNotes.notes[data.id];
-	  					notes.push(note);
+	  					if(gFloatNotes.notes[data.id] === undefined) {
+	  						gFloatNotes.notes[data.id] = new FloatNote(data);
+	  					}  					
+	  					notes.push(gFloatNotes.notes[data.id]);
 	  			    }
 	  			    if(doc == gBrowser.contentDocument) {
 	  			    	gFloatNotes._attachNotesTo(gBrowser.contentDocument);
-	  			    	/*
-	  			    	$.each([gFloatNotes.indicator_below, gFloatNotes.indicator_above], function() {
-	  				    	this.children('.floatnotes-texts').empty();
-	  					    this.detach();
-	  					    $(doc.body).append(this);
-	  				    });
-	  				    */
+	  			    	if(gFloatNotes.pref.getBoolPref('showIndicator')) {
+	  			    		gFloatNotes.indicator_above.attachTo(doc);
+	  			    		gFloatNotes.indicator_below.attachTo(doc);
+	  			    		fireEvent(doc, 'scroll');
+	  			  	    }	  			    	
 	  			    }
 	  			    
 	  			    // hide notes for this domain if previously hidden
@@ -229,49 +327,91 @@ function FloatNotes() {
 	  	    if(gFloatNotes.status[domain]) {
 	  	    	gFloatNotes._updateMenuText(gFloatNotes.status[domain]['hidden']);
 	  	    }
-	  	    /*
-	  	    $.each([this.indicator_below, this.indicator_above], function() {
-	  	    	this.children('.floatnotes-texts').empty();
-	  		    this.detach();
-	  		    $(doc.body).append(this);
-	  	    });
-	  	    */
-	  	    //$(doc).trigger('scroll');
+	  	    if(this.pref.getBoolPref('showIndicator')) {
+	  	    	this.indicator_above.attachTo(doc);
+	  	    	this.indicator_below.attachTo(doc);
+	  	    	fireEvent(doc, 'scroll');
+	  	    }
 	      },
 	      
 	      _attachNotesTo: function(doc) {
 	      	var notes = this.docs[doc.location];
 	      	if (notes) {
-	      		for(var i in notes) {
-	      			if (notes[i].deleted) delete notes[i]; 
-	      			notes[i].attachTo(doc);	
-	      		}	
+	      		var todelete = Array();
+	      		for (var i in notes) {
+	      			var note = this.notes[notes[i].data.id];
+	      			if( note === null) {
+	      				todelete.push(i);
+	      			}
+	      			else {
+	      				note.attachTo(doc);	
+	      			}	      			
+	      		}
+	      		if(todelete) {
+	      			for(var i in todelete) {
+	      				noteids.splice(todelete[i],1);
+	      			}
+	      		}
 	      	}
 	      },
 	      
-	      _attachScrollHandler: function(win, doc) {
+	      startScrollTimer: function() {
+	    	  if(this._scrolltimer) {
+	    		  window.clearTimeout(this._scrolltimer);
+	    		  this._scrolltimer = null;
+	    	  }
+	    	  
+	    	  this._scrolltimer = window.setTimeout(function(){
+	    		  gFloatNotes.updateIndicators();
+	    	  }, this._scrolltimeout);
+	      },
+	      
+	      updateIndicators: function() {
+	    	  var wintop = parseInt(gBrowser.contentDocument.defaultView.pageYOffset),
+	    	  	winheight = parseInt(gBrowser.contentDocument.defaultView.innerHeight);
+    		gFloatNotes.docs[gBrowser.contentDocument.location].forEach(function(note) {
+    				if(note && note.dom) {
+    					var element = note.dom;
+    					var id = 'floatnotes-indicator-text-' + note.data.id,
+    					top = parseInt(element.style.top),
+    					bottom = top + parseInt(element.offsetHeight);
+    					var $position = null;
+    					if (wintop > bottom) {
+    						note.view = 1;
+    					}
+    					else if(wintop + winheight < top) {
+    						note.view = -1;
+    					}
+    					else {
+    						note.view = 0;
+    					}
+    					/*
+    				if($position) {	    				
+    					if($position.find('#' + id).length == 0) {
+    						var ele = $('<div class="floatnotes-text"></div>', doc).attr('id', id)
+	    					.text($element.children('.floatnotes-content').text())
+	    					.data('top', $element.css('top'));
+    						//$position.data('count', $position.data('count') + 1);
+    						ele.appendTo($position.children('.floatnotes-texts'));
+    					}
+    				}
+    				else {
+    					$position = $('#' + id, doc).closest('.floatnotes-indicator');
+    					//$position.data('count', $position.data('count') -1);
+    					$('#' + id, doc).remove();
+    				}*/
+    				}
+    				
+    		});
+    			
+    		gFloatNotes.indicator_above.update(gBrowser.contentDocument);
+    		gFloatNotes.indicator_below.update(gBrowser.contentDocument);
+	      },
+	      
+	      _attachScrollHandler: function(doc) {
+	    	 doc.addEventListener('scroll', scoller, false);
+	    	    	  
 	    	  /*
-	      	$(doc).bind('scroll.floatnotes', function(e) {
-	      		if(this.location == gBrowser.contentDocument.location) {
-	      		var doc = this;
-	      		$.doTimeout('scroll', gFloatNotes._scrolltimer, function(){
-	      			var wintop = parseInt($(doc).scrollTop()),
-	      				winheight = parseInt($(win).height());
-	  	    		gFloatNotes.indicator_below.trigger('reset');
-	  	    		gFloatNotes.indicator_above.trigger('reset');
-	  	    		gFloatNotes.docs[doc.location].forEach(function(obj) {
-	  	    				if(obj) {
-	  	    				var $element = obj.dom;
-	  	    				var id = 'floatnotes-text-' + obj.data.id,
-	  	    					top = parseInt($element.css('top')),
-	  	    					bottom = parseInt($element.css('top')) + parseInt($element.height());
-	  	    				var $position = null;
-	  	    				if (wintop > bottom) {
-	  	    					$position = gFloatNotes.indicator_above;
-	  	    				}
-	  	    				else if(wintop + winheight < top) {
-	  	    					$position = gFloatNotes.indicator_below;
-	  	    				}
 	  	    				if($position) {	    				
 	  	    					if($position.find('#' + id).length == 0) {
 	  	    						var ele = $('<div class="floatnotes-text"></div>', doc).attr('id', id)
@@ -287,27 +427,8 @@ function FloatNotes() {
 	  	    					$('#' + id, doc).remove();
 	  	    				}
 	  	    				}
-	  	    		});
-	  	    			
-	  	    			
-	  	    		[gFloatNotes.indicator_above, gFloatNotes.indicator_below].forEach( function(obj) {
-	  	    			var data = obj.data();
-	  	    			var count = $(obj).children('.floatnotes-texts:first').children().length;
-	  	    			if(count > 0) {
-	  	    				obj
-	  	   					.children('.floatnotes-label')
-	  	   					.text(count + ' ' + (count > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + data.label)
-	  	   					.end()
-	  	   					.show().trigger('fade');
-	      				}	    				
-	      				else {
-	      					obj.hide();
-	  	    			}			
-	  	    		});
-	  	    	});
-	          	}
-	      	});
-	      	*/
+	  	    		});*/
+
 	      },
 	      
 	      /* Inject the JS stylesheet to style the notes */
@@ -325,8 +446,8 @@ function FloatNotes() {
 	      },
 	      
 	      saveNote: function(note) {
-	  		if(!note.dom.hasClass('note-edit')) {
-	  			var data = note.dom.data();
+	  		if(!(note.status & status.EDITING) && note.status & status.NEEDS_SAVE) {
+	  			var data = note.data;
 	  			// new or update ?
 	  			if(data.id) {
 	  				var statement = gFloatNotes.db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, collapse=:collapse, color=:color, url=:url WHERE id = :id");
@@ -357,11 +478,11 @@ function FloatNotes() {
 	  					 print("Query canceled or aborted!");
 	  				    if(insert) {
 	  				    	data.id = gFloatNotes.db.lastInsertRowID;
-	  				    	note.dom.attr('id', 'floatnotes-note-' + data.id);
+	  				    	note.dom.id =  'floatnotes-note-' + data.id;
 	  						note.data = data;
 	  				    	gFloatNotes.notes[data.id] = note;
 	  				    }
-	  				    note.dom.removeClass('needs-save');
+	  				    note.status ^= status.NEEDS_SAVE;
 	  				}
 	  		    });
 	  		}
@@ -370,8 +491,8 @@ function FloatNotes() {
 	      addNote: function() {
 	          var doc = gBrowser.contentDocument;
 	          this._injectStylesheet(doc);
-	          var note = new Note({
-	  			x:this.X,
+	          var note = new FloatNote({
+	  			x: this.X,
 	  			y:this.Y,
 	  			w: this.pref.getIntPref('width'),
 	  			h: this.pref.getIntPref('height'),
@@ -381,32 +502,34 @@ function FloatNotes() {
 	  			collapsed: false});
 	          this.docs[doc.location].push(note);
 	          note.attachTo(doc);
-	          note.dom.trigger('start-edit');
+	          note.edit();
 	      },
 	      
 	      deleteNote: function() {
-	          var statement = this.db.createStatement("DELETE FROM floatnotes WHERE id = :id");
-	          statement.params.id = this.contextNote.data.id;
-	          var t = this;
-	          statement.executeAsync({
-	              handleResult: function(aResultSet) {
-	              },
+	    	  if(this.contextNote) {
+	    		  var statement = this.db.createStatement("DELETE FROM floatnotes WHERE id = :id");
+	    		  statement.params.id = this.contextNote.data.id;
+	    		  var that = this;
+	    		  statement.executeAsync({
+	    			  	handleResult: function(aResultSet) {
+	    		  		},
 
-	              handleError: function(aError) {
-	                  print("Error: " + aError.message);
-	              },
+	    		  		handleError: function(aError) {
+	    		  			print("Error: " + aError.message);
+	    		  		},
 
-	              handleCompletion: function(aReason) {
-	                  if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED) {
-	                      print("Query canceled or aborted!");
-	                      return;
-	                  }
-	                  t.contextNote.dom.detach();
-	                  t.contextNote.dom.remove();
-	                  t.contextNote.deleted = true;
-	                  delete gFloatNotes.notes[t.contextNote.data.id];
-	              }
-	          });
+	    		  		handleCompletion: function(aReason) {
+	    		  			if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED) {
+	    		  				print("Query canceled or aborted!");
+	    		  				return;
+	    		  			}
+	    		  			that.contextNote.detach();
+	    		  			that.contextNote.dom = null;
+	    		  			gFloatNotes.notes[that.contextNote.data.id] = null;
+	    		  			that.contextNote = null;
+	    		  		}
+	    		  });
+	    	  }
 	      },
 	      
 	      /* show or hide the notes for the current location */
@@ -418,16 +541,16 @@ function FloatNotes() {
 	  		    };
 	  		}
 	  		if(!this.status[domain]['hidden']) {
-	  			this.docs[gBrowser.contentDocument].forEach(function(obj) {obj.dom.hide();});
+	  			this.docs[domain].forEach(function(obj) {obj.dom.style.display = "none";});
 	  		    this.status[domain]['hidden'] = true;
-	  		    $(gBrowser.contentDocument).unbind("scroll.floatnotes");
+	  		    //$(gBrowser.contentDocument).unbind("scroll.floatnotes");
 	  		    this._updateMenuText(true);
 	  		}
 	  		else {
 	  		    this.status[domain]['hidden'] = false;
-	  		    this.docs[gBrowser.contentDocument].forEach(function(obj) {obj.dom.show();});
+	  		    this.docs[domain].forEach(function(obj) {obj.dom.style.display = "block";});
 	  		    this._attachScrollHandler(window.content, window.content.document);
-	  		    $(gBrowser.contentDocument).trigger('scroll');
+	  		    //$(gBrowser.contentDocument).trigger('scroll');
 	  		    this._updateMenuText(false);
 	  		}
 
@@ -495,8 +618,7 @@ function FloatNotes() {
 	              this._deleteMenuItem.hidden = true;
 	              this._editMenuItem.hidden = true;
 	          }
-	  		var domain = window.content.document.location;
-	  		if(gFloatNotes.docs[gBrowser.contentDocument]) {
+	  		if(gFloatNotes.docs[gBrowser.contentDocument.location]) {
 	  			this._hideMenuItem.hidden = false;
 	  		}
 	  		else {
@@ -529,7 +651,7 @@ function FloatNotes() {
 	  			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
 	  		}
 	  		else {
-	  			this._hideMenuItem.setAttribute('label', this.stringsBundle.getFormattedString('showNotesString', [jQuery('.floatnotes-note', window.content.document).length ]));
+	  			this._hideMenuItem.setAttribute('label', this.stringsBundle.getFormattedString('showNotesString', [gFloatNotes.docs[gBrowser.contentDocument.location].length ]));
 	  			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
 	  		}
 	      }
@@ -551,299 +673,325 @@ function FloatNotes() {
 	  	},
 	  	
 	  	detach: function() {
-	  		if(this.dom) {
+	  		if(this.dom && this.dom.parentNode) {
 	  			this.dom.parentNode.removeChild(this.dom);
 	  			//this.dom.parentNode = null;
 	  		}
 	  	},
 	  	
-	  	// TODO: write collapse function
-	  	// TODO: write edit function
-
+	  	collapse: function(collapse, save) {
+	  		save = (save === true);
+	  		if(collapse) {
+          		de.felixkling.util.addClass(this.dom, 'small');
+          		if (save) {
+          			this.data.collapsed = true;
+          			this.status |= status.NEEDS_SAVE;
+          			this.save();
+         		}  		
+	  		}
+	  		else {
+	  			de.felixkling.util.removeClass(this.dom, 'small');
+	  			de.felixkling.util.css.set(this.dom, {width: this.data.w, height: this.data.h});
+      	    	if(save) {
+      	    		this.data.collapsed = false;
+      	    		this.status |= status.NEEDS_SAVE;
+          			this.save();
+      	    	}
+	  		}
+	  	},
+	  	
+	  	edit: function() {
+	  		fireEvent(this.dom, 'dblclick');
+	  	},
+	  	
+	  	save: function(){
+	  		gFloatNotes.saveNote(this);
+	  	},	
 	  	getDomElement: function(doc) {
-	          var note = this,
-	          	  container, drag, resize, content, text;
-	          
-	          
-	          // Create elements
-	          container = doc.createElement('div');
-	          container.className = 'floatnotes-note';
-	          
-	          de.felixkling.util.css(container, {
-	        	  'backgroundColor': this.data.color, 
-	        	  'left': this.data.x,
-				  'top': this.data.y,
-				  'width': this.data.w,
-				  'height': this.data.h,
-				  'position': 'absolute'
-	          });
-	          
-	          drag = doc.createElement('div');
-	          drag.className = 'floatnotes-drag';
-	          
-	          content = doc.createElement('div');
-	          content.className = 'floatnotes-content';
-	          
-	          resize = doc.createElement('div');
-	          resize.className = 'floatnotes-resize';
-	          
-	          text = doc.createElement('textarea');
-	          text.style.display = 'none';
-	          
-	          
-	          // define event handlers
-	          drag.addEventListener('dblclick', function() {note.collapse();}, false);
-	          
-	          drag.addEventListener('mousedown', function(event) {
-	              event.preventDefault();
-        		  event.stopPropagation();
-	        	  var X = parseInt(note.dom.style.left) - event.pageX;
-	        	  var Y = parseInt(note.dom.style.top) - event.pageY;
-	        	  
-	        	  var move = function(e) {
-	        		  e.stopPropagation();
-	        		  e.preventDefault();
-		              note.dom.style.left = Math.max(X + e.pageX,0) + 'px';
-		              note.dom.style.top =  Math.max(Y + e.pageY,0) + 'px';
+	  		var note = this,
+	  		container, drag, resize, content, text;
 
-		              if(e.pageY < window.content.pageYOffset) {
-		                  var y = e.pageY - window.content.pageYOffset;
-		              }
-		              else if (e.pageY > window.content.innerHeight + window.content.pageYOffset) {
-		                  var y = e.pageY - (window.content.innerHeight + window.content.pageYOffset);
-		              }
 
-		              if(e.pageX < window.content.pageXOffset) {
-		                  var x = e.pageX - window.content.pageXOffset;
-		              }
-		              else if (e.pageX > window.content.innerWidth + window.content.pageXOffset) {
-		                  var x = e.pageX - (window.content.innerWidth + window.content.pageXOffset);
-		              }
+	  		// Create elements
+	  		container = doc.createElement('div');
+	  		container.className = 'floatnotes-note';
 
-		              if(x || y) {
-		                  window.content.scrollBy(x,y);
-		              }
+	  		de.felixkling.util.css.set(container, {
+	  			'backgroundColor': this.data.color, 
+	  			'left': this.data.x + "px",
+	  			'top': this.data.y  + "px",
+	  			'width': this.data.w  + "px",
+	  			'height': this.data.h  + "px",
+	  			'position': 'absolute',
+	  			'zIndex': ZINDEX
+	  		});
 
-		              return false;
-		          };
-	        	  
-	        	  var release = function(e) {
-	        		  window.content.document.removeEventListener('mousemove', move, true);
-	        		  window.content.document.removeEventListener('mouseup', release, true);
-	        		  return false;
-	        	  };
-	        	  
-	        	  window.content.document.addEventListener("mouseup", release, true);
-	        	  window.content.document.addEventListener("mousemove", move, true);
-	        	  return false;
-	        	  
-	          }, false);
-	          
-	          content.addEventListener('dbclick', function() {note.edit();}, false);
-	          
-	          container.addEventListener('click', function(e) {
-	        	  if(note.data.collapsed && e.target.className != 'floatnotes-drag' && e.target.className != 'floatnotes-resize') {
-		                  note.data.collapsed = false;
-		                  note.status = status.NEEDS_SAVE;
-		                  gFloatnotes.save(note);
-		              }
-	        	  /*
-		  	    	if($(this).hasClass('note-edit')) {
-		  	    		e.stopPropagation();*/
-	          }, false);
-	          
-	          function toFront(event) {
-	        	  var maxz = 0;
-	        	 
-	        	  var siblings = this.parentNode.childNodes;
-	        	  
-	        	  for (var i in siblings) {
-	        		  maxz = parseInt(siblings[i].style.zIndex) > maxz ? parseInt(siblings[i].style.zIndex) : maxz;
-	        	  }
-	        	  
-	        	  this.style.zIndex = maxz+1;  
-	          }
-	          
-	          
-	          container.addEventListener('mousedown', toFront, false);
-	          
-	          // set text
-	          content.innerHTML = gFloatNotes.converter.makeHtml(this.data.content);
-	          
-	          /*
-	          // create the divs, set and bind all necessary handlers
-	          return $('<div class="floatnotes-note"><div class="floatnotes-drag"></div><div class="floatnotes-content"></div><textarea></textarea><div class="floatnotes-resize"></div></div>', doc)
-	          .data(this.data)
-	          .find('textarea').hide().end()
-	          .find('.floatnotes-drag')
-	  	    		.hide()
-	  	    .end()
-	  	    .find('.floatnotes-resize').hide().end()
-	  	    .find('.floatnotes-content')
-	  	    	.html()
-	  	    	.end()
-	          .jqResize('.floatnotes-resize', function() {
-	          		$(this).unbind('mouseenter mouseleave');
-	          	}, function(w, h) {
-	  	        	$(this).unbind('mouseenter mouseleave');
-	  	        	if($(this).hasClass('note-edit')) {
-	  	        		resizeTextarea(this, w, h);
-	  	        	}
-	  	        },
-	  	        function() {
-	  		        var data = $(this).data();
-	  		        data.w = parseInt($(this).css('width'));
-	  	            data.h = parseInt($(this).css('height'));
-	  	            $(this).addClass('needs-save').trigger('save');
-	  	            $(this).removeClass('floatnotes-resizing');
-	  	            $(this).hover(inf, outf);
-	          })
-	          .jqDrag('.floatnotes-drag', function() {
-	  	        	$(this).unbind('mouseenter mouseleave');
-	  		    },
-	  		    null,
-	  		    function() {
-	  		    	var data = $(this).data();
-	  	             	data.x = parseInt($(this).css('left'));
-	  	             	data.y = parseInt($(this).css('top'));
-	  	             	$(this).addClass('needs-save').trigger('save');
-	  	             	$(this).removeClass('floatnotes-dragging');
-	  	             	$(this).hover(inf, outf);
-	          })
-	          .css({'width': this.data.w, 
-	                'height': this.data.h, 
-	                'top': this.data.y, 
-	                'left': this.data.x, 
-	                'position': 'absolute',
-	                'background-color': this.data.color})
-	          .hover(inf, outf)
-	          .bind({
-	          	'collapse': function(event, save, animate) {
-	          		var data = $(this).data();
-	          		if(!data.collapsed) {
-	          			data.collapsed = true;
-	          		}
-	          		if(animate) {
-	          			$(this).animate({height: '16px',width:'16px'}, 'fast', function() {
-	              			$(this).addClass('small needs-save');
-	              			if(save) $(this).trigger('save');
-	              		});
-	          		}
-	          		else {
-	          			$(this).addClass('small needs-save');
-	          			if(save) $(this).trigger('save');
-	          		}
-	  	    	},
-	  	    	'uncollapse': function() {
-	  	    		if($(this).hasClass('small')) {
-	      	    		var data = $(this).data();
-	      	    		$(this).removeClass('small').css({width: data.w, height: data.h});
-	      	    	}
-	  	    	},
-	  	    	'start-edit': function() {
-	  	    		var $note = $(this);
-	  	    		$('.floatnotes-content', this).hide();
-	  	    		$('textarea', this).show().html($note.data('content')).focus();
-	  	    		$note.addClass('note-edit');
-	  	    		resizeTextarea(this, $note.width(), $note.height());
-	  	    		$(window).bind('click.floatnotes', {note: $note}, function(e) {
-	  	    			$(this).unbind('click.floatnotes');
-	  	    			e.data.note.trigger('end-edit');
-	  	    		});
-	  	    	},
-	  	    	'end-edit': function() {
-	  	    		var data = $(this).data();
-	  	    		$(this)
-	  	    		.find('textarea')
-	  	    			.each(function(){data.content = $(this).val();})
-	  	    			.hide()
-	  	    		.end()
-	  	    		.find('.floatnotes-content')
-	  	    			.html(gFloatNotes.converter.makeHtml(data.content))
-	  	    			.show()
-	  	    		.end()
-	  	    		.removeClass('note-edit')
-	  	    		.addClass('needs-save')
-	  	    		.trigger('save');
-	  	    	},
-	  	    	'save.floatnotes': function() {
-	  	    		gFloatNotes.saveNote(note);
-	  	    	},
-	  	    	'contextmenu': function(e){
-	  	    		gFloatNotes.contextNote = note;
-	  	    	}
-	          });*/
-	          
-	          this.ele.drag = drag;
-	          this.ele.content = content;
-	          this.ele.resize = resize;
-	          this.ele.text = text;
-	          
-	          container.appendChild(drag);
-	          container.appendChild(content);
-	          container.appendChild(text);
-	          container.appendChild(resize);
-	          
-	          drag = content = resize = text = null;
-	          doc = null;
-	          
-	          return container;
+	  		drag = doc.createElement('div');
+	  		drag.className = 'floatnotes-drag';
+
+	  		content = doc.createElement('div');
+	  		content.className = 'floatnotes-content';
+
+	  		resize = doc.createElement('div');
+	  		resize.className = 'floatnotes-resize';
+
+	  		text = doc.createElement('textarea');
+	  		text.style.display = 'none';
+
+
+	  		// define event handlers
+
+	  		// note collapse
+	  		drag.addEventListener('dblclick', function(e) {
+	  			e.stopPropagation();
+	  			note.status |= status.COLLAPSED;
+	  			note.collapse(true);
+	  		}, false);
+
+
+	  		// set hover
+	  		var _in = function(e) {
+	  			if(note.status & status.COLLAPSED) {
+	  				note.collapse(false, false);
+	  			}
+	  			de.felixkling.util.css.show(note.ele.drag);
+	  			de.felixkling.util.css.show(note.ele.resize);
+	  		};
+
+	  		var _out = function(e) {
+	  			de.felixkling.util.css.hide(note.ele.drag);
+	  			de.felixkling.util.css.hide(note.ele.resize);
+	  			if(note.status & status.COLLAPSED) {
+	  				note.collapse(true, false);
+	  			}
+	  		};
+
+
+	  		container.addEventListener('mouseover', _in, false);
+	  		container.addEventListener('mouseout', _out, false);
+
+
+	  		// note edit
+	  		container.addEventListener('dblclick', function(e) {
+	  			e.preventDefault();
+	  			e.stopPropagation();
+
+	  			de.felixkling.util.css.hide(note.ele.content);
+	  			note.ele.text.value = note.data.content;
+	  			de.felixkling.util.css.show(note.ele.text);
+	  			note.ele.text.focus();
+	  			de.felixkling.util.addClass(note.dom, 'note-edit');
+	  			resizeTextarea(note, note.dom.style.width, note.dom.style.height);  	    		
+	  			note.status |= status.EDITING;
+
+	  			var finish = function(e) {
+	  				window.removeEventListener('click', finish, false);
+	  				window.removeEventListener('keydown', key, true);
+	  				var content = note.ele.text.value;
+	  				note.data.content = content;
+	  				note.ele.content.innerHTML = gFloatNotes.converter.makeHtml(content);
+	  				de.felixkling.util.css.show(note.ele.content);
+	  				de.felixkling.util.css.hide(note.ele.text);
+
+	  				de.felixkling.util.removeClass(note.dom, 'note-edit');
+	  				note.status ^= status.EDITING;
+	  				note.status |= status.NEEDS_SAVE;
+	  				note.save();    			
+	  			};
+	  			
+	  			var key = function(e) {
+	  				if(e.keyCode == e.DOM_VK_ESCAPE	) { //escape was pressed
+	  					window.removeEventListener('click', finish, false);
+		  				window.removeEventListener('keydown', key, true);
+		  				de.felixkling.util.css.show(note.ele.content);
+		  				de.felixkling.util.css.hide(note.ele.text);
+
+		  				de.felixkling.util.removeClass(note.dom, 'note-edit');
+		  				note.status ^= status.EDITING;
+		  				e.preventDefault();
+			  			e.stopPropagation();
+	  				}
+	  				else if(e.keyCode == 13 && e.ctrlKey) {
+	  					e.preventDefault();
+	  		  			e.stopPropagation();
+	  					fireEvent(window, 'click');
+	  				}
+	  			};
+
+	  			window.addEventListener('keydown', key, true);
+	  			window.addEventListener('click', finish, false);
+
+	  		}, false);
+
+	  		// note move
+	  		drag.addEventListener('mousedown', function(event) {
+	  			event.preventDefault();
+	  			event.stopPropagation();
+	  			var X = parseInt(note.dom.style.left) - event.pageX;
+	  			var Y = parseInt(note.dom.style.top) - event.pageY;
+	  			var opacity = note.dom.style.opacity || 1;
+	  			note.dom.style.opacity = 0.8;
+	  			note.status |= status.DRAGGING;
+	  			note.dom.removeEventListener('mouseout', _out, false);
+	  			note.dom.removeEventListener('mouseover', _in, false);
+
+	  			var move = function(e) {
+	  				e.preventDefault();
+	  				e.stopPropagation();
+	  				moveResize(e, note, X, Y);
+	  			};
+
+	  			var release = function(e) {
+	  				note.status ^= status.DRAGGING | status.NEEDS_SAVE;
+	  				note.dom.style.opacity = opacity;
+	  				note.data.x = parseInt(note.dom.style.left);
+	  				note.data.y = parseInt(note.dom.style.top);
+	  				note.save();
+	  				note.dom.addEventListener('mouseout', _out, false);
+	  				note.dom.addEventListener('mouseover', _in, false);
+	  				window.content.document.removeEventListener('mousemove', move, true);
+	  				window.content.document.removeEventListener('mouseup', release, true);
+	  				return false;
+	  			};
+
+	  			window.content.document.addEventListener("mouseup", release, true);
+	  			window.content.document.addEventListener("mousemove", move, true);	        	  
+
+	  			return false;
+
+	  		}, true);
+
+
+	  		// note resize          
+	  		resize.addEventListener('mousedown', function(event) {
+	  			event.preventDefault();
+	  			event.stopPropagation();
+	  			var X = parseInt(note.dom.style.width) - event.pageX;
+	  			var Y = parseInt(note.dom.style.height) - event.pageY;
+	  			var opacity = note.dom.style.opacity || 1;
+	  			note.dom.style.opacity = 0.8;
+	  			note.status |= status.RESIZING;
+	  			note.dom.removeEventListener('mouseout', _out, false);
+	  			note.dom.removeEventListener('mouseover', _in, false);
+
+	  			var resize = function(e) {
+	  				e.preventDefault();
+	  				e.stopPropagation();
+	  				moveResize(e, note, X, Y);
+	  				resizeTextarea(note);
+	  			};
+
+	  			var release = function(e) {
+	  				note.status ^= status.RESIZING | status.NEEDS_SAVE;
+	  				note.dom.style.opacity = opacity;
+	  				note.dom.addEventListener('mouseout', _out, false);
+	  				note.dom.addEventListener('mouseover', _in, false);
+	  				note.data.w = parseInt(note.dom.style.width);
+	  				note.data.h = parseInt(note.dom.style.height);
+	  				note.save();
+	  				window.content.document.removeEventListener('mousemove', resize, true);
+	  				window.content.document.removeEventListener('mouseup', release, true);
+	  				return false;
+	  			};
+
+	  			window.content.document.addEventListener("mouseup", release, true);
+	  			window.content.document.addEventListener("mousemove", resize, true);	        	  
+
+	  			return false;
+
+	  		}, false);
+
+	  		// note edit
+	  		content.addEventListener('dbclick', function() {note.edit();}, false);
+
+	  		// note extend
+	  		container.addEventListener('click', function(e) {
+	  			if(note.status & status.COLLAPSED && e.target.className != 'floatnotes-drag' && e.target.className != 'floatnotes-resize') {
+	  				note.status ^= status.COLLAPSED;
+	  				note.collapse(false);
+	  			}
+
+	  			if(note.status & status.EDITING) {
+	  				e.stopPropagation();
+	  			}
+	  		}, false);
+
+	  		// bring note to front
+	  		container.addEventListener('mousedown', function(event) {
+	  			var maxz = parseInt(this.style.zIndex);
+
+	  			var siblings = this.parentNode.childNodes;
+
+	  			for (var i in siblings) {
+	  				if(siblings[i] && siblings[i].style)
+	  					var v = parseInt(siblings[i].style.zIndex);
+	  					maxz =  v > maxz ? v : maxz;
+	  			}
+	  			this.style.zIndex = maxz+1;  
+	  		}, true);
+
+
+	  		// set as context note
+	  		container.addEventListener('contextmenu', function(e) {
+	  			gFloatNotes.contextNote = note;		
+	  		}, true);
+
+
+	  		// set text
+	  		content.innerHTML = gFloatNotes.converter.makeHtml(this.data.content);
+
+	  		this.ele.drag = drag;
+	  		this.ele.content = content;
+	  		this.ele.resize = resize;
+	  		this.ele.text = text;
+
+	  		container.appendChild(drag);
+	  		container.appendChild(content);
+	  		container.appendChild(text);
+	  		container.appendChild(resize);
+
+	  		drag = content = resize = text = null;
+	  		doc = null;
+
+	  		return container;
 	  	}
 	  	
 	  };
+	
+	Indicator.prototype = {
+		update: function(doc) {
+			var that = this;
+			this.stop();
+			var n = gFloatNotes.docs[doc.location].filter(function(note){ return note.view == that.type;}).length;
+			if(n > 0) {
+				this.ele.label.innerHTML = n + ' ' + (n > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + this.label;
+				this.ele.indicator.style.display = "block";
+				this.timer = window.setTimeout(function(){ that.ele.indicator.style.display="none";}, gFloatNotes.indicator_timeout*1000);
+			}
+			else {
+				this.ele.indicator.style.display = "none";
+			}
+			return n;
+		},
+		stop: function() {
+			if(this.timer) {
+				window.clearTimeout(this.timer);
+			}
+		},
+		attachTo: function(doc) {
+	  		this.detach();
+	  		this.ele.indicator.style.display = "none";
+	  		doc.body.appendChild(this.ele.indicator);
+	  	},
+	  	
+	  	detach: function() {
+	  		if(this.ele.indicator && this.ele.indicator.parentNode) {
+	  			this.ele.indicator.parentNode.removeChild(this.ele.indicator);
+	  			//this.dom.parentNode = null;
+	  		}
+	  	}
+	};
 })();
-
-/*
-window.addEventListener("load", function(event){
-      (function(loader){
-          loader.loadSubScript("resource://floatnotes/jquery.js");
-          loader.loadSubScript("resource://floatnotes/jqDnR.js");
-          loader.loadSubScript("resource://floatnotes/showdown/showdown.js");
-          loader.loadSubScript("resource://floatnotes/jQuery.dotimeout.js");
-          loader.loadSubScript("resource://floatnotes/jQuery.scrollTo-1.4.2.js");
-      })(
-          Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(
-              Components.interfaces.mozIJSSubScriptLoader
-          )
-      );
-      
-      
-
-      (function ($) {
-    	  $.support.opacity = true;
-
-    	  
-
-    	  //small function to compute the size of the textarea properly
-    	  var resizeTextarea = function(context, width, height) {
-    	  	var $ta = $('textarea', context);
-    	  	var $context = $(context);
-    	  	$ta.css('height', parseInt(height)
-    	            - 2*$context.css('border-width')
-    	            - 2*parseInt($ta.css('padding-left')))
-    	      .css('width', parseInt(width)
-    	            - 2*$context.css('border-width')
-    	            - 2*parseInt($ta.css('padding-left')));
-    	  };
-
-    	  var inf = function() {
-    	  	if($(this).data('collapsed')) {
-    	  		$(this).trigger('uncollapse');
-    	  	}
-    	  	$('.floatnotes-drag, .floatnotes-resize', this).show();
-    	  };
-    	  var outf = function() {
-    	  	$('.floatnotes-drag, .floatnotes-resize', this).hide();
-    	  	if($(this).data('collapsed'))
-    	  		$(this).trigger('collapse', [false, true]);
-    	  };
-
-    	  
-
-    	  
-
-    	  })(jQuery.noConflict());
-*/
 
 var gFloatNotes = new FloatNotes();
 window.addEventListener("load", function(event){gFloatNotes.init();}, false);

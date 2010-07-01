@@ -6,33 +6,32 @@
 /*  ----- Note style ----- */
 
 .floatnotes-note {
-    border: 1px solid black;
-    font-family: sans-serif;
-    text-align:left;
-    color: black;
-    min-height: 30px;
-    min-width:30px;
-    z-index: 100000;
-    opacity:1;
-    -moz-box-shadow: 0px 0px 5px #888;
-    -moz-border-radius: 5px;
+    border: 1px solid black !important;
+    font-family: Arial, sans-serif !important;
+    text-align:left !important;
+    color: !important;
+    min-height: 30px !important;
+    min-width:30px !important;
+    opacity:1 !important;
+    -moz-box-shadow: 0px 0px 5px #888 !important;
+    -moz-border-radius: 5px !important;
 }
 
 .floatnotes-note * {
-    padding:0;
-    margin:0;
-    font-size: 12px !important;
+    padding:0 !important;
+    margin:0 !important;
+    font-size: 13px !important;
 }
 
 .floatnotes-note.small {
-    min-height:16px;
-    max-height:16px;
-    max-width:16px;
-    min-height:16px;
-    -moz-border-radius: 7px;
-    -moz-border-radius-bottomright: 0;
-    opacity: 0.8;
-    -moz-box-shadow: none;
+    min-height:16px !important;
+    max-height:16px !important;
+    max-width:16px !important;
+    min-height:16px !important;
+    -moz-border-radius: 7px !important;
+    -moz-border-radius-bottomright: 0 !important;
+    opacity: 0.8 !important;
+    -moz-box-shadow: none !important;
 }
 
 .floatnotes-note.small > * {
@@ -41,97 +40,142 @@
 }
 
 .floatnotes-note.note-edit {
-    border-color: red;
-    border-width:2px;
+    border-color: red !important;
+    border-width:2px !important;
 }
 
 .floatnotes-note ul, .floatnotes-note ol {
-    padding-left:30px;
+    padding-left:30px !important;;
 }
 
 .floatnotes-note .floatnotes-drag{
-    background-color: #706C6C;
-    height: 20px;
-    cursor: move;
-    margin-top:-17px;
-    margin-left:-1px;
-    border:1px solid black;
-    width: 100%;
+    background-color: #706C6C !important;
+    height: 20px !important;
+    cursor: move !important;
+    margin-top:-17px !important;
+    margin-left:-1px !important;
+    border:1px solid black !important;
+    width: 100% !important;
     display: none;
-    -moz-box-shadow: 0px 0px 5px #888;
+    -moz-box-shadow: 0px 0px 5px #888 !important;
 }
 
 .floatnotes-note .floatnotes-resize{
     /*border-right: 5px solid #706C6C;*/
     /*border-bottom: 5px solid #706C6C;*/
-    background-color: #706C6C;
-    width: 20px;
-    height: 20px;
-    position: absolute;
-    right: -5px;
-    bottom: -5px;
-    cursor: se-resize;
+    background-color: #706C6C !important;
+    width: 20px !important;
+    height: 20px !important;
+    position: absolute !important;
+    right: -5px !important;
+    bottom: -5px !important;
+    cursor: se-resize !important;
     display: none;
-    -moz-box-shadow: 0px 0px 5px #888;
+    -moz-box-shadow: 0px 0px 5px #888 !important;
 }
 
 .floatnotes-note.note-edit .floatnotes-drag {
-    border-color: red;
-    border-width:2px;
-    margin-left:-2px;
-    margin-top:-19px;
-    border-bottom:none;
-    background-color: red;
+    border-color: red !important;
+    border-width:2px !important;
+    margin-left:-2px !important;
+    margin-top:-19px !important;
+    border-bottom:none !important;
+    background-color: red !important;
 }
 
 .floatnotes-note.note-edit .floatnotes-resize {
-    background-color: red;
+    background-color: red !important;
 }
 
 .floatnotes-note .floatnotes-content{
-    padding: 5px;
-    overflow:auto;
-    position:absolute;
-    top: 0;
-    bottom: 0;
-    left:0;
-    right:0;
-    z-index:-1;
+    padding: 5px !important;
+    overflow:auto !important;
+    position:absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left:0 !important;
+    right:0 !important;
+    z-index:-1 !important;
 }
 
 .floatnotes-note textarea {
-    position: absolute;
-    border: none;
-    background-color: transparent;
-    padding: 5px;
+    position: absolute !important;
+    border: none !important;
+    background-color: transparent !important;
+    padding: 5px !important;
 }
+
+/* ------ Note content style ---- */
+
+.floatnotes-note h1 {	
+	font-size: 1.4em !important;
+}
+
+.floatnotes-note h2 {   
+    font-size: 1.1em !important;
+}
+
+.floatnotes-note p {   
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
+}
+
+.floatnotes-note pre {   
+    padding: 5px !important;
+    border: 1px dotted #555 !important;
+    background-color: #eee !important;
+    margin: 5px !important;
+}
+
+.floatnotes-note p > code {   
+    padding: 2px !important;
+    border: 1px dotted #555 !important;
+    background-color: #eee !important;
+    line-height: 1.2em !important;
+}
+
+.floatnotes-note em,  .floatnotes-not strong{   
+    font-size: inherit !important;
+}
+
+.floatnotes-note ul{   
+    padding-left: 20px !important;
+}
+
+
 
 /*  ----- Indicator styles ----- */
 
 .floatnotes-indicator {
     font-family: Verdana,Arial,sans-serif !important;
-    font-size: 12px;
+    font-size: 12px !important;
     text-align: left !important;
-    max-width: 200px;
-    opacity: .9;
-    border: 1px solid black;
-    z-index: 1000000;
-    background-color: #CCC;
+    max-width: 200px !important;
+    opacity: .9 !important;
+    border: 1px solid black !important;
+    z-index: 1000000 !important;
+    background-color: #CCC !important;
     color: black !important;
+    padding: 7px !important;
+    margin-left: 5px !important;
+}
+
+.floatnotes-indicator .floatnotes-indicator-container {
+    padding: 5px 0 5px 0 !important;	
 }
 
 .floatnotes-indicator .floatnotes-indicator-label {
-    padding: 5px;
 }
 
 .floatnotes-indicator .floatnotes-indicator-text {
-    max-height: 50px;
-    overflow: hidden;
-    border-top: 1px solid black;
-    padding: 5px;
-    cursor: pointer;
+    max-height: 50px !important;
+    overflow: hidden !important;
+    border-top: 1px solid black !important;
+    border-bottom: 1px solid black !important;
+    padding:5px !important;
+    cursor: pointer !important;
 }
 
 .floatnotes-indicator .floatnotes-indicator-text:hover {
-    background-color: #FCFACF;
+    background-color: #FCFACF !important;
 }

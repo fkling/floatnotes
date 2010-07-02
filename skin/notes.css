@@ -15,6 +15,7 @@
     opacity:1 !important;
     -moz-box-shadow: 0px 0px 5px #888 !important;
     -moz-border-radius: 5px !important;
+    padding:5px !important;
 }
 
 .floatnotes-note * {
@@ -52,7 +53,7 @@
     background-color: #706C6C !important;
     height: 20px !important;
     cursor: move !important;
-    margin-top:-17px !important;
+    margin-top:-22px !important;
     margin-left:-1px !important;
     border:1px solid black !important;
     width: 100% !important;
@@ -78,7 +79,7 @@
     border-color: red !important;
     border-width:2px !important;
     margin-left:-2px !important;
-    margin-top:-19px !important;
+    margin-top:-24px !important;
     border-bottom:none !important;
     background-color: red !important;
 }
@@ -88,7 +89,7 @@
 }
 
 .floatnotes-note .floatnotes-content{
-    padding: 5px !important;
+	padding: 5px !important;
     overflow:auto !important;
     position:absolute !important;
     top: 0 !important;
@@ -98,11 +99,7 @@
     z-index:-1 !important;
 }
 
-.floatnotes-note textarea {
-    position: absolute !important;
-    border: none !important;
-    background-color: transparent !important;
-    padding: 5px !important;
+.floatnotes-note  textarea.floatnotes-text {
 }
 
 /* ------ Note content style ---- */

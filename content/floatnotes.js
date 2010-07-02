@@ -1,4 +1,3 @@
-
 function FloatNotes() {
 	this.db = null;
 	this.converter = new Showdown.converter();
@@ -6,8 +5,6 @@ function FloatNotes() {
 	this.docs = {};
 	this.notes = {};
 }
-
-//TODO: write upgrade function
 
 (function() {
 	
@@ -60,8 +57,8 @@ function FloatNotes() {
 	
 	var resizeTextarea = function(note) {
 		util.css(note.ele.text, {
-			'height': (parseInt(note.dom.style.height) - 10) + 'px',
-			'width': (parseInt(note.dom.style.width) - 10) + 'px'
+			'height': (parseInt(note.dom.style.height)) + 'px',
+			'width': (parseInt(note.dom.style.width)) + 'px'
 		});
 	  };
 	
@@ -103,11 +100,9 @@ function FloatNotes() {
 	  };
 	  
 	  var scoller = function() {
-		  if(gFloatNotes.pref.getBoolPref('showIndicator')) {
-			  gFloatNotes.startScrollTimer();
-		  }
+		  gFloatNotes.startScrollTimer();
 	  };
-	 
+	  
 	  
     /**
      * FloatNotes global object prototype. Contains all the functions to load,
@@ -117,21 +112,52 @@ function FloatNotes() {
 	FloatNotes.prototype = {
 	      /* Initial startup */
 	      init: function () {
-	  	// --- Load and create database
-	          var file = Components.classes["@mozilla.org/file/directory_service;1"]
-	                       .getService(Components.interfaces.nsIProperties)
-	                       .get("ProfD", Components.interfaces.nsIFile);
-	          file.append("floatnotes.sqlite");
+				var ver = -1, firstrun = true;
+				var gExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"]
+				                                           .getService(Components.interfaces.nsIExtensionManager);
+				var current = gExtensionManager.getItemForID("floatnotes@felix-kling.de").version;
+				
+				// Load preferences
+		          this.pref = Components.classes["@mozilla.org/preferences-service;1"]
+		  				.getService(Components.interfaces.nsIPrefBranch)
+		  				.getBranch("extensions.floatnotes.");
+		          
+		  	  	// --- Load and create database
+		          var file = Components.classes["@mozilla.org/file/directory_service;1"]
+		                       .getService(Components.interfaces.nsIProperties)
+		                       .get("ProfD", Components.interfaces.nsIFile);
+		          file.append("floatnotes.sqlite");
 
-	          var storageService = Components.classes["@mozilla.org/storage/service;1"]
-	                          .getService(Components.interfaces.mozIStorageService);
-	          this.db = storageService.openDatabase(file);
-	          // Create DB if not exists
-	          this.db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, collapse INTEGER)');
-	          this.db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
-	          // -- end database
+		          var storageService = Components.classes["@mozilla.org/storage/service;1"]
+		                          .getService(Components.interfaces.mozIStorageService);
+		          this.db = storageService.openDatabase(file);
+		          
+		        // check for first run or upgrade
+		
+				try{
+					firstrun = this.pref.getBoolPref("firstrun");
+					ver = this.pref.getCharPref("version");					
+				}catch(e){
+					// nothing
+				}finally{
+					if (firstrun){
+						this.pref.setBoolPref("firstrun",false);
+						this.pref.setCharPref("version",current);	
+						 // Insert code for first run here				
+				          // Create DB if not exists
+				          this.db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, collapse INTEGER)');
+				          this.db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
+				          // -- end database
+					}		
+					if (ver != current && !firstrun){ // !firstrun ensures that this
+						this.pref.setCharPref("version",current);		
+						// Insert code if version is different here => upgrade
+						this.db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');
+						
+					}
+				}
 	          
-	    //create statments
+	    //create statements
 	          this._update_note_statement = this.db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, collapse=:collapse, color=:color, url=:url WHERE id = :id");
 	          this._create_note_statement  = this.db.createStatement("INSERT INTO floatnotes  (url, content, h, w, x, y, collapse, color) VALUES ( :url, :content, :h, :w, :x, :y, :collapse, :color)");
 	          this._delete_note_statement  = this.db.createStatement("DELETE FROM floatnotes WHERE id = :id");
@@ -145,10 +171,7 @@ function FloatNotes() {
 	          if(!sss.sheetRegistered(uri, sss.AGENT_SHEET))
 	              sss.loadAndRegisterSheet(uri, sss.AGENT_SHEET);
 	          
-	  	// Load preferences
-	          this.pref = Components.classes["@mozilla.org/preferences-service;1"]
-	  				.getService(Components.interfaces.nsIPrefBranch)
-	  				.getBranch("extensions.floatnotes.");
+	  	
 
 	  	// get references to menu items
 	          this._deleteMenuItem = document.getElementById('floatnotes-delete-note');
@@ -164,6 +187,7 @@ function FloatNotes() {
 	          gBrowser.addEventListener("load", function(e){gFloatNotes.onPageLoad(e);}, true);
 	          var container = gBrowser.tabContainer;
 	          container.addEventListener("TabSelect", function(e){gFloatNotes.onTabSelect(e);}, false);
+	          window.removeEventListener("load", function(event){gFloatNotes.init();}, false);
 	      },
 
 	      /**
@@ -181,23 +205,28 @@ function FloatNotes() {
 
 	              var doc = win.document; // doc is document that triggered "onload" event
 
-	              this._scrolltimeout = this.pref.getIntPref('scrolltimer');
-	              this.indicator_timeout = this.pref.getIntPref('fadeOutAfter');
-
-	              // enable indicators
-	              if(this.pref.getBoolPref('showIndicator')) {	  	    	
-	            	  if(!this.indicator_above && !this.indicator_below) {  	    		
-	            		  this.indicator_above = new Indicator(1);
-	            		  this.indicator_below = new Indicator(-1);
-	            	  }	  	    	
-	              }
-
+	              // Get these preferences everytime on page load to have a fast update
 	              if(doc === gBrowser.contentDocument) {
-	            	  this.loadNotes(gBrowser.contentDocument);
+		              this._scrolltimeout = this.pref.getIntPref('scrolltimer');
+		              this.indicator_timeout = this.pref.getIntPref('fadeOutAfter');
+		              this.show_indicators = this.pref.getBoolPref('showIndicator');
+	
+		              //TODO: fix for special sites
+		              // create indicators
+		              if(this.show_indicators) {
+		            	  if(!this.indicator_above && !this.indicator_below) {  	    		
+		            		  this.indicator_above = new Indicator(1);
+		            		  this.indicator_below = new Indicator(-1);
+		            	  }	  	    	
+		              }
+		              this.loadNotes(gBrowser.contentDocument);
 	              }
 	      	}
 	      },
 	      
+	      /**
+	       * Load and/or show notes
+	       */
 	      onTabSelect: function(e) {
 	      	var doc = gBrowser.contentDocument;
 	      	var domain = doc.location;
@@ -211,16 +240,18 @@ function FloatNotes() {
 		  	    if(this.status[domain]) {
 		  	    	this._updateMenuText(gFloatNotes.status[domain]['hidden']);
 		  	    }
-		  	    if(this.pref.getBoolPref('showIndicator')) {
+		  	    if(this.show_indicators) {
 		  	    	this.indicator_above.attachTo(doc);
-		  	    	this.indicator_below.attachTo(doc);
-		  	    	this._removeScrollHandler(doc);
+		  	    	this.indicator_below.attachTo(doc);		  	    	
 		  	    	this._attachScrollHandler(doc);
 		  	    	util.fireEvent(doc, 'scroll');
 		  	    }
 	      	}
 	      },
 	      
+	      /**
+	       * Load and attach the notes
+	       */
 	      loadNotes: function(doc) {
 	    	  var notes = Array();
               this.docs[doc.location] = notes;
@@ -257,17 +288,14 @@ function FloatNotes() {
             		  notes.push(gFloatNotes.notes[data.id]);
             	  }
 
-            	  /*if(doc === gBrowser.contentDocument) {
-            		  doc = gBrowser.contentDocument;*/
-            		  gFloatNotes._attachNotesTo(doc);
-            		  if(gFloatNotes.pref.getBoolPref('showIndicator')) {
-            			  gFloatNotes.indicator_above.attachTo(doc);
-            			  gFloatNotes.indicator_below.attachTo(doc);  			    		
-            			  gFloatNotes._removeScrollHandler(doc);
-            			  gFloatNotes._attachScrollHandler(doc);
-            			  util.fireEvent(doc, 'scroll');
-            		  }	  			    	
-            	  //}
+            	  gFloatNotes._attachNotesTo(doc);
+            	  if(gFloatNotes.show_indicators) {
+            		  gFloatNotes.indicator_above.attachTo(doc);
+            		  gFloatNotes.indicator_below.attachTo(doc); 
+            		  gFloatNotes._attachScrollHandler(doc);
+            		  util.fireEvent(doc, 'scroll');
+            	  }	  			    	
+
               },
               handleCompletion: function() {
             	  
@@ -336,12 +364,16 @@ function FloatNotes() {
 	      },
 	      
 	      _attachScrollHandler: function(doc) {
+	    	 if(this._killScrollHandler)
+	  	    	 this._killScrollHandler();
 	    	 doc.addEventListener('scroll', scoller, false);
+	    	 var that = this;
+	    	 this._killScrollHandler = function() {
+	    		 doc.removeEventListener('scroll', scoller, false);
+	    		 that._killScrollHandler = null;
+	    	 };
 	      },
 	      
-	      _removeScrollHandler: function(doc) {
-		    	 doc.removeEventListener('scroll', scoller, false);
-		   },
 	      
 	      saveNote: function(note) {
 	  		if(!(note.status & status.EDITING) && note.status & status.NEEDS_SAVE) {
@@ -436,7 +468,6 @@ function FloatNotes() {
 	  		if(!this.status[domain]['hidden']) {
 	  			this.docs[domain].forEach(function(obj) {obj.dom.style.display = "none";});
 	  		    this.status[domain]['hidden'] = true;
-	  		    this._removeScrollHandler(gBrowser.contentDocument);
 	  		    this._updateMenuText(true);
 	  		}
 	  		else {
@@ -513,8 +544,16 @@ function FloatNotes() {
 	              this._editMenuItem.hidden = true;
 	              this._newMenuItem.hidden = false;
 	          }
-	          if(gFloatNotes.docs[gBrowser.contentDocument.location].length > 0 && !this.contextNote) {
+	          var domain = gBrowser.contentDocument.location;
+	          if(gFloatNotes.docs[domain].length > 0 && !this.contextNote) {
 	        	  this._hideMenuItem.hidden = false;
+	        	  if(gFloatNotes.status[domain]) {
+	        		  this._updateMenuText(gFloatNotes.status[domain]['hidden']);
+	        	  }
+	        	  else {
+	        		  this._updateMenuText(false);
+	        	  }
+	        	  
 	          }
 	          else {
 	        	  this._hideMenuItem.hidden = true;
@@ -561,17 +600,19 @@ function FloatNotes() {
 	
 	FloatNote.prototype = {
 	  	attachTo: function(doc) {
-	  		if(this.dom == null) {
-	  			this.dom = this.getDomElement(doc);
-	  			this.dom.id = 'floatnotes-note-' + this.data.id;
-	  		}
-	  		else {
-	  			this.detach();
-	  		}
-	  		doc.body.appendChild(this.dom);
-	  		if(this.collapse == true) {
-	  		    //this.collapse();			    
-	  		}
+			if(doc) {
+		  		if(this.dom == null) {
+		  			this.dom = this.getDomElement(doc);
+		  			this.dom.id = 'floatnotes-note-' + this.data.id;
+		  		}
+		  		else {
+		  			this.detach();
+		  		}
+		  		doc.body.appendChild(this.dom);
+		  		if(this.collapse == true) {
+		  		    //this.collapse();			    
+		  		}
+			}
 	  	},
 	  	
 	  	detach: function() {
@@ -644,7 +685,15 @@ function FloatNotes() {
 	  		resize.className = 'floatnotes-resize';
 
 	  		text = doc.createElement('textarea');
+	  		text.className = 'floatnotes-text';
 	  		text.style.display = 'none';
+	  		
+	  		util.css(text, {
+	  			'backgroundColor': this.data.color, 
+	  			"position": "absolute",
+	  	    	"border": "0",
+	  	    	"padding": "5px",
+	  		});
 
 
 	  		// define event handlers
@@ -740,7 +789,7 @@ function FloatNotes() {
 	  			var X = parseInt(note.dom.style.left) - event.pageX;
 	  			var Y = parseInt(note.dom.style.top) - event.pageY;
 	  			var opacity = note.dom.style.opacity || 1;
-	  			note.dom.style.opacity = 0.8;
+	  			note.dom.style.opacity = 0.6;
 	  			note.status |= status.DRAGGING;
 	  			note.dom.removeEventListener('mouseout', _out, false);
 	  			note.dom.removeEventListener('mouseover', _in, false);
@@ -779,7 +828,7 @@ function FloatNotes() {
 	  			var X = parseInt(note.dom.style.width) - event.pageX;
 	  			var Y = parseInt(note.dom.style.height) - event.pageY;
 	  			var opacity = note.dom.style.opacity || 1;
-	  			note.dom.style.opacity = 0.8;
+	  			note.dom.style.opacity = 0.6;
 	  			note.status |= status.RESIZING;
 	  			note.dom.removeEventListener('mouseout', _out, false);
 	  			note.dom.removeEventListener('mouseover', _in, false);
@@ -911,25 +960,27 @@ function FloatNotes() {
 			}
 		},
 		
-		starInternalTimeout: function() {
+		startInternalTimeout: function() {
 			if(this.internal_timer) {
 				window.clearTimeout(this.internal_timer);
 				this.internal_timer = null;
 			}
 			var that = this;
-			this.timer = window.setTimeout(function(){ that.hide(true);}, 3000);
+			this.timer = window.setTimeout(function(){ that.hide(true);}, 5000);
 		},
 		
 		attachTo: function(doc) {
-			this.current_doc = doc;
-			if(!this.ele) {
-				this.createDOM(doc);
+			if(doc) {
+				this.current_doc = doc;
+				if(!this.ele) {
+					this.createDOM(doc);
+				}
+				else {
+			  		this.detach();
+				}
+		  		this.ele.indicator.style.display = "none";
+		  		doc.body.appendChild(this.ele.indicator);
 			}
-			else {
-		  		this.detach();
-			}
-	  		this.ele.indicator.style.display = "none";
-	  		doc.body.appendChild(this.ele.indicator);
 	  	},
 	  	
 	  	detach: function() {
@@ -980,8 +1031,10 @@ function FloatNotes() {
 	  		
 	  		
 	  		util.css(container, {"display": 'none'});
-	  			
+	  		
+	  		//TODO: fix internal timeout
 	  		indicator.addEventListener('mouseover', function(e) {
+	  			that.stopTimeout();
 	  			if(that.updateList)
 	  				that.updateNoteList();
 	  			that.startInternalTimeout();

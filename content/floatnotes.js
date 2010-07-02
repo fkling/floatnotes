@@ -424,10 +424,16 @@ function FloatNotes() {
 	  			url: this._getDefaultUrl(),
 	  			color: this.pref.getCharPref('color'),
 	  			collapse: false});
-	          this.docs[doc.location].push(note);
+	          if(!this.docs[doc.location]) {
+	        	  this.docs[doc.location] = Array();	        	  
+	          }
+	          this.docs[doc.location].push(note);       
 	          note.attachTo(doc);
-	          if(this.docs[doc.location].length == 1)
+	          if(this.docs[doc.location].length == 1) {
+	        	  gFloatNotes.indicator_above.attachTo(doc);
+        		  gFloatNotes.indicator_below.attachTo(doc); 
 	        	  this._attachScrollHandler(doc);
+	          }
 	          note.edit();
 	      },
 	      
@@ -437,7 +443,7 @@ function FloatNotes() {
 	    		  var that = this;
 	    		  try {
 	    			  
-	    			  statement.executeAsync({
+	    			  this._delete_note_statement.executeAsync({
 	    				  handleResult: function(aResultSet) {
 	    			  },
 
@@ -943,7 +949,7 @@ function FloatNotes() {
 			if(this.ele) {
 				var that = this;
 				this.hide(true);
-				var n = gFloatNotes.docs[doc.location].filter(function(note){ return note.view == that.type;}).length;
+				var n = gFloatNotes.docs[doc.location].filter(function(note){ return note.view == that.type && !(note.status & status.EDITING);}).length;
 				if(n > 0) {
 					this.updateList = true;
 					this.ele.label.innerHTML = n + ' ' + (n > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + this.label;

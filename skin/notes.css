@@ -10,8 +10,8 @@
     font-family: Arial, sans-serif !important;
     text-align:left !important;
     color: !important;
-    min-height: 30px !important;
-    min-width:30px !important;
+    min-height: 8px !important;
+    min-width:16px !important;
     opacity:1 !important;
     -moz-box-shadow: 0px 0px 5px #888 !important;
     -moz-border-radius: 5px !important;
@@ -25,10 +25,8 @@
 }
 
 .floatnotes-note.small {
-    min-height:16px !important;
-    max-height:16px !important;
+    max-height:8px !important;
     max-width:16px !important;
-    min-height:16px !important;
     -moz-border-radius: 7px !important;
     -moz-border-radius-bottomright: 0 !important;
     opacity: 0.8 !important;

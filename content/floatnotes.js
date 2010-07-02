@@ -183,11 +183,16 @@ function FloatNotes() {
 	      // load string bundle
 	          this.stringsBundle = document.getElementById("floatnotes-stringbundle");
 	          
+          // create indicators	    		
+              this.indicator_above = new Indicator(1);
+              this.indicator_below = new Indicator(-1);
+	          
 	      // attach load handler
 	          gBrowser.addEventListener("load", function(e){gFloatNotes.onPageLoad(e);}, true);
 	          var container = gBrowser.tabContainer;
 	          container.addEventListener("TabSelect", function(e){gFloatNotes.onTabSelect(e);}, false);
 	          window.removeEventListener("load", function(event){gFloatNotes.init();}, false);
+	          
 	      },
 
 	      /**
@@ -206,19 +211,11 @@ function FloatNotes() {
 	              var doc = win.document; // doc is document that triggered "onload" event
 
 	              // Get these preferences everytime on page load to have a fast update
+	              this._scrolltimeout = this.pref.getIntPref('scrolltimer');
+	              this.indicator_timeout = this.pref.getIntPref('fadeOutAfter');
+	              this.show_indicators = this.pref.getBoolPref('showIndicator');
+	              
 	              if(doc === gBrowser.contentDocument) {
-		              this._scrolltimeout = this.pref.getIntPref('scrolltimer');
-		              this.indicator_timeout = this.pref.getIntPref('fadeOutAfter');
-		              this.show_indicators = this.pref.getBoolPref('showIndicator');
-	
-		              //TODO: fix for special sites
-		              // create indicators
-		              if(this.show_indicators) {
-		            	  if(!this.indicator_above && !this.indicator_below) {  	    		
-		            		  this.indicator_above = new Indicator(1);
-		            		  this.indicator_below = new Indicator(-1);
-		            	  }	  	    	
-		              }
 		              this.loadNotes(gBrowser.contentDocument);
 	              }
 	      	}
@@ -230,7 +227,8 @@ function FloatNotes() {
 	      onTabSelect: function(e) {
 	      	var doc = gBrowser.contentDocument;
 	      	var domain = doc.location;
-	      	
+	      	if(domain.href.indexOf('about:') === 0)
+	      		return
 	      	if(!this.docs[domain]) {
 	      		this.loadNotes(doc);
 	      	}
@@ -253,9 +251,13 @@ function FloatNotes() {
 	       * Load and attach the notes
 	       */
 	      loadNotes: function(doc) {
+	    	  // don't load stuff for about pages
+	    	  if(doc.location.href.indexOf('about:') === 0)
+	    		  return;
+	    	  
 	    	  var notes = Array();
               this.docs[doc.location] = notes;
-
+              
               // Get notes for this site
               var statement = this.db.createStatement("SELECT * FROM floatnotes WHERE url = :url ORDER BY x ASC");
               var urls = this._getLocations(doc, true);
@@ -424,6 +426,8 @@ function FloatNotes() {
 	  			collapse: false});
 	          this.docs[doc.location].push(note);
 	          note.attachTo(doc);
+	          if(this.docs[doc.location].length == 1)
+	        	  this._attachScrollHandler(doc);
 	          note.edit();
 	      },
 	      
@@ -545,7 +549,7 @@ function FloatNotes() {
 	              this._newMenuItem.hidden = false;
 	          }
 	          var domain = gBrowser.contentDocument.location;
-	          if(gFloatNotes.docs[domain].length > 0 && !this.contextNote) {
+	          if(gFloatNotes.docs[domain] && gFloatNotes.docs[domain].length > 0 && !this.contextNote) {
 	        	  this._hideMenuItem.hidden = false;
 	        	  if(gFloatNotes.status[domain]) {
 	        		  this._updateMenuText(gFloatNotes.status[domain]['hidden']);
@@ -609,8 +613,9 @@ function FloatNotes() {
 		  			this.detach();
 		  		}
 		  		doc.body.appendChild(this.dom);
-		  		if(this.collapse == true) {
-		  		    //this.collapse();			    
+		  		if(this.data.collapse) {
+		  			this.status |= status.COLLAPSED;
+		  		    this.collapse(true, false);			    
 		  		}
 			}
 	  	},
@@ -634,7 +639,7 @@ function FloatNotes() {
 	  		}
 	  		else {
 	  			util.removeClass(this.dom, 'small');
-	  			util.css(this.dom, {width: this.data.w, height: this.data.h});
+	  			util.css(this.dom, {width: this.data.w + "px", height: this.data.h + "px"});
       	    	if(save) {
       	    		this.data.collapse = false;
       	    		this.status |= status.NEEDS_SAVE;
@@ -701,8 +706,10 @@ function FloatNotes() {
 	  		// note collapse
 	  		drag.addEventListener('dblclick', function(e) {
 	  			e.stopPropagation();
+	  			if(note.status & status.EDITING)
+	  				return;
 	  			note.status |= status.COLLAPSED;
-	  			note.collapse(true);
+	  			note.collapse(true, true);
 	  		}, false);
 
 
@@ -861,7 +868,7 @@ function FloatNotes() {
 	  		}, false);
 
 	  		// note edit
-	  		content.addEventListener('dbclick', function() {note.edit();}, false);
+	  		//content.addEventListener('dbclick', function() {note.edit();}, false);
 
 	  		// note extend
 	  		container.addEventListener('click', function(e) {
@@ -933,19 +940,21 @@ function FloatNotes() {
 	
 	Indicator.prototype = {
 		update: function(doc) {
-			var that = this;
-			this.hide(true);
-			var n = gFloatNotes.docs[doc.location].filter(function(note){ return note.view == that.type;}).length;
-			if(n > 0) {
-				this.updateList = true;
-				this.ele.label.innerHTML = n + ' ' + (n > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + this.label;
-				this.ele.indicator.style.display = "block";
-				this.startTimeout();
+			if(this.ele) {
+				var that = this;
+				this.hide(true);
+				var n = gFloatNotes.docs[doc.location].filter(function(note){ return note.view == that.type;}).length;
+				if(n > 0) {
+					this.updateList = true;
+					this.ele.label.innerHTML = n + ' ' + (n > 1 ? gFloatNotes.stringsBundle.getString('pluralIndicatorString'): gFloatNotes.stringsBundle.getString('singularIndicatorString')) +  " " + this.label;
+					this.ele.indicator.style.display = "block";
+					this.startTimeout();
+				}
+				else {
+					this.hide();
+				}
+				return n;
 			}
-			else {
-				this.hide();
-			}
-			return n;
 		},
 		startTimeout: function() {
 			this.stopTimeout();
@@ -984,7 +993,7 @@ function FloatNotes() {
 	  	},
 	  	
 	  	detach: function() {
-	  		if(this.ele.indicator && this.ele.indicator.parentNode) {
+	  		if(this.ele && this.ele.indicator && this.ele.indicator.parentNode) {
 	  			this.ele.indicator.parentNode.removeChild(this.ele.indicator);
 	  			//this.dom.parentNode = null;
 	  		}
@@ -1032,7 +1041,6 @@ function FloatNotes() {
 	  		
 	  		util.css(container, {"display": 'none'});
 	  		
-	  		//TODO: fix internal timeout
 	  		indicator.addEventListener('mouseover', function(e) {
 	  			that.stopTimeout();
 	  			if(that.updateList)

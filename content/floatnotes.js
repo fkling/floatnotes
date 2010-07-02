@@ -545,9 +545,11 @@ function FloatNotes() {
 	      
 	      updateMenuItems: function(event) {
 	          if(this.contextNote) {
-	              this._deleteMenuItem.hidden = false;
-	              this._editMenuItem.hidden = false;
-	              this._newMenuItem.hidden = true;true;
+	        	  // don't show any menu items if in editing mode
+	        	  var hide = (this.contextNote.status & status.EDITING);
+	              this._deleteMenuItem.hidden = hide;
+	              this._editMenuItem.hidden = hide;
+	              this._newMenuItem.hidden = true;
 	          }
 	          else {
 	              this._deleteMenuItem.hidden = true;
@@ -756,6 +758,14 @@ function FloatNotes() {
 
 	  			var finish = function(e) {
 	  				if(e.button === undefined || e.button != 2) {
+	  					
+	  					// If a context menu item is clicked, don't trigger end of edit
+	  					var target = e.target;
+	  					do {
+	  						if(target.id == "contentAreaContextMenu")
+	  							return;
+	  					} while(target = target.parentNode);
+	  					
 	  					window.removeEventListener('click', finish, false);
 	  					window.removeEventListener('keydown', key, true);
 	  					var content = note.ele.text.value;

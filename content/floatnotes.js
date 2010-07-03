@@ -148,13 +148,15 @@ function FloatNotes() {
 				          this.db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, collapse INTEGER)');
 				          this.db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
 				          // -- end database
-					}		
-					if (ver != current && !firstrun){ // !firstrun ensures that this
-						this.pref.setCharPref("version",current);		
-						// Insert code if version is different here => upgrade
-						this.db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');
-						
 					}
+					if(!firstrun) {
+						if (ver == -1 || ver < "0.6"){ 
+							this.pref.setCharPref("version",current);		
+							// Insert code if version is different here => upgrade
+							this.db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');
+						}
+					}
+
 				}
 	          
 	    //create statements
@@ -328,20 +330,23 @@ function FloatNotes() {
 	      },
 	      
 	      startScrollTimer: function() {
+	    	  var win = window,
+	    	  	  that = this;
 	    	  if(this._scrolltimer) {
-	    		  window.clearTimeout(this._scrolltimer);
+	    		  win.clearTimeout(this._scrolltimer);
 	    		  this._scrolltimer = null;
 	    	  }
 	    	  
-	    	  this._scrolltimer = window.setTimeout(function(){
-	    		  gFloatNotes.updateIndicators();
+	    	  this._scrolltimer = win.setTimeout(function(){
+	    		  that.updateIndicators();
 	    	  }, this._scrolltimeout);
 	      },
 	      
 	      updateIndicators: function() {
-	    	  var wintop = parseInt(gBrowser.contentDocument.defaultView.pageYOffset),
-	    	  winheight = parseInt(gBrowser.contentDocument.defaultView.innerHeight);
-	    	  gFloatNotes.docs[gBrowser.contentDocument.location].forEach(function(note) {
+	    	  var doc = gBrowser.contentDocument;
+	    	  var wintop = parseInt(doc.defaultView.pageYOffset),
+	    	  winheight = parseInt(doc.defaultView.innerHeight);
+	    	  this.docs[doc.location].forEach(function(note) {
 	    		  if(note && note.dom) {
 	    			  var element = note.dom;
 	    			  var id = 'floatnotes-indicator-text-' + note.data.id,
@@ -361,13 +366,12 @@ function FloatNotes() {
     				
     		});
     			
-    		gFloatNotes.indicator_above.update(gBrowser.contentDocument);
-    		gFloatNotes.indicator_below.update(gBrowser.contentDocument);
+    		this.indicator_above.update(doc);
+    		this.indicator_below.update(doc);
 	      },
 	      
 	      _attachScrollHandler: function(doc) {
-	    	 if(this._killScrollHandler)
-	  	    	 this._killScrollHandler();
+	    	 this._removeScrollHandler();
 	    	 doc.addEventListener('scroll', scoller, false);
 	    	 var that = this;
 	    	 this._killScrollHandler = function() {
@@ -376,6 +380,12 @@ function FloatNotes() {
 	    	 };
 	      },
 	      
+	      _removeScrollHandler: function() {
+	    	if(this._killScrollHandler) {
+	    		this._killScrollHandler();
+	    		this._killScrollHandler = null;
+	      	}
+	      },
 	      
 	      saveNote: function(note) {
 	  		if(!(note.status & status.EDITING) && note.status & status.NEEDS_SAVE) {
@@ -456,7 +466,7 @@ function FloatNotes() {
 	    				  }
 	    				  that.contextNote.detach();
 	    				  that.contextNote.dom = null;
-	    				  gFloatNotes.notes[that.contextNote.data.id] = null;
+	    				  that.notes[that.contextNote.data.id] = null;
 	    				  that.contextNote = null;
 	    			  }
 	    			  });
@@ -476,13 +486,16 @@ function FloatNotes() {
 	  		    };
 	  		}
 	  		if(!this.status[domain]['hidden']) {
-	  			this.docs[domain].forEach(function(obj) {obj.dom.style.display = "none";});
+	  			this.docs[domain].forEach(function(obj) {if(obj && obj.dom) obj.dom.style.display = "none";});
+	  		    this._removeScrollHandler();
+	  		    this.indicator_above.hide(true);
+	  		    this.indicator_below.hide(true);
 	  		    this.status[domain]['hidden'] = true;
 	  		    this._updateMenuText(true);
 	  		}
 	  		else {
 	  		    this.status[domain]['hidden'] = false;
-	  		    this.docs[domain].forEach(function(obj) {obj.dom.style.display = "block";});
+	  		    this.docs[domain].forEach(function(obj) {if(obj && obj.dom) obj.dom.style.display = "block";});
 	  		    this._attachScrollHandler(gBrowser.contentDocument);
 	  		    util.fireEvent(gBrowser.contentDocument, 'scroll');
 	  		    this._updateMenuText(false);
@@ -595,7 +608,7 @@ function FloatNotes() {
 	  			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
 	  		}
 	  		else {
-	  			this._hideMenuItem.setAttribute('label', this.stringsBundle.getFormattedString('showNotesString', [gFloatNotes.docs[gBrowser.contentDocument.location].length ]));
+	  			this._hideMenuItem.setAttribute('label', this.stringsBundle.getFormattedString('showNotesString', [this.docs[gBrowser.contentDocument.location].filter(function(obj) {return obj && obj.dom;}).length], 1));
 	  			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
 	  		}
 	      }
@@ -761,10 +774,12 @@ function FloatNotes() {
 	  					
 	  					// If a context menu item is clicked, don't trigger end of edit
 	  					var target = e.target;
-	  					do {
-	  						if(target.id == "contentAreaContextMenu")
-	  							return;
-	  					} while(target = target.parentNode);
+	  					if(target != gFloatNotes._newMenuItem && target != gFloatNotes._hideMenuItem) {
+		  					do {
+		  						if(target.id == "contentAreaContextMenu")
+		  							return;
+		  					} while(target = target.parentNode);
+	  					}
 	  					
 	  					window.removeEventListener('click', finish, false);
 	  					window.removeEventListener('keydown', key, true);
@@ -890,7 +905,7 @@ function FloatNotes() {
 	  		container.addEventListener('click', function(e) {
 	  			if(note.status & status.COLLAPSED && e.target.className != 'floatnotes-drag' && e.target.className != 'floatnotes-resize') {
 	  				note.status ^= status.COLLAPSED;
-	  				note.collapse(false);
+	  				note.collapse(false, true);
 	  			}
 
 	  			if(note.status & status.EDITING) {

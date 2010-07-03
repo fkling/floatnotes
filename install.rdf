@@ -5,7 +5,7 @@
 		<em:iconURL>chrome://floatnotes/skin/icon.png</em:iconURL>
 		<em:type>2</em:type>
 		<em:name>FloatNotes</em:name>
-		<em:version>0.6.1</em:version>
+		<em:version>0.6.2</em:version>
 		<em:description>Create floating notes on any web site.
 		</em:description>
 		<em:creator>Felix Kling</em:creator>

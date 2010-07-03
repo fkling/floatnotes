@@ -774,7 +774,7 @@ function FloatNotes() {
 	  					
 	  					// If a context menu item is clicked, don't trigger end of edit
 	  					var target = e.target;
-	  					if(target != gFloatNotes._newMenuItem && target != gFloatNotes._hideMenuItem) {
+	  					if(target != gFloatNotes._newMenuItem && target != gFloatNotes.hideMenuItem) {
 		  					do {
 		  						if(target.id == "contentAreaContextMenu")
 		  							return;

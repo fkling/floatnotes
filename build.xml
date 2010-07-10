@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="FloatNotes" default="copy" basedir=".">
+	<property name="src" location="src" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+	<property name="debug" location="debug" />
+	<property name="debug.test.html" value="${src}/test/floatnotestest.html" />
+	<loadproperties srcfile="mac.properties" />
+
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="copy" depends="init">
+		<copy todir="${build}/content">
+			<fileset dir="${src}/XUL" />
+		</copy>
+		<mkdir dir="${build}/defaults"/>
+		<copy todir="${build}/defaults/preferences">
+			<fileset dir="${src}/preferences/" />
+		</copy>
+		<copy todir="${build}/locale">
+			<fileset dir="${src}/locale" />
+		</copy>
+		<copy todir="${build}/resources">
+			<fileset dir="${src}/lib/" />
+		</copy>
+		<copy todir="${build}/skin">
+			<fileset dir="${src}/style" />
+		</copy>
+		<copy todir="${build}">
+			<fileset dir="${src}/meta" />
+		</copy>
+	</target>
+
+	<target name="debug" depends="copy">
+		<copy todir="${build}/resources" file="${debug.test.html}" />
+		<apply executable="cpp" dest="${build}/content">
+			<fileset dir="${src}/js" includes="main.js" />
+			<arg line="-P -C -DDEBUG" />
+			<srcfile />
+			<targetfile />
+			<mapper type="glob" from="main.js" to="floatnotes.js" />
+		</apply>
+
+		<!-- Updated the exec tag to use additional arguments -->
+		<exec executable="${browser}" spawn="yes">
+		    <arg line="${browser.args}" />
+		</exec>
+
+	</target>
+
+	<target name="clean">
+		<delete dir="${build}" />
+	</target>
+</project>

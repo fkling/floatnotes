@@ -4,19 +4,22 @@
 	<property name="build" location="build" />
 	<property name="dist" location="dist" />
 	<property name="debug" location="debug" />
-	<property name="debug.test.html" value="${src}/test/floatnotestest.html" />
+	<property name="debug.test.html" location="${src}/test/floatnotestest.html" />
+	<property name="output.test.html" value="chrome://floatnotes/content/floatnotestest.html" />
 	<loadproperties srcfile="mac.properties" />
+	<property name="test.dir" location="${build}/test" />
 
-	<target name="init">
+	<target name="-init">
 		<tstamp />
 		<mkdir dir="${build}" />
+		<mkdir dir="${build}/test" />
 	</target>
 
-	<target name="copy" depends="init">
+	<target name="-copy" depends="-init">
 		<copy todir="${build}/content">
 			<fileset dir="${src}/XUL" />
 		</copy>
-		<mkdir dir="${build}/defaults"/>
+		<mkdir dir="${build}/defaults" />
 		<copy todir="${build}/defaults/preferences">
 			<fileset dir="${src}/preferences/" />
 		</copy>
@@ -34,8 +37,17 @@
 		</copy>
 	</target>
 
-	<target name="debug" depends="copy">
-		<copy todir="${build}/resources" file="${debug.test.html}" />
+	<target name="-lauch_debug_server" unless="debug_server.running">
+		<propertyfile file="mac.properties" comment="Server properties">
+			<entry key="debug_server.running" value="true" />
+		</propertyfile>
+		<exec executable="${debug_server}" spawn="yes">
+			<arg line="${debug_server.args}" />
+		</exec>
+		<sleep seconds="10" />
+	</target>
+
+	<target name="debug" depends="-copy, -lauch_debug_server">
 		<apply executable="cpp" dest="${build}/content">
 			<fileset dir="${src}/js" includes="main.js" />
 			<arg line="-P -C -DDEBUG" />
@@ -44,14 +56,33 @@
 			<mapper type="glob" from="main.js" to="floatnotes.js" />
 		</apply>
 
+		<apply executable="cpp" dest="${build}/content">
+			<fileset dir="${src}/js" excludes="main.js" />
+			<arg line="-P -C -DDEBUG" />
+			<srcfile />
+			<targetfile />
+			<mapper type="glob" from="*.js" to="*.js" />
+		</apply>
+		<apply executable="cpp" dest="${build}/test">
+			<fileset dir="${src}/test" />
+			<arg line="-P -C -DDEBUG" />
+			<srcfile />
+			<targetfile />
+			<mapper type="glob" from="*.js" to="*.js" />
+		</apply>
+
 		<!-- Updated the exec tag to use additional arguments -->
-		<exec executable="${browser}" spawn="yes">
-		    <arg line="${browser.args}" />
+		<exec executable="${browser}" failonerror="true">
+			<arg line="${browser.args}" />
+			<arg line="${test.dir}" />
 		</exec>
 
 	</target>
 
 	<target name="clean">
 		<delete dir="${build}" />
+		<propertyfile file="mac.properties" comment="Server properties">
+			<entry key="debug_server.running" operation="del" />
+		</propertyfile>
 	</target>
 </project>

@@ -1,5 +1,5 @@
-	function FloatNotes() {
-		this.db = null;
+	function FloatNotes(database) {
+		this._db = database;
 		this.converter = new Showdown.converter();
 		this.status = {};
 		this.docs = {};
@@ -19,6 +19,7 @@
 	FloatNotes.prototype = {
 	      /* Initial startup */
 	      init: function () {
+		/*
 				var ver = -1, firstrun = true;
 				var gExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"]
 				                                           .getService(Components.interfaces.nsIExtensionManager);
@@ -101,7 +102,7 @@
 	          var container = gBrowser.tabContainer;
 	          container.addEventListener("TabSelect", function(e){gFloatNotes.onTabSelect(e);}, false);
 	          window.removeEventListener("load", function(event){gFloatNotes.init();}, false);
-	          
+	          */
 	      },
 
 	      /**

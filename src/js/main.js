@@ -1,9 +1,5 @@
 (function() {
-
-#include "util.js"
-#include "floatnotes.js"
-#include "note.js"
-#include "indicator.js"
-
+#include "database.js"
 #include "loader.js"
+#include "manager.js"
 })();

@@ -79,10 +79,20 @@
 
 	</target>
 
+	<target name="build" depends="-copy">
+		<apply executable="cpp" dest="${build}/content">
+			<fileset dir="${src}/js" includes="main.js" />
+			<arg line="-P -C" />
+			<srcfile />
+			<targetfile />
+			<mapper type="glob" from="main.js" to="floatnotes.js" />
+		</apply>
+	</target>
+
 	<target name="clean">
 		<delete dir="${build}" />
-		<propertyfile file="mac.properties" comment="Server properties">
+		<!--<propertyfile file="mac.properties" comment="Server properties">
 			<entry key="debug_server.running" operation="del" />
-		</propertyfile>
+		</propertyfile>-->
 	</target>
 </project>

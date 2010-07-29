@@ -1,5 +1,23 @@
+#ifndef __INCLUDE_DB__
+#define __INCLUDE_DB__
+
 function DatabaseConnector(database_file) {
-	this.initWithFile(database_file);
+	var file = Components.classes["@mozilla.org/file/directory_service;1"]  
+	                              .getService(Components.interfaces.nsIProperties)  
+	                              .get("ProfD", Components.interfaces.nsIFile);  
+	file.append("floatnotes.sqlite");  
+	
+	database_file = database_file || file;
+	if(!DatabaseConnector.prototype._dbs) {
+		DatabaseConnector.prototype._dbs = {};
+	}
+	if(!DatabaseConnector.prototype._dbs[database_file]) {
+		this.initWithFile(database_file);
+		DatabaseConnector.prototype._dbs[database_file] = this;
+	}
+	else {
+		return DatabaseConnector.prototype._dbs[database_file];
+	}
 }
 
 DatabaseConnector.prototype = {
@@ -89,5 +107,29 @@ DatabaseConnector.prototype = {
 		finally {
 			statement.reset();
 		}
+	},
+	
+	deleteNote: function(note_id, runWhenFinished) {
+		var statement = this._db.createStatement("DELETE FROM floatnotes WHERE id = :id");
+		try {
+			statement.params.id = note_id;
+			var that = this;
+			statement.executeAsync({
+				handleCompletion: function(aReason) {
+			    	if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED)
+			    		return
+			    	runWhenFinished();
+				}
+			});
+		}
+		finally {
+			statement.reset();
+		}
+	},
+	
+	executeSimpleSQL: function(statement) {
+		return this._db.executeSimpleSQL(statement);
 	}
 };
+
+#endif

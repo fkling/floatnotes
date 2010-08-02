@@ -9,13 +9,13 @@
     border: 1px solid black !important;
     font-family: Arial, sans-serif !important;
     text-align:left !important;
-    color: !important;
     min-height: 8px !important;
     min-width:16px !important;
     opacity:1 !important;
     -moz-box-shadow: 0px 0px 5px #888 !important;
     -moz-border-radius: 5px !important;
     padding:5px !important;
+    position: absolute !important;
 }
 
 .floatnotes-note * {
@@ -31,6 +31,11 @@
     -moz-border-radius-bottomright: 0 !important;
     opacity: 0.8 !important;
     -moz-box-shadow: none !important;
+}
+
+.floatnotes-note.fixed {
+    position: fixed !important;
+    border-width: 2px !important;
 }
 
 .floatnotes-note.small > * {
@@ -51,17 +56,30 @@
     background-color: #706C6C !important;
     height: 20px !important;
     cursor: move !important;
-    margin-top:-22px !important;
-    margin-left:-1px !important;
+    margin-top:-17px !important;
     border:1px solid black !important;
     width: 100% !important;
     display: none;
     -moz-box-shadow: 0px 0px 5px #888 !important;
+    text-align: right !important;
+    vertical-align: middle !important;
+    line-height: 20px !important;
+}
+
+.floatnotes-note .floatnotes-togglefix {
+	display: inline-block !important;
+	font-size:28px !important;
+	color:white !important;
+    line-height: 20px !important;
+    cursor: pointer !important;
+}
+
+.floatnotes-note.fixed .floatnotes-togglefix{
+    color: black !important;
 }
 
 .floatnotes-note .floatnotes-resize{
-    /*border-right: 5px solid #706C6C;*/
-    /*border-bottom: 5px solid #706C6C;*/
+    border:1px solid black !important;
     background-color: #706C6C !important;
     width: 20px !important;
     height: 20px !important;
@@ -73,16 +91,8 @@
     -moz-box-shadow: 0px 0px 5px #888 !important;
 }
 
-.floatnotes-note.note-edit .floatnotes-drag {
+.floatnotes-note.note-edit .floatnotes-drag, .floatnotes-note.note-edit .floatnotes-resize {
     border-color: red !important;
-    border-width:2px !important;
-    margin-left:-2px !important;
-    margin-top:-24px !important;
-    border-bottom:none !important;
-    background-color: red !important;
-}
-
-.floatnotes-note.note-edit .floatnotes-resize {
     background-color: red !important;
 }
 
@@ -91,13 +101,27 @@
     overflow:auto !important;
     position:absolute !important;
     top: 0 !important;
-    bottom: 0 !important;
+    /*bottom: 0 !important;*/
     left:0 !important;
-    right:0 !important;
+    /*right:0 !important;*/
     z-index:-1 !important;
+    -moz-box-sizing: border-box !important;
+    width: 100% !important;
+    height: 100% !important;
+    -moz-border-radius: 5px !important;
 }
 
 .floatnotes-note  textarea.floatnotes-text {
+	font-family: Arial, sans-serif !important;
+	width: 100% !important;
+	height: 100% !important;
+	-moz-box-sizing: border-box !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 15px 0px 5px 5px !important;
+	z-index:-1;
+	-moz-border-radius: 5px !important;
 }
 
 /* ------ Note content style ---- */

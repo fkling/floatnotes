@@ -3,7 +3,8 @@
 
 #include "util.js"
 
-function Indicator(type) {
+function Indicator(type, notesManager) {
+	this.notes
 	this.ABOVE = 1;
 	this.BELOW = -1;
 	
@@ -22,7 +23,7 @@ Indicator.prototype = {
 		if(this.ele) {
 			var that = this;
 			this.hide(true);
-			var n = gFloatNotesManager.docs[doc.location].filter(function(note){ return note.view == that.type && !(note.status & status.EDITING);}).length;
+			var n = gFloatNotesManager.docs[doc.location].filter(function(note){ return note.view == that.type && !note.hasStatus(status.EDITING | status.FIXED);}).length;
 			if(n > 0) {
 				this.updateList = true;
 				this.ele.label.innerHTML = n + ' ' + (n > 1 ? util.getString('pluralIndicatorString'): util.getString('singularIndicatorString')) +  " " + this.label;
@@ -83,7 +84,7 @@ Indicator.prototype = {
   		this.ele.container.style.display = 'block';
 		this.ele.container.textContent = '';
 		
-		var notes = gFloatNotes.docs[this.current_doc.location];  			
+		var notes = gFloatNotesManager.docs[this.current_doc.location];  			
 		for each(var note in notes) {
 			if(note.view == this.type) {
 				var div = this.current_doc.createElement('div');

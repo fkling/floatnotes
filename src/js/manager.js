@@ -24,17 +24,14 @@ function FloatNotes(database) {
     this.indicator_below = new Indicator(-1);
     
     // attach load handler
-    gBrowser.addEventListener("load", function(e){gFloatNotesManager.onPageLoad(e);}, true);
+    gBrowser.addEventListener("DOMContentLoaded", function(e){gFloatNotesManager.onPageLoad(e);}, true);
     var container = gBrowser.tabContainer;
     container.addEventListener("TabSelect", function(e){gFloatNotesManager.onTabSelect(e);}, false);
     window.addEventListener("contextmenu", function(e) {gFloatNotesManager.updateContext(e);}, true);
     window.addEventListener("contextmenu", function(e) {gFloatNotesManager.updateMenuItems(e);}, false);
     
 }
-  
- var scoller = function() {
-	 gFloatNotesManager.startScrollTimer();
- };
+ 
   
   
 /**
@@ -47,21 +44,12 @@ FloatNotes.prototype = {
        * Loads the note data on page load.
        */
       onPageLoad: function (event) {
-      	if (event.originalTarget instanceof HTMLDocument) {
-              var win = event.originalTarget.defaultView;
-              if (win.frameElement) {
-              	// Frame within a tab was loaded. win should be the top window of
-              	// the frameset. If you don't want do anything when frames/iframes
-              	// are loaded in this web page, uncomment the following line:
-              	return;
-              }
-              this.updatePreferences();  
-
-              var doc = win.document; // doc is document that triggered "onload" event                       
-              if(doc === gBrowser.contentDocument) {
-	              this.loadNotes(gBrowser.contentDocument);
-              }
-      	}
+    	this.updatePreferences();  
+    	var win = event.originalTarget.defaultView;
+    	var doc = win.document; // doc is document that triggered "onload" event                       
+    	if(doc === gBrowser.contentDocument) {
+    		this.loadNotes(gBrowser.contentDocument);
+    	}
       },
       
       updatePreferences: function() {
@@ -74,21 +62,22 @@ FloatNotes.prototype = {
        * Load and/or show notes
        */
       onTabSelect: function(e) {
-      	var doc = gBrowser.contentDocument;
+    	var that = this;
+		var doc = gBrowser.contentDocument;
       	var domain = doc.location;
       	if(domain.href.indexOf('about:') === 0)
-      		return
-      	if(!this.docs[domain]) {
-      		this.loadNotes(doc);
+      		return false;
+      	if(!that.docs[domain]) {
+      		that.loadNotes(doc);
       	}
       	else {      		
-	      	this._attachNotesTo(doc);
+      		that._attachNotesTo(doc);
 
-	  	    if(this.status[domain]) {
-	  	    	this._updateMenuText(this.status[domain]['hidden']);
+	  	    if(that.status[domain]) {
+	  	    	that._updateMenuText(that.status[domain]['hidden']);
 	  	    }
-	  	    this._showIndicators(doc);
-      	}
+	  	  that._showIndicators(doc);
+      	}  	   	
       },
       
       /**
@@ -97,11 +86,11 @@ FloatNotes.prototype = {
       loadNotes: function(doc) {
     	  // don't load stuff for about pages
     	  if(doc.location.href.indexOf('about:') === 0)
-    		  return;
+    		  return false;
     	  
     	  var that = this;
     	  
-          this._db.getNotesForURLs(this._getLocations(doc, true), function(notesdata) {
+          this._db.getNotesForURLs(util.getLocations(doc, true), function(notesdata) {
         	  var notes = Array();
         	  var manager = that;
         	  
@@ -135,7 +124,7 @@ FloatNotes.prototype = {
       	var notes = this.docs[doc.location];
       	if (notes) {
       		var todelete = Array();
-      		for (var i in notes) {
+      		for (var i = 0, length = notes.length; i < length; ++i) {
       			var note = this.notes[notes[i].data.id];
       			if( note === null) {
       				todelete.push(i);
@@ -145,7 +134,7 @@ FloatNotes.prototype = {
       			}	      			
       		}
       		if(todelete) {
-      			for(var i in todelete) {
+      			for(var i = 0, length = todelete.length; i < length; ++i) {
       				notes.splice(todelete[i],1);
       			}
       		}
@@ -195,10 +184,14 @@ FloatNotes.prototype = {
       
       _attachScrollHandler: function(doc) {
     	 this._removeScrollHandler();
-    	 doc.addEventListener('scroll', scoller, false);
+    	 doc.addEventListener('scroll', function() {
+    		 gFloatNotesManager.startScrollTimer();
+    	 }, false);
     	 var that = this;
     	 this._killScrollHandler = function() {
-    		 doc.removeEventListener('scroll', scoller, false);
+    		 doc.removeEventListener('scroll', function() {
+    			 gFloatNotesManager.startScrollTimer();
+    		 }, false);
     		 that._killScrollHandler = null;
     	 };
       },
@@ -210,7 +203,7 @@ FloatNotes.prototype = {
       	}
       },
       
-      saveNote: function(note) {
+      saveNote: function(note, cb) {
 		var data = note.data;
 		var that = this;
 		
@@ -218,16 +211,12 @@ FloatNotes.prototype = {
 		
 		if(typeof data.id == "undefined") {
 			this._db.createNoteAndGetId(data, function(id) {
-				note.dom.id =  'floatnotes-note-' + data.id;
-		    	note.data = data;
-		    	that.notes[data.id] = note;
-		    	note.status ^= status.NEEDS_SAVE;
+		    	that.notes[id] = note;
+		    	cb(id);
 			});
 		}
 		else {
-			this._db.updateNote(data, function() {
-		    	note.status ^= status.NEEDS_SAVE;
-			});
+			this._db.updateNote(data, cb);
 		}		
       },
       
@@ -239,7 +228,7 @@ FloatNotes.prototype = {
   			w: util.getPreferencesService().getIntPref('width'),
   			h: util.getPreferencesService().getIntPref('height'),
   			content: "",
-  			url: this._getDefaultUrl(),
+  			url: util.getDefaultUrl(),
   			color: util.getPreferencesService().getCharPref('color'),
   			collapse: false}, this, this.converter);
           if(!this.docs[doc.location]) {
@@ -294,53 +283,6 @@ FloatNotes.prototype = {
 
       },
       
-      /* get the URL for a new note */ 
-      _getDefaultUrl: function() {
-      	var loc = this._getLocations();
-      	var default_loc = util.getPreferencesService().getIntPref('location');
-      	if(default_loc == 0) {
-      		return loc[0];
-      	}
-      	if(window.content.document.location.search) {
-      		return loc[loc.length + default_loc];
-      	}
-      	else {
-      		return loc[loc.length + default_loc +1];
-      	}
-      },
-      
-      /* compute the possible locations for the current URL */
-      _getLocations: function(doc) {
-  		var location = (doc) ? doc.location : window.content.document.location;
-  		var urls = Array();
-  		if(location.protocol == 'http:' || location.protocol == 'https:') {
-  		    var url =  location.href.replace(location.hash, '').replace(location.protocol + '//', '');
-  		    if(location.search) {
-  		        var url_with_search = url;
-  		        url = url_with_search.replace(location.search, '');
-  		    }
-  		    var parts = url.split('/');
-  		    var path = '';
-  		    if(parts[parts.length-1] == '') parts.pop();
-  		    for (var i in parts) {
-  		        path += parts[i];
-  		        urls.push( path + '*');
-  		        path += '/';
-  		    }
-  		    var last = urls[urls.length-1];
-  	        last = last.substring(0,last.length-1);
-  	        if(last.charAt(last.length-1) == '/')
-  	            last = last.substring(0,last.length-1);
-  		    urls.push(last);
-  		    if(location.search)
-  		        urls.push(url_with_search);
-  		}
-  		else {
-  		   urls.push(location.href.replace(location.hash,''));
-  		}
-  		return urls;
-      },
-      
       updateContext: function(event) {
           this.contextNote = null;
           this.X = event.pageX;
@@ -377,7 +319,7 @@ FloatNotes.prototype = {
       },
       
       updateMenuLocations: function() {
-      	var loc = this._getLocations(window.content);
+      	var loc = util.getLocations(window.content);
   		for(var i in loc) {
   		    var item = this._locationsMenu.appendItem(loc[i], loc[i]);
   		    item.setAttribute('type','radio');
@@ -395,11 +337,11 @@ FloatNotes.prototype = {
       
       _updateMenuText: function(hide) {	      	
   		if(!hide) {
-  			this._hideMenuItem.setAttribute('label', this.stringsBundle.getString('hideNotesString'));
+  			this._hideMenuItem.setAttribute('label', util.getString('hideNotesString'));
   			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
   		}
   		else {
-  			this._hideMenuItem.setAttribute('label', this.stringsBundle.getFormattedString('showNotesString', [this.docs[gBrowser.contentDocument.location].filter(function(obj) {return obj && obj.dom;}).length], 1));
+  			this._hideMenuItem.setAttribute('label', util.getString('showNotesString', [this.docs[gBrowser.contentDocument.location].filter(function(obj) {return obj && obj.dom;}).length], 1));
   			this._hideMenuItem.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
   		}
       }

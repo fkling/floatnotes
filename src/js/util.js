@@ -67,7 +67,52 @@ var util = {
 		};
 		
 		return this.getString(string, params);
-	}
+	},
+	 /* compute the possible locations for the current URL */
+    getLocations: function(doc) {
+		var location = (doc) ? doc.location : window.content.document.location;
+		var urls = Array();
+		if(location.protocol == 'http:' || location.protocol == 'https:') {
+		    var url =  location.href.replace(location.hash, '').replace(location.protocol + '//', '');
+		    if(location.search) {
+		        var url_with_search = url;
+		        url = url_with_search.replace(location.search, '');
+		    }
+		    var parts = url.split('/');
+		    var path = '';
+		    if(parts[parts.length-1] == '') parts.pop();
+		    for (var i = 0, length = parts.length; i < length; ++i) {
+		        path += parts[i];
+		        urls.push( path + '*');
+		        path += '/';
+		    }
+		    var last = urls[urls.length-1];
+	        last = last.substring(0,last.length-1);
+	        if(last.charAt(last.length-1) == '/')
+	            last = last.substring(0,last.length-1);
+		    urls.push(last);
+		    if(location.search)
+		        urls.push(url_with_search);
+		}
+		else {
+		   urls.push(location.href.replace(location.hash,''));
+		}
+		return urls;
+    },
+    /* get the URL for a new note */ 
+    getDefaultUrl: function() {
+    	var loc = this.getLocations();
+    	var default_loc = this.getPreferencesService().getIntPref('location');
+    	if(default_loc == 0) {
+    		return loc[0];
+    	}
+    	if(gBrowser.contentDocument.location.search) {
+    		return loc[loc.length + default_loc];
+    	}
+    	else {
+    		return loc[loc.length + default_loc +1];
+    	}
+    }
 };
 
 #endif

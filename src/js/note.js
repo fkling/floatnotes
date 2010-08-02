@@ -163,8 +163,7 @@ FloatNote.prototype = {
   	},
   	
   	unminimize: function() {
-  		util.removeClass(this.dom, 'small');
-  		util.css(this.dom, {width: this.data.w + "px", height: this.data.h + "px"});	  		
+  		util.removeClass(this.dom, 'small'); 		
   	},
   	
   	unminimizeAndSave: function() {

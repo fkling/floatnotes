@@ -420,7 +420,7 @@ FloatNote.prototype = {
 
   		text = doc.createElement('textarea');
   		text.className = 'floatnotes-text';
-  		text.style.cssText = "display: none; border: 0px";
+  		text.style.cssText = "display: none;";
   		text.rows = 1;
   		text.cols = 1;
   		

@@ -122,6 +122,8 @@
 	padding: 15px 0px 5px 5px !important;
 	z-index:-1;
 	-moz-border-radius: 5px !important;
+	border: none !important;
+	outline: none !important;
 }
 
 /* ------ Note content style ---- */

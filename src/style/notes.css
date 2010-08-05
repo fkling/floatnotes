@@ -22,6 +22,7 @@
     padding:0 !important;
     margin:0 !important;
     font-size: 13px !important;
+    font-family: Arial, sans-serif !important;
 }
 
 .floatnotes-note.small {
@@ -124,16 +125,26 @@
 	-moz-border-radius: 5px !important;
 	border: none !important;
 	outline: none !important;
+	resize: none !important;
 }
 
 /* ------ Note content style ---- */
 
-.floatnotes-note h1 {	
+.floatnotes-note h1 {
 	font-size: 1.4em !important;
 }
 
-.floatnotes-note h2 {   
+
+
+.floatnotes-note h2 {
     font-size: 1.1em !important;
+}
+
+.floatnotes-note h1, .floatnotes-note h2 {
+    font-family: inherit !important;
+    margin: 7px 0 7px 0;
+    color: black !important;
+    font-weight: bold !important;
 }
 
 .floatnotes-note p {   
@@ -162,6 +173,11 @@
 .floatnotes-note ul{   
     padding-left: 20px !important;
 }
+
+.floatnotes-note ul li{   
+    list-style: square !important;
+}
+
 
 
 

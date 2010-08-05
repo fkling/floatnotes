@@ -137,7 +137,7 @@ FloatNote.prototype = {
 	  		this.dom = doc.adoptNode(this.dom);
 	  		doc.body.parentNode.appendChild(this.dom);
 	  		if(this.data.collapse) {
-	  			this.status |= status.MINIMIZED;
+	  			this.setStatus(status.MINIMIZED);
 	  		    this.minimize();
 	  		}
 		}
@@ -214,7 +214,6 @@ FloatNote.prototype = {
 		var note = FloatNote.editedNote;
 		if(e.type == "keydown" && e.keyCode == e.DOM_VK_ESCAPE	) { //escape was pressed
 			finish = true;
-			Firebug.Console.log('ESC pressed');
 		}
 		else if((e.type == "keydown" && e.keyCode == 13 && e.ctrlKey) || (e.type == "click" && (e.button === undefined || e.button != 2))) {
 			// If a context menu item is clicked, don't trigger end of edit
@@ -227,14 +226,15 @@ FloatNote.prototype = {
 			var content = note.ele.text.value;
 			note.data.content = content;
 			note.ele.content.innerHTML = note.markdownParser.makeHtml(content);
+			note.unsetStatus(status.EDITING);
 			note.setStatus(status.NEEDS_SAVE);
 			note.save();
 			finish = true;
 		}
 		
 		if(finish) {
-			e.preventDefault();
-			e.stopPropagation();
+			//e.preventDefault();
+			//e.stopPropagation();
 			
 			window.removeEventListener('click', note.endEdit, false);
 			window.removeEventListener('keydown', note.endEdit, true);
@@ -390,7 +390,6 @@ FloatNote.prototype = {
   	
   	getDomElement: function(doc) {	
   		var elements = this.createDOMElements(doc);
-  		Firebug.Console.log(elements);
   		this.setData(elements);
   		this.attachEventHandlers(elements);
   		this.ele = elements;

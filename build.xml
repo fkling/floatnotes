@@ -12,7 +12,6 @@
 	<target name="-init">
 		<tstamp />
 		<mkdir dir="${build}" />
-		<mkdir dir="${build}/test" />
 	</target>
 
 	<target name="-copy" depends="-init">
@@ -32,7 +31,8 @@
 		<copy todir="${build}/skin">
 			<fileset dir="${src}/style" />
 		</copy>
-		<copy todir="${build}">
+		<filter token="version" value="${version}"/>
+		<copy todir="${build}" filtering="true">
 			<fileset dir="${src}/meta" />
 		</copy>
 	</target>
@@ -63,6 +63,7 @@
 			<targetfile />
 			<mapper type="glob" from="*.js" to="*.js" />
 		</apply>
+	    <mkdir dir="${build}/test" />
 		<apply executable="cpp" dest="${build}/test">
 			<fileset dir="${src}/test" />
 			<arg line="-P -C -DDEBUG" />
@@ -88,9 +89,17 @@
 			<mapper type="glob" from="main.js" to="floatnotes.js" />
 		</apply>
 	</target>
+	
+	<target name="dist" depends="build">
+		<mkdir dir="${dist}" />
+		<zip destfile="${dist}/floatnotes-${version}.xpi" basedir="${build}"
+			excludes="**/.*"
+			/>
+	</target>
 
 	<target name="clean">
 		<delete dir="${build}" />
+		<delete dir="${dist}" failonerror="false"/>
 		<!--<propertyfile file="mac.properties" comment="Server properties">
 			<entry key="debug_server.running" operation="del" />
 		</propertyfile>-->

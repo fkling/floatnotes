@@ -11,34 +11,53 @@ FloatNotesLoader.prototype = {
 	listenToApplicationLoad: function() {
 		var that = this;
 		var runWhenLoaded = function(event){
-			that.runUpdate();
-			that.loadCSS();
-			that.createFloatNotesManager();
-			window.removeEventListener('load', runWhenLoaded, false);
+			that.runUpdate(function() {
+				that.loadCSS();
+				that.createFloatNotesManager();
+				window.removeEventListener('load', runWhenLoaded, false);			
+			});
+
 		};
 		window.addEventListener("load", runWhenLoaded , false);
 	},
 	
-	runUpdate: function() {
+	runUpdate: function(cb) {
 		var lastVersion = "0.0", firstrun = true;
 		
 		var newVersion = util.getCurrentVersion();
-        var preferences = util.getPreferencesService();        
+        var preferences = util.getPreferencesService();
+        var that = this;
+        
+        if(newVersion == null) { // Firefox 4
+        	var scope = {};
+        	Components.utils.import("resource://gre/modules/AddonManager.jsm", scope);
+        	scope.AddonManager.getAddonByID('floatnotes@felix-kling.de', function(addon) {
+        		newVersion = addon.version;
+        		upgrade();
+        		cb();
+        	});
+        }
+        else {
+        	upgrade();
+        	cb();
+        }
   	  	
-		try{
-			firstrun = preferences.getBoolPref("firstrun");
-			lastVersion = preferences.getCharPref("version");					
-		}
-		catch(e){}
-		finally{
-			if (firstrun){
-				this.runOnFirstRun();
+        function upgrade() {
+			try{
+				firstrun = preferences.getBoolPref("firstrun");
+				lastVersion = preferences.getCharPref("version");					
 			}
-			if(!firstrun) {
-				upgrade.upgrade(lastVersion, newVersion);
-			}
-
-		}	
+			catch(e){}
+			finally{
+				if (firstrun){
+					that.runOnFirstRun();
+				}
+				if(!firstrun) {
+					update.upgrade(lastVersion, newVersion);
+				}
+	
+			}	
+        }
 	},
 	
 	runOnFirstRun: function() {

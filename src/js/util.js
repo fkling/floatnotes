@@ -46,9 +46,14 @@ var util = {
 	},
 	getCurrentVersion: function() {
 		if(!this._currentVersion) {
+			try {
 			var extensionManager = Components.classes["@mozilla.org/extensions/manager;1"]
 			                                           .getService(Components.interfaces.nsIExtensionManager);
 			this._currentVersion = extensionManager.getItemForID("floatnotes@felix-kling.de").version;
+			}
+			catch(e){
+				this._currentVersion = null;
+			}
 		}
 		return this._currentVersion;
 	},

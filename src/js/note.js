@@ -114,7 +114,6 @@ var move = function(e) {
 		this.data = data;
 		this.dom = null;
 		this.ele = {};
-		this.status = 0;
 		this.noteManager = noteManager;
 		this.markdownParser = markdownParser;
 }
@@ -136,9 +135,11 @@ FloatNote.prototype = {
 	  		}
 	  		this.dom = doc.adoptNode(this.dom);
 	  		doc.body.parentNode.appendChild(this.dom);
-	  		if(this.data.collapse) {
-	  			this.setStatus(status.MINIMIZED);
+	  		if(this.hasStatus(status.MINIMIZED)) {
 	  		    this.minimize();
+	  		}
+	  		if(this.hasStatus(status.FIXED)) {
+	  		    this.setFix();
 	  		}
 		}
   	},
@@ -177,20 +178,20 @@ FloatNote.prototype = {
   	
   	updateLocation: function(newLocation) {
   		this.data.url = newLocation;
-  		this.status |= status.NEEDS_SAVE;
+  		this.setStatus(status.NEEDS_SAVE);
   		this.save();
   	},
   	
   	setStatus: function(status) {
-  		this.status |= status;
+  		this.data.status |= status;
   	},
   	
   	unsetStatus: function(status) {
-  		this.status ^= status;
+  		this.data.status ^= status;
   	},
   	
   	hasStatus: function(status) {
-  		return this.status & status;
+  		return this.data.status & status;
   	},
   	
   	edit: function() {
@@ -241,9 +242,9 @@ FloatNote.prototype = {
 			
 			util.show(note.ele.content);
 			util.hide(note.ele.text);
-	
+
 			util.removeClass(note.dom, 'note-edit');
-			note.unsetStatus(status.EDITING);
+			if(this.hasStatus(status.EDITING)) note.unsetStatus(status.EDITING);
 			FloatNote.editedNote = null;
 		}
   	},
@@ -349,32 +350,44 @@ FloatNote.prototype = {
   	save: function(){
   		if(!this.hasStatus(status.EDITING) && this.hasStatus(status.NEEDS_SAVE)) {
   			var that = this;
+  			that.unsetStatus(status.NEEDS_SAVE);
 	  		this.noteManager.saveNote(this, function(id) {
 	  			if(id) {
 	  				that.dom.id =  'floatnotes-note-' + id;
-	  				that.data.id = id;
-	  				that.unsetStatus(status.NEEDS_SAVE);
+	  				that.data.id = id; 				
 	  			}
 	  		});
   		}
   	},
   	
-  	fix : function(e) {
-		this.setStatus(status.FIXED);
-		var style = this.dom.style;
-		style.top = (e.clientY - e.layerY) + "px";
+  	setFix: function() {
+  		this.setStatus(status.FIXED);
   		util.addClass(this.dom, "fixed");
   		this.toggleFix = this.unfix;
+  	},
+  	
+  	fix : function(e) {
+		this.setFix();
+		var style = this.dom.style;
+		var newTop = (e.clientY - e.layerY);
+		style.top =  newTop + "px";
+		this.data.y = newTop;
+		this.setStatus(status.NEEDS_SAVE);
+		this.save();
   	},
   	
   	unfix: function(e) {
 		this.unsetStatus(status.FIXED);
 		var style = this.dom.style;
-		style.top = (e.pageY - e.layerY) + "px";
+		var newTop = (e.pageY - e.layerY);
+		style.top = newTop + "px";
+		this.data.y = newTop;
 		util.removeClass(this.dom, "fixed");
 		this.toggleFix = this.fix;
+		this.setStatus(status.NEEDS_SAVE);
+		this.save();
   	},
-  	
+
   	raiseToTop: function(e) {
 		var maxz = parseInt(this.style.zIndex);
 

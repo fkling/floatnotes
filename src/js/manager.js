@@ -230,7 +230,7 @@ FloatNotes.prototype = {
   			content: "",
   			url: util.getDefaultUrl(),
   			color: util.getPreferencesService().getCharPref('color'),
-  			collapse: false}, this, this.converter);
+  			status: 0}, this, this.converter);
           if(!this.docs[doc.location]) {
         	  this.docs[doc.location] = Array();	        	  
           }

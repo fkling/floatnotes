@@ -28,12 +28,12 @@ DatabaseConnector.prototype = {
 	},
 	
 	createTables: function() {
-		this._db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, collapse INTEGER)');
+		this._db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER)');
         this._db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
 	},
 	
 	getNotesForURLs: function(urls, runOnFinished) {
-		var statement = this._db.createStatement("SELECT * FROM floatnotes WHERE url = :url ORDER BY x ASC"),
+		var statement = this._db.createStatement("SELECT * FROM floatnotes WHERE url = :url ORDER BY y ASC"),
         	params = statement.newBindingParamsArray(),
         	notes = [];
         for (var i in urls) {
@@ -55,7 +55,7 @@ DatabaseConnector.prototype = {
       				  content: row.getResultByName("content"),
       				  w: row.getResultByName("w"),
       				  h: row.getResultByName("h"),
-      				  collapse: row.getResultByName("collapse"),
+      				  status: row.getResultByName("status"),
       				  color: row.getResultByName("color")
       		  };
       		  notes.push(data);
@@ -68,7 +68,7 @@ DatabaseConnector.prototype = {
 	},
 	
 	createNoteAndGetId: function(note, runWhenFinished) {
-		var statement = this._db.createStatement("INSERT INTO floatnotes  (url, content, h, w, x, y, collapse, color) VALUES ( :url, :content, :h, :w, :x, :y, :collapse, :color)");
+		var statement = this._db.createStatement("INSERT INTO floatnotes  (url, content, h, w, x, y, status, color) VALUES ( :url, :content, :h, :w, :x, :y, :status, :color)");
 		
 		try {
 			for (var param in statement.params) {
@@ -78,7 +78,7 @@ DatabaseConnector.prototype = {
 			statement.executeAsync({
 				handleCompletion: function(aReason) {
 			    	if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED)
-			    		return
+			    		return null;
 			    	runWhenFinished(that._db.lastInsertRowID);
 				}
 			});
@@ -89,7 +89,7 @@ DatabaseConnector.prototype = {
 	},
 	
 	updateNote: function(note, runWhenFinished) {
-		var statement = this._db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, collapse=:collapse, color=:color, url=:url WHERE id = :id");
+		var statement = this._db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, status=:status, color=:color, url=:url WHERE id = :id");
 		
 		try {
 			for (var param in statement.params) {
@@ -99,7 +99,7 @@ DatabaseConnector.prototype = {
 			statement.executeAsync({
 				handleCompletion: function(aReason) {
 			    	if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED)
-			    		return
+			    		return null;
 			    	runWhenFinished();
 				}
 			});
@@ -117,7 +117,7 @@ DatabaseConnector.prototype = {
 			statement.executeAsync({
 				handleCompletion: function(aReason) {
 			    	if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED)
-			    		return
+			    		return null;
 			    	runWhenFinished();
 				}
 			});

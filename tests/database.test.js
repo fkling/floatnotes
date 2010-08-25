@@ -1,8 +1,7 @@
 var db_file;
-var priority = "never";
 
 function warmUp() {
-	utils.include("../content/database.js");
+	utils.include("lib/database.js");
 }
 
 function setUp() {

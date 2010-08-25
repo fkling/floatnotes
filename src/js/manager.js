@@ -1,9 +1,9 @@
-#ifndef __INCLUDE_MANAGER_
-#define __INCLUDE_MANAGER_
+//!#ifndef __INCLUDE_MANAGER_
+//!#define __INCLUDE_MANAGER_
 
-#include "note.js"
-#include "indicator.js"
-#include "util.js"
+//!#include "note.js"
+//!#include "indicator.js"
+//!#include "util.js"
 
 function FloatNotes(database) {
 	this._db = database;
@@ -347,4 +347,4 @@ FloatNotes.prototype = {
       }
   };
 
-#endif
+//!#endif

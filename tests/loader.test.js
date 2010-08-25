@@ -5,9 +5,9 @@ var window;
 var db_file;
 
 function warmUp() {
-	utils.include("../content/loader.js");
-	utils.include("../content/manager.js");
-	utils.include("../content/database.js");
+	utils.include("lib/loader.js");
+	utils.include("lib//manager.js");
+	utils.include("lib/database.js");
 	utils.include("../resources/showdown/showdown.js");
 }
 

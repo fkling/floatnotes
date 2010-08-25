@@ -1,6 +1,6 @@
-#include "util.js"
-#include "update.js"
-#include "manager.js"
+//!#include "util.js"
+//!#include "update.js"
+//!#include "manager.js"
 
 function FloatNotesLoader(database_file) {
 	this._db_file = database_file;
@@ -92,7 +92,7 @@ FloatNotesLoader.prototype = {
 	}
 };
 
-#ifndef DEBUG
+//!#if !DEBUG
 var floatnotes_loader = new FloatNotesLoader();
 floatnotes_loader.listenToApplicationLoad();
-#endif
+//!#endif

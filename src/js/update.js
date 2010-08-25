@@ -1,8 +1,8 @@
-#ifndef __INCLUDE_UPDATE__
-#define __INCLUDE_UPDATE__
+//!#ifndef __INCLUDE_UPDATE__
+//!#define __INCLUDE_UPDATE__
 
-#include "database.js"
-#include "util.js"
+//!#include "database.js"
+//!#include "util.js"
 
 var update = {
 	upgrade: function(from, to) {
@@ -21,4 +21,4 @@ var update = {
 	}
 }
 
-#endif
+//!#endif

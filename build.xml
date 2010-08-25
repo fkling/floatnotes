@@ -1,43 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="FloatNotes" default="copy" basedir=".">
-	<property name="src" location="src" />
-	<property name="build" location="build" />
-	<property name="dist" location="dist" />
-	<property name="debug" location="debug" />
-	<property name="debug.test.html" location="${src}/test/floatnotestest.html" />
-	<property name="output.test.html" value="chrome://floatnotes/content/floatnotestest.html" />
+<project name="FloatNotes" default="dist" basedir=".">
+
+	<loadfile property="version" srcfile="version.txt" />
+
+	<property name="src.dir" location="src" />
+	<property name="build.dir" location="build" />
+
+	<property name="dist.dir" location="dist" />
+	<property name="debug.dir" location="debug" />
+	<property name="test.dir" location="${build.dir}/test" />
+	
 	<loadproperties srcfile="mac.properties" />
-	<property name="test.dir" location="${build}/test" />
+
+	<property name="debug" value="0" />
+
+	<macrodef name="prepare-cpp">
+		<attribute name="dest" />
+		<attribute name="src" />
+		<sequential>
+			<copy todir="@{dest}">
+				<fileset dir="@{src}" />
+			</copy>
+			<replaceregexp byline="true" match="^//!#" replace="#">
+				<fileset dir="@{dest}" />
+			</replaceregexp>
+		</sequential>
+	</macrodef>
 
 	<target name="-init">
 		<tstamp />
-		<mkdir dir="${build}" />
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.dir}/defaults" />
 	</target>
 
 	<target name="-copy" depends="-init">
-		<copy todir="${build}/content">
-			<fileset dir="${src}/XUL" />
+		<copy todir="${build.dir}/content">
+			<fileset dir="${src.dir}/XUL" />
+		</copy>	
+		<copy todir="${build.dir}/defaults/preferences">
+			<fileset dir="${src.dir}/preferences/" />
 		</copy>
-		<mkdir dir="${build}/defaults" />
-		<copy todir="${build}/defaults/preferences">
-			<fileset dir="${src}/preferences/" />
+		<copy todir="${build.dir}/locale">
+			<fileset dir="locale" />
 		</copy>
-		<copy todir="${build}/locale">
-			<fileset dir="${src}/locale" />
+		<copy todir="${build.dir}/resources">
+			<fileset dir="lib" />
 		</copy>
-		<copy todir="${build}/resources">
-			<fileset dir="${src}/lib/" />
+		<copy todir="${build.dir}/skin">
+			<fileset dir="${src.dir}/css" />
+			<fileset dir="images" />
 		</copy>
-		<copy todir="${build}/skin">
-			<fileset dir="${src}/style" />
-		</copy>
-		<filter token="version" value="${version}"/>
-		<copy todir="${build}" filtering="true">
-			<fileset dir="${src}/meta" />
+		<filter token="VERSION" value="${version}" />
+		<copy todir="${build.dir}" filtering="true">
+			<fileset dir="META" />
 		</copy>
 	</target>
 
-	<target name="-lauch_debug_server" unless="debug_server.running">
+	<target name="-lauch_debug_server" unless="${debug_server.running}">
 		<propertyfile file="mac.properties" comment="Server properties">
 			<entry key="debug_server.running" value="true" />
 		</propertyfile>
@@ -47,29 +66,32 @@
 		<sleep seconds="10" />
 	</target>
 
-	<target name="debug" depends="-copy, -lauch_debug_server">
-		<apply executable="cpp" dest="${build}/content">
-			<fileset dir="${src}/js" includes="main.js" />
+	<target name="runtest" depends="-lauch_debug_server">
+	    <antcall target="build">
+	    	   <param name="debug" value="1"/>
+	    </antcall>
+		
+			
+		<prepare-cpp dest="tmp" src="${src.dir}/js"/>
+		
+		<mkdir dir="${test.dir}" />
+		<mkdir dir="${test.dir}/lib" />       
+		<apply executable="cpp" dest="${test.dir}/lib">
+			<fileset dir="tmp" />
 			<arg line="-P -C -DDEBUG" />
 			<srcfile />
 			<targetfile />
-			<mapper type="glob" from="main.js" to="floatnotes.js" />
+			<identitymapper />
 		</apply>
+		
+		<delete dir="tmp"/>
 
-		<apply executable="cpp" dest="${build}/content">
-			<fileset dir="${src}/js" excludes="main.js" />
+		<apply executable="cpp" dest="${test.dir}">
+			<fileset dir="tests" />
 			<arg line="-P -C -DDEBUG" />
 			<srcfile />
 			<targetfile />
-			<mapper type="glob" from="*.js" to="*.js" />
-		</apply>
-	    <mkdir dir="${build}/test" />
-		<apply executable="cpp" dest="${build}/test">
-			<fileset dir="${src}/test" />
-			<arg line="-P -C -DDEBUG" />
-			<srcfile />
-			<targetfile />
-			<mapper type="glob" from="*.js" to="*.js" />
+			<mapper type="identity" />
 		</apply>
 
 		<!-- Updated the exec tag to use additional arguments -->
@@ -81,27 +103,37 @@
 	</target>
 
 	<target name="build" depends="-copy">
-		<apply executable="cpp" dest="${build}/content">
-			<fileset dir="${src}/js" includes="main.js" />
-			<arg line="-P -C" />
+		<property name="tmp.dir" value="tmp"/>	
+		<mkdir dir="${tmp.dir}" />
+		<prepare-cpp dest="${tmp.dir}" src="${src.dir}/js"/>
+		
+		<apply executable="cpp" dest="${build.dir}/content">
+			<fileset dir="${tmp.dir}" />
+			<arg line="-P -C -DDEBUG=${debug}" />
 			<srcfile />
 			<targetfile />
-			<mapper type="glob" from="main.js" to="floatnotes.js" />
+			<globmapper from="main.js" to="floatnotes.js" />
 		</apply>
+		<exec executable="git" outputproperty="date">
+			<arg line="log -1 --pretty=format:%ad" />
+		</exec>
+		<replaceregexp match="@DATE@" replace="${date}" file="${build.dir}/content/floatnotes.js" />
+		<replaceregexp match="@VERSION@" replace="${version}" file="${build.dir}/content/floatnotes.js" />
+		<delete dir="${tmp.dir}" />
 	</target>
-	
+
 	<target name="dist" depends="build">
-		<mkdir dir="${dist}" />
-		<zip destfile="${dist}/floatnotes-${version}.xpi" basedir="${build}"
-			excludes="**/.*"
-			/>
+		<mkdir dir="${dist.dir}" />
+		<zip destfile="${dist.dir}/floatnotes-${version}.xpi" basedir="${build.dir}" excludes="**/.*" />
+		<delete dir="${build.dir}" />
 	</target>
 
 	<target name="clean">
-		<delete dir="${build}" />
-		<delete dir="${dist}" failonerror="false"/>
-		<!--<propertyfile file="mac.properties" comment="Server properties">
-			<entry key="debug_server.running" operation="del" />
-		</propertyfile>-->
+		<delete dir="${build.dir}" failonerror="false" />
+		<delete dir="${dist.dir}" failonerror="false" />
+		<delete dir="tmp" failonerror="false" />
+		<propertyfile file="mac.properties" comment="Server properties">
+			<entry key="debug_server.running" value="false" />
+		</propertyfile>
 	</target>
 </project>

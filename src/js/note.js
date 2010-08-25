@@ -1,7 +1,7 @@
-#ifndef __INCLUDE_NOTE__
-#define __INCLUDE_NOTE__
+//!#ifndef __INCLUDE_NOTE__
+//!#define __INCLUDE_NOTE__
 
-#include "util.js"
+//!#include "util.js"
 
 var status = {
 		SAVED: 1,
@@ -543,4 +543,4 @@ FloatNote.prototype = {
   	
   };
 
-#endif
+//!#endif

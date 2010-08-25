@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_UTIL__
-#define __INCLUDE_UTIL__
+//!#ifndef __INCLUDE_UTIL__
+//!#define __INCLUDE_UTIL__
 
 var util = {
 	css: function(node, style) {
@@ -120,4 +120,4 @@ var util = {
     }
 };
 
-#endif
+//!#endif

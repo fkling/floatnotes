@@ -1,7 +1,7 @@
 var managerMock;
 function warmUp() {
-	utils.include("../content/util.js");
-	utils.include("../content/note.js");
+	utils.include("lib/util.js");
+	utils.include("lib/note.js");
 	utils.wait(utils.setUpTestWindow());
 }
 

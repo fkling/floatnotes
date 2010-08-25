@@ -1,7 +1,7 @@
-#ifndef __INCLUDE_INDICATOR_
-#define __INCLUDE_INDICATOR_
+//!#ifndef __INCLUDE_INDICATOR_
+//!#define __INCLUDE_INDICATOR_
 
-#include "util.js"
+//!#include "util.js"
 
 function Indicator(type, notesManager) {
 	this.notes
@@ -170,4 +170,4 @@ Indicator.prototype = {
   	}
 };
 
-#endif
+//!#endif

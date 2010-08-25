@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_DB__
-#define __INCLUDE_DB__
+//!#ifndef __INCLUDE_DB__
+//!#define __INCLUDE_DB__
 
 function DatabaseConnector(database_file) {
 	var file = Components.classes["@mozilla.org/file/directory_service;1"]  
@@ -132,4 +132,4 @@ DatabaseConnector.prototype = {
 	}
 };
 
-#endif
+//!#endif

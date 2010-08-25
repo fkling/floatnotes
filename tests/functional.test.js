@@ -1,8 +1,9 @@
 var window;
+var priority = "never";
 
 
 function warmUp() {
-	utils.include("../content/loader.js");
+	utils.include("lib/loader.js");
 }
 
 function setUp() {

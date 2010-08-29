@@ -78,7 +78,7 @@ FloatNotesLoader.prototype = {
     }
 };
 
-//!#if !DEBUG
+//!#if !TESTRUN
 var floatnotes_loader = new FloatNotesLoader();
 floatnotes_loader.listenToApplicationLoad();
 //!#endif

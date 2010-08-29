@@ -12,7 +12,8 @@
 	
 	<loadproperties srcfile="mac.properties" />
 
-	<property name="debug" value="0" />
+	<property name="cpp.debug" value="0" />
+	<property name="cpp.testrun" value="0" />
 
 	<macrodef name="prepare-cpp">
 		<attribute name="dest" />
@@ -57,21 +58,25 @@
 	</target>
 
 	<target name="-lauch_debug_server" unless="${debug_server.running}">
-		<propertyfile file="mac.properties" comment="Server properties">
+        <echo>Start test server...</echo>
+        <propertyfile file="mac.properties" comment="Server properties">
 			<entry key="debug_server.running" value="true" />
 		</propertyfile>
 		<exec executable="${debug_server}" spawn="yes">
 			<arg line="${debug_server.args}" />
-		</exec>
+        </exec>
+        <echo> Wait for test server to come up...</echo>
 		<sleep seconds="10" />
 	</target>
 
-	<target name="runtest" depends="-lauch_debug_server">
-	    <antcall target="build">
-	    	   <param name="debug" value="1"/>
-	    </antcall>
-		
-			
+    <target name="runtest"> 
+        <antcall target="build">
+             <param name="cpp.debug" value="1"/>
+             <param name="cpp.testrun" value="1"/>
+        </antcall>
+               
+        <antcall target="-lauch_debug_server"/>
+        
 		<prepare-cpp dest="tmp" src="${src.dir}/js"/>
 		
 		<mkdir dir="${test.dir}" />
@@ -88,7 +93,7 @@
 
 		<apply executable="cpp" dest="${test.dir}">
 			<fileset dir="tests" />
-			<arg line="-P -C -DDEBUG" />
+			<arg line="-P -C -DDEBUG=1 -DTESTRUN=1" />
 			<srcfile />
 			<targetfile />
 			<mapper type="identity" />
@@ -109,8 +114,8 @@
 		
 		<apply executable="cpp" dest="${build.dir}/content">
 			<fileset dir="${tmp.dir}" />
-			<arg line="-P -C -DDEBUG=${debug}" />
-			<srcfile />
+            <arg line="-P -C -DDEBUG=${cpp.debug} -DTESTRUN=${cpp.testrun}" />
+            <srcfile />
 			<targetfile />
 			<globmapper from="main.js" to="floatnotes.js" />
 		</apply>
@@ -121,6 +126,12 @@
 		<replaceregexp match="@VERSION@" replace="${version}" file="${build.dir}/content/floatnotes.js" />
 		<delete dir="${tmp.dir}" />
 	</target>
+
+	<target name="debug">
+        <antcall target="build">
+            <param name="cpp.debug" value="1" />
+        </antcall>
+    </target>
 
 	<target name="dist" depends="build">
 		<mkdir dir="${dist.dir}" />

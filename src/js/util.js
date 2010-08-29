@@ -1,6 +1,12 @@
 //!#ifndef __INCLUDE_UTIL__
 //!#define __INCLUDE_UTIL__
 
+//!#if DEBUG
+//!#define LOG(msg) util.log((msg));
+//!#else
+//!#define LOG(msg)  
+//!#endif
+
 var util = {
     css: function(node, style) {
             if(node && node.style) {
@@ -20,8 +26,13 @@ var util = {
         }
     },
     addClass: function(node, cls) {
-        if(node && node.className && node.className.indexOf(cls) == -1) {
-            node.className = node.className + " " + cls;
+        if(node) {
+            if(!node.className) {
+                node.className = cls;
+            }
+            else if(node.className.indexOf(cls) == -1) {
+                node.className = node.className + " " + cls;
+            }
         }
     },
     removeClass: function(node, cls) {
@@ -128,7 +139,15 @@ var util = {
         else {
             return loc[loc.length + default_loc +1];
         }
+    },
+
+    log: function(msg) {
+        this._consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+                                       .getService(Components.interfaces.nsIConsoleService);
+        this.log = function(msg) {
+            this._consoleService.logStringMessage(msg);
+        }
+        this.log(msg);
     }
 };
-
 //!#endif

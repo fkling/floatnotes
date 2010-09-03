@@ -1,114 +1,161 @@
-var managerMock;
-function warmUp() {
-	utils.include("lib/util.js");
+
+var    win;
+
+function getNote(data, manager) {
+	var data = data || {id: 5, url: "google.com", h : 100, w: 100, y : 10, x : 10, status : 0, color : "#AAA", content:"test"};
+    manager = manager || mock.mock(ManagerStub); 
+	return new FloatNote(data, manager);
+}
+
+function startUp() {
+    utils.include('integrateMock.js');
+    utils.include("../resources/showdown/showdown.js",window);
 	utils.include("lib/note.js");
-	utils.wait(utils.setUpTestWindow());
+	utils.include("lib/loader.js");
+    var loader = new FloatNotesLoader();
+    loader.loadCSS();
+}
+
+function setUp() {
+    var options = {
+      name      : 'TEST',                               // default: _blank
+      width     : 400,
+      height    : 400,
+    },
+    ManagerStub = function() {
+        this.saveNote = function(note, callback){};
+    };
+    utils.setUpTestWindow(options);
+   	utils.wait(utils.loadURI("http://google.com"));
+    this.origContent = window.content;
+    window.content = content;
+    this.managerMock = mock.mock(ManagerStub);
+	this.note = getNote(null, managerMock);
+}
+
+function tearDown() {
+    this.note = null;
+    this.managerMock = null;
+    window.content = this.origContent;
+    //utils.tearDownTestWindow({name: 'TEST'});
 }
 
 function testCreateNote() {
-	var data = {url: "test.com", height : 100, width : 20, positionY : 50, positionX : 100, collapse : 0, color : "#AAA", content:"test"};
-	var converter = {makeHTML: function(text) {return text;}};
-	var note = getNote(data);
-	/*
-	assert.isDefined(note, "A new note is created");
-	assert.equals(data.url, note.url, "URL correctly set");
-	assert.equals(data.height, note.height, "height correctly set");
-	assert.equals(data.width, note.width, "width correctly set");
-	assert.equals(data.positionY, note.positionY, "Y position correctly set");
-	assert.equals(data.positionX, note.postionX, "X position correctly set");
-	assert.equals(data.collapse, note.collapse, "collapse correctly set");
-	assert.equals(data.color, note.color, "color correctly set");
-	assert.equals(data.content, note.content, "content correctly set");
-	*/
+	assert.isDefined(this.note, "A new note is created");
 }
 
 function testAttachToNode() {
-	utils.wait(utils.loadURI("http://google.com"));
-	var note = getNote();
+	this.note.attachToDocument(gBrowser.contentDocument, gBrowser.contentDocument.body);
 	
-	note.attachToDocument(gBrowser.contentDocument);
-	
-	assert.contained(gBrowser.contentDocument.body, note.domNode, "Note DOM node is containd in page");
+	assert.contained(gBrowser.contentDocument.body, this.note.dom, "Note DOM node is containd in page");
 }
 
 function testMinimizeNote() {
-	utils.wait(utils.loadURI("http://google.com"));
-	var note = getNote();
-	note.attachToDocument(gBrowser.contentDocument);
+	this.note.attachToDocument(gBrowser.contentDocument);
+    var that = this;
 	
-	note.minimize();
+	this.note.minimize();
 
-	assert.matches(/small/, note.dom.className, "Note has CSS class small");
-	assert.isNull(managerMock.note, "Collapse was not saved");
+
+    verifyMock(function(){mock.verify(managerMock, mock.never()).saveNote(that.note, mock.func())});
+	assert.matches(/small/, this.note.dom.className, "Note has CSS class small");
 }
 
 function testMinimizeNoteAndSave() {
-	utils.wait(utils.loadURI("http://google.com"));
-	var note = getNote();
-	note.attachToDocument(gBrowser.contentDocument);
+    var that = this;
+	this.note.attachToDocument(gBrowser.contentDocument);
 	
-	note.minimizeAndSave();
+	this.note.minimizeAndSave();
 
-	assert.isTrue(note.status & status.MINIMIZED, "Note has status collpased");
-	assert.matches(/small/, note.dom.className, "Note has CSS class small");
-	assert.isNotNull(managerMock.note, "Collapse was not saved");
+    verifyMock(function(){mock.verify(managerMock).saveNote(that.note, mock.func())});
+    assert.equals(status.MINIMIZED, this.note.data.status, "Note has status minimized");
+	assert.matches(/small/, this.note.dom.className, "Note has CSS class small");
+}
+
+function testMinimizeOnDblclick() {
+
+    var that = this;
+	this.note.attachToDocument(gBrowser.contentDocument);
+
+    //window.setTimeout(function() {
+        action.dblclickOn($(that.note.ele.drag));
+    //}, 100);
+    utils.waitDOMEvent('dblclick', this.note.ele.drag);
+    assert.equals(status.MINIMIZED, this.note.data.status, "Note has status minimized");
+	assert.matches(/small/, this.note.dom.className, "Note has CSS class small");
+    verifyMock(function(){mock.verify(managerMock).saveNote(that.note, mock.func())});
+}
+
+function testFix() {
+    var that = this;
+	this.note.attachToDocument(gBrowser.contentDocument);
+
+    window.setTimeout(function() {
+        action.mousedownOn(that.note.ele.fixer);
+    }, 100);
+
+    utils.waitDOMEvent('mousedown', this.note.ele.fixer);
+    
+    assert.equals(status.FIXED, this.note.data.status, "Note has status fixed");
+	assert.matches(/fixed/, this.note.dom.className, "Note has CSS class fixed");
+    verifyMock(function(){mock.verify(managerMock).saveNote(that.note, mock.func())});
 }
 
 function testUnMinimizeNote() {
-	utils.wait(utils.loadURI("http://google.com"));
-	var note = getNote();
-	note.attachToDocument(gBrowser.contentDocument);
-	
-	note.unminimize();
+    var that = this;
+	this.note.attachToDocument(gBrowser.contentDocument);
+    this.note.data.status |= status.MINIMIZED;
 
-	assert.notMatches(/small/, note.dom.className, "Note has CSS class small");
-	assert.isNull(managerMock.note, "Collapse was not saved");
+	this.note.unminimize();
+
+    verifyMock(function(){mock.verify(managerMock, mock.never()).saveNote(that.note, mock.func())});
+	assert.notMatches(/small/, this.note.dom.className, "Note has CSS class small");
 }
 
-function testUnMinimizeNoteandSave() {
-	utils.wait(utils.loadURI("http://google.com"));
-	var note = getNote();
-	note.attachToDocument(gBrowser.contentDocument);
-	
-	note.unminimizeAndSave();
+function testUnMinimizeNoteAndSave() {
+    var that = this;
+	this.note.attachToDocument(gBrowser.contentDocument);
+    this.note.data.status |= status.MINIMIZED;
 
-	assert.isTrue(note.status & status.MINIMIZED, "Note has status collpased");
-	assert.notMatches(/small/, note.dom.className, "Note has CSS class small");
-	assert.isNotNull(managerMock.note, "Collapse was not saved");
+	this.note.unminimizeAndSave();
+
+    verifyMock(function(){mock.verify(managerMock).saveNote(that.note, mock.func())});
+	assert.isFalse(this.note.data.status, "Note has not status minimized");
+	assert.notMatches(/small/, this.note.dom.className, "Note has CSS class small");
 }
 
 function testSave() {
-	var note = getNote();
+    var that = this;
 	
-	note.status |= status.NEEDS_SAVE;
-	note.save();
+	this.note.data.status |= status.NEEDS_SAVE;
+	this.note.save();
 	
-	assert.isNotNull(managerMock.note, "Note gets saved");
+    verifyMock(function(){mock.verify(managerMock).saveNote(that.note, mock.func())});
 }
 
 function testNoSaveIfNotNeeded() {
-	var note = getNote();
+    var that = this;
 	
-	note.save();
+	this.note.save();
 	
-	assert.isNull(managerMock.note, "No save on edit");
+    verifyMock(function(){mock.verify(managerMock, mock.never()).saveNote(that.note, mock.func())});
 }
 
 function testNoSaveOnEdit() {
-	var note = getNote();
+    var that = this;
 	
-	note.status |= status.EDIT;
-	note.save();
+	this.note.data.status |= status.EDIT;
+	this.note.save();
 	
-	assert.isNull(managerMock.note, "No save on edit");
+    verifyMock(function(){mock.verify(managerMock, mock.never()).saveNote(that.note, mock.func())});
 }
 
-function getNote(data) {
-	var converter = {makeHtml: function(text) {return text;}};
-	managerMock = {
-			note: null,
-			saveNote: function(note) {this.note = note;}
-	};
-	var data = data || {id: 5, url: "google.com", height : 100, width : 20, positionY : 50, positionX : 100, collapse : 0, color : "#AAA", content:"test"};
-	return new FloatNote(data, managerMock, converter);
+function testUpdateLocation() {
+    var that = this;
+    var location = "www.example.com";
+
+    this.note.updateLocation(location);
+
+    verifyMock(function(){mock.verify(managerMock).saveNote(that.note, mock.func())});
+    assert.equals(this.note.data.url, location, "Location is changed");
 }

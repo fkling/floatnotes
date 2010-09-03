@@ -1,4 +1,5 @@
 var db_file;
+var priority = "never";
 
 function warmUp() {
 	utils.include("lib/database.js");
@@ -34,9 +35,11 @@ function testCreateTables() {
 }
 
 function testCanReadNotesForURLs() {
-	var db = getDatabase(db_file);
-	createNotes(db);
+	var db = utils.openDatabase(db_file);
 	var dbc = new DatabaseConnector(db_file);
+	dbc.createTables();
+    createNotes(db);
+	
 	var loaded = {
 		value : false
 	};
@@ -125,7 +128,7 @@ function createNotes(db) {
 		w : 100,
 		y : 50,
 		x : 50,
-		collapse : 0,
+		status : 0,
 		color : "#AAA",
 		content:"test"
 	}, {
@@ -134,11 +137,11 @@ function createNotes(db) {
 		w : 100,
 		y : 50,
 		x : 50,
-		collapse : 0,
+		status : 0,
 		color : "#AAA",
 		content:"test"
 	} ];
-	var statement = db.createStatement("INSERT INTO floatnotes  (url, content, h, w, x, y, collapse, color) VALUES ( :url, :content, :h, :w, :x, :y, :collapse, :color)");
+	var statement = db.createStatement("INSERT INTO floatnotes  (url, content, h, w, x, y, status, color) VALUES ( :url, :content, :h, :w, :x, :y, :status, :color)");
 	var params = statement.newBindingParamsArray();
 	var loaded = {
 		value : false

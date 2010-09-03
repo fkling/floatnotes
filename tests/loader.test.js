@@ -1,21 +1,20 @@
 // Wait that the testing window is completely loaded.
 // After that, go forward
-var priority = "must";
 var window;
 var db_file;
 
 function warmUp() {
-	utils.include("lib/loader.js");
-	utils.include("lib//manager.js");
-	utils.include("lib/database.js");
-	utils.include("../resources/showdown/showdown.js");
-}
-
-function setUp() {
 	db_file = utils.makeTempFile();
 	utils.wait(utils.setUpTestWindow());
 	//utils.wait(utils.loadURI("http://www.reblaus-kleinkunst.de"));
 	window = utils.getTestWindow();
+	utils.include("../resources/showdown/showdown.js",window);
+	utils.include("lib/loader.js",window);
+	utils.include("lib//manager.js",window);
+	utils.include("lib/database.js",window);
+}
+
+function setUp() {
 }
 
 function tearDown() {
@@ -23,13 +22,13 @@ function tearDown() {
 }
 
 function testLoaderCreateFloatNotesManager() {
-	var loader = new FloatNotesLoader(db_file);
+	var loader = new window.FloatNotesLoader(db_file);
 	loader.createFloatNotesManager();
 	assert.isDefined(window.gFloatNotesManager, "FloatNotes manager is globally available.")
 }
 
 function testLoaderCreatesDatabase() {
-	var loader = new FloatNotesLoader(db_file);
+	var loader = new window.FloatNotesLoader(db_file);
 	loader.createFloatNotesManager();
 	assert.isDefined(window.gFloatNotesManager._db, "FloatNotes manager has database.")
 }

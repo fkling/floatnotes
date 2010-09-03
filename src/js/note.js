@@ -22,7 +22,7 @@ var _in = function(note) {
 		util.show(note.ele.drag);
 		util.show(note.ele.resize);
 	}
-	};
+};
 
 var _out = function(note) {
     return function(e) {
@@ -32,17 +32,17 @@ var _out = function(note) {
 			note.minimize();
 		}
 	}
-	};
+};
 	
-	var _updateFix = function(newValues, defaultX, defaultY, window, noteStyle) {
-		if(parseInt(newValues.Y) + parseInt(noteStyle.height) >= window.innerHeight) {
-			newValues.Y = defaultY;
-		 }
-		if(parseInt(newValues.X) + parseInt(noteStyle.width) >= window.innerWidth) {
-			newValues.X = defaultX;
-		}
+var _updateFix = function(newValues, defaultX, defaultY, window, noteStyle) {
+	if(parseInt(newValues.Y) + parseInt(noteStyle.height) >= window.innerHeight) {
+		newValues.Y = defaultY;
 	}
-	var updateFix = function(){};
+	if(parseInt(newValues.X) + parseInt(noteStyle.width) >= window.innerWidth) {
+		newValues.X = defaultX;
+	}
+}
+var updateFix = function(){};
 	
 var resize = function(e) {
 	  e.stopPropagation();
@@ -85,46 +85,42 @@ var move = function(e) {
 	  style.top =  newValues.Y;
 	  
 	  scrollWindow(e, content);
-  };
+};
   
-  var scrollWindow = function(e, window) {
-	  if(e.pageY < window.pageYOffset) {
-		  var y = e.pageY - window.pageYOffset;
-	  }
-	  else if (e.pageY > window.innerHeight + window.pageYOffset) {
-		  var y = e.pageY - (window.innerHeight + window.pageYOffset);
-	  }
+var scrollWindow = function(e, window) {
+      if(e.pageY < window.pageYOffset) {
+          var y = e.pageY - window.pageYOffset;
+      }
+      else if (e.pageY > window.innerHeight + window.pageYOffset) {
+          var y = e.pageY - (window.innerHeight + window.pageYOffset);
+      }
 
-	  if(e.pageX < window.pageXOffset) {
-		  var x = e.pageX - window.pageXOffset;
-	  }
-	  else if (e.pageX > window.innerWidth + window.pageXOffset) {
-		  var x = e.pageX - (window.innerWidth + window.pageXOffset);
-	  }
+      if(e.pageX < window.pageXOffset) {
+          var x = e.pageX - window.pageXOffset;
+      }
+      else if (e.pageX > window.innerWidth + window.pageXOffset) {
+          var x = e.pageX - (window.innerWidth + window.pageXOffset);
+      }
 
-	  if(x || y) {
-		  content.scrollBy(x,y);
-	  }
-	  return false;
-  }
+      if(x || y) {
+          content.scrollBy(x,y);
+      }
+      return false;
+}
   
-  var _scrollWindow = scrollWindow;
+var _scrollWindow = scrollWindow;
   
- function FloatNote(data, noteManager, markdownParser) {
+function FloatNote(data, noteManager) {
 		this.data = data;
 		this.dom = null;
 		this.ele = {};
 		this.noteManager = noteManager;
-		this.markdownParser = markdownParser;
 }
  
-FloatNotes.handler = {
-		
-}
-	
-	
 FloatNote.prototype = {
-	attachToDocument: function(doc) {
+    markdownParser: new Showdown.converter(),
+
+	attachToDocument: function(doc, node) {
 		if(doc) {
 	  		if(this.dom == null) {
 	  			this.dom = this.getDomElement(doc);
@@ -134,7 +130,8 @@ FloatNote.prototype = {
 	  			//this.detach();
 	  		}
 	  		this.dom = doc.adoptNode(this.dom);
-	  		doc.body.parentNode.appendChild(this.dom);
+            node = node || doc.body.parentNode;
+	  		node.appendChild(this.dom);
 	  		if(this.hasStatus(status.MINIMIZED)) {
 	  		    this.minimize();
 	  		}
@@ -158,7 +155,6 @@ FloatNote.prototype = {
   	minimizeAndSave: function() {
   		this.setStatus(status.MINIMIZED);
   		this.minimize();
-  		this.data.collapsed = true;
   		this.setStatus(status.NEEDS_SAVE);
   		this.save();
   	},
@@ -170,7 +166,6 @@ FloatNote.prototype = {
   	unminimizeAndSave: function() {
   		this.unsetStatus(status.MINIMIZED);
   		this.unminimize();
-  		this.data.collapsed = false;
   		this.setStatus(status.NEEDS_SAVE);
   		this.save();
   	},
@@ -244,7 +239,7 @@ FloatNote.prototype = {
 			util.hide(note.ele.text);
 
 			util.removeClass(note.dom, 'note-edit');
-			if(this.hasStatus(status.EDITING)) note.unsetStatus(status.EDITING);
+			if(note.hasStatus(status.EDITING)) note.unsetStatus(status.EDITING);
 			FloatNote.editedNote = null;
 		}
   	},
@@ -269,8 +264,8 @@ FloatNote.prototype = {
 			scrollWindow = function(){};
 		}
 		
-		window.content.document.addEventListener("mouseup", this.endMove, true);
-  		window.content.document.addEventListener("mousemove", move, true);
+		gBrowser.contentDocument.addEventListener("mouseup", this.endMove, true);
+  		gBrowser.contentDocument.addEventListener("mousemove", move, true);
 
   	},
   	
@@ -294,8 +289,8 @@ FloatNote.prototype = {
 		note.dom.addEventListener('mouseout', note.outHandler, false);
 		note.dom.addEventListener('mouseover', note.inHandler, false);
 		
-		window.content.document.removeEventListener('mousemove', move, true);
-		window.content.document.removeEventListener('mouseup', note.endMove, true);
+		gBrowser.contentDocument.removeEventListener('mousemove', move, true);
+		gBrowser.contentDocument.removeEventListener('mouseup', note.endMove, true);
   	},
   	
   	startResize: function(e) {
@@ -318,8 +313,8 @@ FloatNote.prototype = {
 		this.dom.removeEventListener('mouseout', this.outHandler, false);
 		this.dom.removeEventListener('mouseover', this.inHandler, false);
 		
-		window.content.document.addEventListener("mouseup", this.endResize, true);
-  		window.content.document.addEventListener("mousemove", resize, true);	
+		gBrowser.contentDocument.addEventListener("mouseup", this.endResize, true);
+  		gBrowser.contentDocument.addEventListener("mousemove", resize, true);	
 
   	},
   	
@@ -343,8 +338,8 @@ FloatNote.prototype = {
 		note.dom.addEventListener('mouseout', note.outHandler, false);
 		note.dom.addEventListener('mouseover', note.inHandler, false);
 		
-		window.content.document.removeEventListener('mousemove', resize, true);
-		window.content.document.removeEventListener('mouseup', note.endResize, true);
+		gBrowser.contentDocument.removeEventListener('mousemove', resize, true);
+		gBrowser.contentDocument.removeEventListener('mouseup', note.endResize, true);
   	},
   	
   	save: function(){

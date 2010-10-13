@@ -5,19 +5,19 @@
 	<popup id="contentAreaContextMenu">
 		<menuseparator />
 		<menuitem id="floatnotes-hide-note" label='&floatnotes.hide;'
-			oncommand='gFloatNotesManager.toggleNotes();' class="menuitem-iconic"
+			oncommand='gFloatNotesView.toggleNotes();' class="menuitem-iconic"
 			image='chrome://floatnotes/skin/hide_note_small.png' />
 
 
 		<menu id="floatnotes-edit-note" label="&floatnotes.edit;"
-			onpopupshowing='gFloatNotesManager.updateMenuLocations()' onpopuphiding='gFloatNotesManager.removeMenuLocations()'>
+			onpopupshowing='gFloatNotesView.updateMenuLocations()' onpopuphiding='gFloatNotesView.removeMenuLocations()'>
 			<menupopup id="floatnotes-edit-note-menu"></menupopup>
 		</menu>
 		<menuitem id="floatnotes-delete-note" label='&floatnotes.delete;'
-			oncommand='gFloatNotesManager.deleteNote();' class="menuitem-iconic"
+			oncommand='gFloatNotesView.deleteNote();' class="menuitem-iconic"
 			image='chrome://floatnotes/skin/delete_note16.png' />
 		<menuitem id="floatnotes-new-note" label='&floatnotes.new;'
-			oncommand='gFloatNotesManager.addNote();' class="menuitem-iconic"
+			oncommand='gFloatNotesView.addNote();' class="menuitem-iconic"
 			image='chrome://floatnotes/skin/new_note16.png' />
 	</popup>
 	

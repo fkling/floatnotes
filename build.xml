@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="FloatNotes" default="dist" basedir=".">
+<project name="FloatNotes" default="dist" basedir="." xmlns:jsl="antlib:com.googlecode.jslint4java">
 
 	<loadfile property="version" srcfile="version.txt" />
 
@@ -44,7 +44,7 @@
 		<copy todir="${build.dir}/locale">
 			<fileset dir="locale" />
 		</copy>
-		<copy todir="${build.dir}/resources">
+		<copy todir="${build.dir}/modules">
 			<fileset dir="lib" />
 		</copy>
 		<copy todir="${build.dir}/skin">
@@ -118,7 +118,15 @@
             <srcfile />
 			<targetfile />
 			<globmapper from="main.js" to="floatnotes.js" />
+            </apply>
+        <apply executable="cpp" dest="${build.dir}/modules">
+			<fileset dir="${tmp.dir}" includes="database.js, loader.js, manager.js, init.js"/>
+            <arg line="-P -C -DDEBUG=${cpp.debug} -DTESTRUN=${cpp.testrun}" />
+            <srcfile />
+			<targetfile />
+			<globmapper from="*.js" to="*.jsm" />
 		</apply>
+
 		<exec executable="git" outputproperty="date">
 			<arg line="log -1 --pretty=format:%ad" />
 		</exec>
@@ -139,6 +147,13 @@
 		<delete dir="${build.dir}" />
 	</target>
 
+    <target name="jslint">
+        <jsl:jslint options="browser, es5">
+            <jsl:formatter type="plain" />
+            <fileset dir="${src.dir}/js" includes="*.js" />
+        </jsl:jslint>
+        
+    </target>
 	<target name="clean">
 		<delete dir="${build.dir}" failonerror="false" />
 		<delete dir="${dist.dir}" failonerror="false" />

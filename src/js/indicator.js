@@ -89,7 +89,7 @@ Indicator.prototype = {
 
     _getCurrentNotesFrom: function(notes) {
         var that = this;
-        return notes.filter(function(note){ return note.position == that.type && !note.hasStatus(status.EDITING | status.FIXED);});
+        return notes.filter(function(note){ return note.position == that.type && !note.hasStatus(note_status.EDITING | note_status.FIXED);});
     },
 
     _updateLabel: function(nn_notes) {

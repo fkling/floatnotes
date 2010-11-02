@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<dialog id="editSearch" title="Edit Search"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        buttons="accept,cancel"
+        ondialogaccept="return doOK();"
+        ondialogcancel="return doCancel();">
+
+<grid>
+<columns>
+<column flex="1"/>
+<column flex="2" />
+</columns>
+<rows>
+<row align="center">
+    <label>Name</label>
+<textbox id="name"/>
+</row>
+<row align="center">
+    <label>Keywords</label>
+<textbox id="keywords"/>
+</row>
+</rows>
+</grid>
+<script>
+function doOK()
+{
+    if(!name.value || !keywords.value) {
+        return false;
+    }
+    item.value = keywords.value;
+    item.label = name.value;
+    manager.update(window.arguments[0].selectedIndex, item.label, item.value);
+    return true;
+}
+
+function doCancel()
+{
+    return true;
+}
+
+var item =  window.arguments[0].selectedItem;
+var manager =  window.arguments[1];
+
+var name = document.getElementById('name');
+var keywords = document.getElementById('keywords');
+
+name.value = item.label;
+keywords.value = item.value;
+
+</script>
+
+</dialog>
+

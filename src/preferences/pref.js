@@ -14,3 +14,5 @@ pref("extensions.floatnotes.showIndicator", true);
 pref("extensions.floatnotes.fadeOutAfter", 3);
 
 pref("extensions.floatnotes.scrolltimer", 100);
+
+pref("extensions.floatnotes.savedSearches", '[]');

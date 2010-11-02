@@ -146,6 +146,9 @@ FloatNotesView.prototype = {
             that.currentNotes = that._createNotesWith(data);
             that._attachNotesToCurrentDocument();
             that._attachAndShowIndicators();
+            if(doc.location.hash && doc.location.hash.indexOf('#floatnotes-note') === 0) {
+                doc.location.hash = doc.location.hash;
+            }
         });
     },
 
@@ -332,7 +335,7 @@ FloatNotesView.prototype = {
     updateContextMenu: function(event) {
         if(this.contextNote) {
             // don't show any menu items if in editing mode
-            var showOrHide = (this.contextNote.hasStatus(status.EDITING) ? this._hideMenuItems : this._showMenuItems);
+            var showOrHide = (this.contextNote.hasStatus(note_status.EDITING) ? this._hideMenuItems : this._showMenuItems);
             showOrHide([this._deleteMenuEntry, this._editMenuEntry]);
             this._hideMenuItems([this._newMenuEntry]);
         }

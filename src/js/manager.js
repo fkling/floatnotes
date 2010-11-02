@@ -15,9 +15,9 @@ function getManager(db) {
 }
 
 
-
 function FloatNotesManager(database) {
     this._db = database;
+    this.notesByUrl = {};
     this.notes = {};
     this._observer_service = CC["@mozilla.org/observer-service;1"].getService(CI.nsIObserverService);
 }
@@ -49,7 +49,7 @@ FloatNotesManager.prototype = {
         for(var i = domains.length -1; i > -1; --i) {
             var domain = domains[i];
             LOG('Check ' + domain);
-            var notes = this.notes[domain];
+            var notes = this.notesByUrl[domain];
             if(!notes) {
                 domainsToFetch.push(domain);
             }
@@ -60,15 +60,16 @@ FloatNotesManager.prototype = {
 
         this._db.getNotesForURLs(domainsToFetch, function(notesdata) {
             LOG('Manager loaded from DB: ' + notesdata.length + ' notes');
-            var notes = that.notes;
+            var notesByUrl = that.notesByUrl;
 
             for (var i = 0, length = notesdata.length; i < length;i++) {
                 var data = notesdata[i];
 
-                if(typeof notes[data.url] == "undefined") {
-                    notes[data.url] = [];
-                }  					
-                notes[data.url].push(data);
+                if(typeof notesByUrl[data.url] == "undefined") {
+                    notesByUrl[data.url] = [];
+                }
+                notesByUrl[data.url].push(data);
+                that.notes[data.id] = data;
             }
 
             cb(notesToReturn.concat(notesdata));
@@ -76,18 +77,29 @@ FloatNotesManager.prototype = {
 
     },
 
-    saveNote: function(note, cb) {
+    saveNote: function(data, cb) {
         var that = this;
         // new or update ?
+        var note = data;
+        var ID = data.id;
+
+        if(typeof ID  != 'undefined' && this.notes[ID]) {
+            note = this.notes[ID];
+            if(note != data) {
+                util.updateObject(note, data);
+            }
+        }
+
         this.lastChangedNote = note;
 
-        if(note._prevURL) {
-            this.updateCacheForNewURL(note, note._prevURL, note.url);
+        if(data._prevURL) {
+            this.updateCacheForNewURL(note, data._prevURL, data.url);
             this._observer_service.notifyObservers(null, 'floatnotes-note-urlchange', note.id);
         }
 
-        if(typeof note.id == "undefined") {
+        if(typeof ID == "undefined") {
             this._db.createNoteAndGetId(note, function(id) {
+                that.notes[id] = note;
                 cb(id);
                 that._observer_service.notifyObservers(null, 'floatnotes-note-add', id);
             });
@@ -95,17 +107,17 @@ FloatNotesManager.prototype = {
         else {
             this._db.updateNote(note, function() {
                 that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.id);
-                cb() 
+                cb(); 
             });
         }		
     },
 
     updateCacheForNewURL: function(note, oldURL, newURL) {
-        if(!this.notes[newURL]) {
-            this.notes[newURL] = [];
+        if(!this.notesByUrl[newURL]) {
+            this.notesByUrl[newURL] = [];
         }
-        this.notes[newURL].push(note);
-        util.removeObjectFromArray(note, this.notes[oldURL]);
+        this.notesByUrl[newURL].push(note);
+        util.removeObjectFromArray(note, this.notesByUrl[oldURL]);
     },
 
     createNote: function(document) {
@@ -118,18 +130,30 @@ FloatNotesManager.prototype = {
             color: util.getPreferencesService().getCharPref('color'),
             status: 0};
 
-            if(typeof this.notes[domain] == "undefined") {
-                this.notes[domain] = [];
-            }
-            this.notes[domain].push(data);       
-            return data;
+        if(typeof this.notesByUrl[domain] == "undefined") {
+            this.notesByUrl[domain] = [];
+        }
+        this.notesByUrl[domain].push(data);       
+        return data;
     },
 
     deleteNote: function(data, cb) {
         var that = this;
-        this._db.deleteNote(data.id, function() {
-            that._observer_service.notifyObservers(null, 'floatnotes-note-delete', data.id);
-            util.removeObjectFromArray(data, that.notes[data.url]);
+        var note = data;
+        var ID = data.id;
+        var cached = false;
+
+        if(typeof ID  != 'undefined' && this.notes[ID]) {
+            note = this.notes[ID];
+            cached = true;
+        }
+
+        this._db.deleteNote(note.id, function() {
+            that._observer_service.notifyObservers(null, 'floatnotes-note-delete', note.id);
+            if(cached) {
+                util.removeObjectFromArray(note, that.notesByUrl[note.url]);
+                delete that.notes[note.url];
+            }
             cb();
         });
     },
@@ -138,7 +162,7 @@ FloatNotesManager.prototype = {
         var domains = util.getLocations(location);
         for(var i = domains.length -1; i > -1; --i) {
             var domain = domains[i];
-            if( this.notes[domain] && this.notes[domain].length) {
+            if( this.notesByUrl[domain] && this.notesByUrl[domain].length) {
                 return true;
             }  
         }

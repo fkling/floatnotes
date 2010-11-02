@@ -1,7 +1,20 @@
 <?xml version="1.0"?>
 <!DOCTYPE window SYSTEM "chrome://floatnotes/locale/floatnotes.dtd">
 <overlay id="floatnotesOverlay"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<menupopup id="menu_ToolsPopup">
+  <menu id="xulschoolhello-hello-menu" label="FloatNotes"
+    accesskey=""
+    insertafter="javascriptConsole,devToolsSeparator">
+    <menupopup>
+<menuitem label="NoteManager"
+    oncommand="window.open('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome=yes')" />
+    </menupopup>
+  </menu>
+</menupopup>     
+
+
 	<popup id="contentAreaContextMenu">
 		<menuseparator />
 		<menuitem id="floatnotes-hide-note" label='&floatnotes.hide;'

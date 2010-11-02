@@ -160,6 +160,16 @@ var util = {
         }
     },
 
+    updateObject: function(object, values) {
+        for(var attr in object) {
+            var value = values[attr];
+            LOG('Setting ' + attr + ' to ' + value);
+            if(object.hasOwnProperty(attr) && value) {
+                object[attr] = value;
+            }
+        }
+    },
+
     log: function(msg) {
         this._consoleService = Components.classes["@mozilla.org/consoleservice;1"]
         .getService(Components.interfaces.nsIConsoleService);

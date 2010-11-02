@@ -132,6 +132,16 @@ FloatNote.prototype = {
         this.ele.content.innerHTML = this.markdownParser.makeHtml(value);
     },
 
+    get title() {
+        var index = this.data.content.indexOf("\n");
+        if(index < 0) {
+            return this.data.content;
+        }
+        else {
+            return this.data.content.substring(0, index);
+        }
+    },
+
     /* end getter and setter */
 
     markdownParser: new Showdown.converter(),
@@ -177,13 +187,14 @@ FloatNote.prototype = {
     updateDOM: function() {
         if(this.dom) {
             var style = this.dom.style;
-            style.cssText = [ 'background-color:' + this.data.color, 
-                'left:' + this.data.x + "px",
-                'top:' + this.data.y  + "px",
-                'width:' + this.data.w  + "px",
-                'height:' + this.data.h  + "px",
-                'z-index:' + style.zIndex
-            ].join(';');
+            //style.cssText = [ 'background-color:' + this.data.color, 
+                //'left:' + this.data.x + "px",
+                //'top:' + this.data.y  + "px",
+                //'width:' + this.data.w  + "px",
+               //'height:' + this.data.h  + "px",
+                //'z-index:' + style.zIndex
+            //].join(';');
+            this.setData(this.ele);
             this.updateStatus();
         }
     },

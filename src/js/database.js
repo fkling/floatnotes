@@ -1,5 +1,6 @@
 //!#ifndef __INCLUDE_DB__
 //!#define __INCLUDE_DB__
+//!#include "util.js"
 
 var EXPORTED_SYMBOLS = ['getDatabase'];
 
@@ -35,6 +36,88 @@ DatabaseConnector.prototype = {
         this._db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER)');
         this._db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
     },
+
+    getURLs: function(runWhenFinished) {
+        var statement = this._db.createStatement("SELECT DISTINCT url FROM floatnotes ORDER BY url DESC");
+        var urls = [];
+        statement.executeAsync({
+            handleResult: function(aResultSet) {
+                for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+                    urls.push(row.getResultByName('url'));
+                }
+            },
+            handleCompletion: function() {
+                runWhenFinished(urls);
+            }
+        });
+    },
+
+    getAllNotes: function(runWhenFinished) {
+        var statement = this._db.createStatement("SELECT * FROM floatnotes ORDER BY content DESC");
+        var notes = [];
+        statement.executeAsync({
+            handleResult: function(aResultSet) {
+                for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+                    var data = {
+                        x: row.getResultByName("x"),
+                        y: row.getResultByName("y"),
+                        id: row.getResultByName("id"),
+                        url: row.getResultByName("url"),
+                        content: row.getResultByName("content"),
+                        w: row.getResultByName("w"),
+                        h: row.getResultByName("h"),
+                        status: row.getResultByName("status"),
+                        color: row.getResultByName("color")
+                    };
+                    notes.push(data);
+                }
+            },
+            handleCompletion: function() {
+                runWhenFinished(notes);
+            }
+        });
+
+    },
+
+    getNotesContaining: function(wordList, runWhenFinished) {
+
+        //wordlist = wordlist.concat(wordlist);
+        var ands = [];
+        for(var i = wordList.length; i--; ) {
+            ands.push('uc LIKE :w' + i + " ESCAPE '~'");
+        }
+
+        var statement = this._db.createStatement("SELECT *, url || content AS uc FROM floatnotes WHERE " + ands.join(' AND ') + " ORDER BY content");
+        for (var i = wordList.length; i--;) {
+            statement.params['w' + i] =  '%' + statement.escapeStringForLIKE(wordList[i], "~") + '%';
+            LOG('Include word: ' + statement.escapeStringForLIKE(wordList[i], "~"));
+        }
+
+        var notes = [];
+        statement.executeAsync({
+            handleResult: function(aResultSet) {
+                for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+                    var data = {
+                        x: row.getResultByName("x"),
+                        y: row.getResultByName("y"),
+                        id: row.getResultByName("id"),
+                        url: row.getResultByName("url"),
+                        content: row.getResultByName("content"),
+                        w: row.getResultByName("w"),
+                        h: row.getResultByName("h"),
+                        status: row.getResultByName("status"),
+                        color: row.getResultByName("color")
+                    };
+                    notes.push(data);
+                }
+            },
+            handleCompletion: function() {
+                runWhenFinished(notes);
+            }
+        });
+
+    },
+
 
     getNotesForURLs: function(urls, runOnFinished) {
         var statement = this._db.createStatement("SELECT * FROM floatnotes WHERE url = :url ORDER BY y ASC"),

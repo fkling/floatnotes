@@ -64,11 +64,12 @@ var util = {
             .getService(CI.nsIXULAppInfo);
             var versionChecker = CC["@mozilla.org/xpcom/version-comparator;1"]
             .getService(CI.nsIVersionComparator);
-            LOG('Application version: ' + appInfo.version + '. Compared to 4.0: ' + versionChecker.compare(appInfo.version, "4.0"));
+            LOG('Application version: ' + appInfo.version + '. Compared to 4.0alpha: ' + versionChecker.compare(appInfo.version, "4.0alpha"));
             if(versionChecker.compare(appInfo.version, "4.0alpha") < 0) {
                 var extensionManager = CC["@mozilla.org/extensions/manager;1"]
                 .getService(CI.nsIExtensionManager);
                 this._currentVersion = extensionManager.getItemForID("floatnotes@felix-kling.de").version;
+                LOG('Extension version: ' + this._currentVersion);
                 cb(this._currentVersion);
             }
             else {
@@ -76,7 +77,8 @@ var util = {
                 Components.utils.import("resource://gre/modules/AddonManager.jsm", scope);
                     scope.AddonManager.getAddonByID('floatnotes@felix-kling.de', function(addon) {
                     that._currentVersion = addon.version;
-                    cb(this._currentVersion);
+                    LOG('Extension version: ' + that._currentVersion);
+                    cb(that._currentVersion);
                 });
 
             }

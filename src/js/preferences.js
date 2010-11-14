@@ -24,7 +24,7 @@ var Preferences = {
 
     get color() {
         if(!this._color) {
-            this._color = this._branch.getStringPref('color');
+            this._color = this._branch.getCharPref('color');
         }
         return this._color;
     },

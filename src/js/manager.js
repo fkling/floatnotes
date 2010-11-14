@@ -69,7 +69,7 @@ FloatNotesManager.prototype = {
                     notesByUrl[data.url] = [];
                 }
                 notesByUrl[data.url].push(data);
-                that.notes[data.id] = data;
+                that.notes[data.guid] = data;
             }
 
             cb(notesToReturn.concat(notesdata));
@@ -78,38 +78,55 @@ FloatNotesManager.prototype = {
     },
 
     saveNote: function(data, cb) {
-        var that = this;
         // new or update ?
-        var note = data;
         var ID = data.id;
 
-        if(typeof ID  != 'undefined' && this.notes[ID]) {
+        if(typeof ID == "undefined") {
+            this.addNote(data, cb);
+        }
+        else {
+            this.updateNote(data, cb);
+        }		
+    },
+
+    addNote: function(data, cb) {
+        var that = this;
+        this._db.createNoteAndGetId(data, function(id, guid) {
+            var domain = data.url;
+            if(typeof that.notesByUrl[domain] == "undefined") {
+                that.notesByUrl[domain] = [];
+            }
+            that.notesByUrl[domain].push(data);       
+            that.notes[guid] = data;
+            data.guid = guid
+            data.id = id;
+            that._observer_service.notifyObservers(null, 'floatnotes-note-add', guid);
+            if(typeof cb == 'function') {
+                cb(id, guid);
+            }
+        });
+    },
+
+    updateNote: function(data, cb) {
+        var that = this;
+        var note = data;
+        var ID = data.guid;
+        if(this.notes[ID]) {
             note = this.notes[ID];
             if(note != data) {
                 util.updateObject(note, data);
             }
         }
-
-        this.lastChangedNote = note;
-
-        if(data._prevURL) {
-            this.updateCacheForNewURL(note, data._prevURL, data.url);
-            this._observer_service.notifyObservers(null, 'floatnotes-note-urlchange', note.id);
-        }
-
-        if(typeof ID == "undefined") {
-            this._db.createNoteAndGetId(note, function(id) {
-                that.notes[id] = note;
-                cb(id);
-                that._observer_service.notifyObservers(null, 'floatnotes-note-add', id);
-            });
-        }
-        else {
-            this._db.updateNote(note, function() {
-                that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.id);
-                cb(); 
-            });
-        }		
+        this._db.updateNote(note, function() {
+            that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.guid);
+            if(data._prevURL) {
+                this.updateCacheForNewURL(note, data._prevURL, data.url);
+                this._observer_service.notifyObservers(null, 'floatnotes-note-urlchange', note.guid);
+            }
+            if(typeof cb == 'function') {
+                cb(id, guid);
+            }
+        });
     },
 
     updateCacheForNewURL: function(note, oldURL, newURL) {
@@ -130,26 +147,27 @@ FloatNotesManager.prototype = {
             color: util.getPreferencesService().getCharPref('color'),
             status: 0};
 
-        if(typeof this.notesByUrl[domain] == "undefined") {
-            this.notesByUrl[domain] = [];
-        }
-        this.notesByUrl[domain].push(data);       
         return data;
     },
 
     deleteNote: function(data, cb) {
         var that = this;
         var note = data;
-        var ID = data.id;
+        var ID = data.guid;
         var cached = false;
+
+        if(typeof cb != 'function') {
+            cb = function(){};
+        }
+
 
         if(typeof ID  != 'undefined' && this.notes[ID]) {
             note = this.notes[ID];
             cached = true;
         }
 
-        this._db.deleteNote(note.id, function() {
-            that._observer_service.notifyObservers(null, 'floatnotes-note-delete', note.id);
+        this._db.deleteNote(ID, function() {
+            that._observer_service.notifyObservers(null, 'floatnotes-note-delete', note.guid);
             if(cached) {
                 util.removeObjectFromArray(note, that.notesByUrl[note.url]);
                 delete that.notes[note.url];

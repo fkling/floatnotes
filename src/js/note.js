@@ -413,10 +413,9 @@ FloatNote.prototype = {
         if(!this.hasStatus(note_status.EDITING) && this.hasStatus(note_status.NEEDS_SAVE)) {
             var that = this;
             that.unsetStatus(note_status.NEEDS_SAVE);
-            this.view.saveNote(this, function(id) {
+            this.view.saveNote(this, function(id, guid) {
                 if(id) {
                     that.dom.id =  'floatnotes-note-' + id;
-                    that.data.id = id;
                 }
             });
         }

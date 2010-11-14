@@ -7,8 +7,13 @@ var Loader = {
         var that = this;
         var runWhenLoaded = function(event){
             LOG("Window loaded");
+            //try {
+                Components.utils.import("resource://floatnotes/sync.jsm");
+                initSync();
+           // }
+            //catch(e){};
             Components.utils.import("resource://floatnotes/init.jsm");
-                Init.init(function() {
+            Init.init(function() {
                 that.createFloatNotesView();
             });
             window.removeEventListener('load', runWhenLoaded, false);           

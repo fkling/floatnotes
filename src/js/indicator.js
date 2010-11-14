@@ -180,10 +180,11 @@ Indicator.prototype = {
         }, false);
 
         indicator.addEventListener('click', function(e) {
+            var doc = gBrowser.contentDocument;
             if(e.target.className == 'floatnotes-indicator-text') {
                 that._hide();
-                var t = gBrowser.contentDocument.getElementById(e.target.getAttribute('rel'));
-                gBrowser.contentDocument.defaultView.scrollTo(0, Math.max(parseInt(t.style.top) - 20, 0));
+                var t = doc.getElementById(e.target.getAttribute('rel'));
+                doc.defaultView.scrollTo(0, Math.max(parseInt(t.style.top) - 20, 0));
             }
         }, true);
 

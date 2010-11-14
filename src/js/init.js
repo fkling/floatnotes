@@ -73,10 +73,16 @@ var Init = {
             // Insert code if version is different here => upgrade
             db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');
         }
+        // TODO: merge into one!
         if(versionChecker.compare(from, "0.6.3") < 0) {
             // Change column collapse to status
             db.executeSimpleSQL('ALTER TABLE floatnotes ADD COLUMN status INTEGER');
             db.executeSimpleSQL('UPDATE floatnotes SET status=32 WHERE collapse=1');
+        }
+        if(versionChecker.compare(from, "0.6.4") < 0) {
+            db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN guid');
+            db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)');
+            db.executeSimpleSQL('UPDATE floatnotes SET guid=hex(randomblob(16))');
         }
     }
 }

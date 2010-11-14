@@ -102,7 +102,7 @@ FloatNotesView.prototype = {
                     }
                 case 'floatnotes-note-add':
                     var locations = util.getLocations(this.currentDocument.location);
-                    var note = this.notes[data] || this._createNotesWith([this.notesManager.lastChangedNote])[0];
+                    var note = this.notes[data] || this._createNotesWith([this.notesManager.notes[data]])[0];
                     if (locations.indexOf(note.data.url) > -1) {
                         this._attachNotesToCurrentDocument([note]);
                     }
@@ -156,10 +156,10 @@ FloatNotesView.prototype = {
         var notes = [];
         for(var i = dataSet.length -1; i > -1; --i) {
             var data = dataSet[i];
-            if(!this.notes[data.id]) {
-                this.notes[data.id] = new FloatNote(data, this); LOG('Created first time: ' + data.id);
+            if(!this.notes[data.guid]) {
+                this.notes[data.guid] = new FloatNote(data, this); LOG('Created first time: ' + data.guid);
             }
-            notes.push(this.notes[data.id]);
+            notes.push(this.notes[data.guid]);
         }
         return notes;
     },
@@ -264,12 +264,12 @@ FloatNotesView.prototype = {
     saveNote: function(note, cb) {
         this.doObserve = false;
         var that = this;
-        this.notesManager.saveNote(note.data, function(id) {
-            if(id) {
-                that.notes[id] = note;
+        this.notesManager.saveNote(note.data, function(id, guid) {
+            if(guid) {
+                that.notes[guid] = note;
             }
             that.doObserve = true;
-            cb(id);
+            cb(id, guid);
         });
     },
 
@@ -279,7 +279,7 @@ FloatNotesView.prototype = {
             this.doObserve = false;
             this.notesManager.deleteNote(this.contextNote.data, function() {
                 that.contextNote.detach();
-                delete this.notes[that.contextNote.data];
+                delete that.notes[that.contextNote.data.guid];
                 that.contextNote = null;
                 that.doObserve = true;
             }); 

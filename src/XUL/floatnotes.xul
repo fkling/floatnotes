@@ -2,7 +2,23 @@
 <!DOCTYPE window SYSTEM "chrome://floatnotes/locale/floatnotes.dtd">
 <overlay id="floatnotesOverlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <popupset id="mainPopupSet">
+    <panel id="floatnotes-edit-popup" style="padding:5px;" onpopuphidden="gFloatNotesView.saveChanges()">
+        <vbox>
+            <hbox align="center">
+                <label value="Color:" />
+                <colorpicker id="floatnotes-edit-color" type="button" />
+            </hbox>
+            <vbox>
+                <groupbox>
+                    <caption label="Location" />
+                    <radiogroup id="floatnotes-edit-location-list"> </radiogroup>
+                </groupbox>
+            </vbox>
+        </vbox>
 
+    </panel>
+</popupset>
 <menupopup id="menu_ToolsPopup">
   <menu id="xulschoolhello-hello-menu" label="FloatNotes"
     accesskey=""
@@ -13,8 +29,6 @@
     </menupopup>
   </menu>
 </menupopup>     
-
-
 	<popup id="contentAreaContextMenu">
 		<menuseparator />
 		<menuitem id="floatnotes-hide-note" label='&floatnotes.hide;'

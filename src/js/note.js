@@ -23,6 +23,7 @@ var _in = function(note) {
         }
         util.show(note.ele.drag);
         util.show(note.ele.resize);
+        util.show(note.ele.menu);
     };
 };
 
@@ -30,6 +31,7 @@ var _out = function(note) {
     return function(e) {
         util.hide(note.ele.drag);
         util.hide(note.ele.resize);
+        util.hide(note.ele.menu);
         if(note.hasStatus(note_status.MINIMIZED)) {
             note.minimize();
         }
@@ -124,12 +126,34 @@ FloatNote.prototype = {
 
     /* getter and setter */
 
+    get url() {
+        return this.data.url;
+    },
+
+    set url(value) {
+        this.data._prevURL = this.data.url;
+        this.data.url = value;
+        this.setStatus(note_status.NEEDS_SAVE);
+    },
+
+    get color() {
+        return this.data.color;
+    },
+
+    set color(value) {
+        this.setStatus(note_status.NEEDS_SAVE);
+        this.data.color = value;
+    },
+
     get text() {
         return this.data.content;
     },
 
     set text(value) {
-        this.ele.content.innerHTML = this.markdownParser.makeHtml(value);
+        this.setStatus(note_status.NEEDS_SAVE);
+        if(this.ele && this.ele.content) {
+            this.ele.content.innerHTML = this.markdownParser.makeHtml(value);
+        }
     },
 
     get title() {
@@ -152,11 +176,8 @@ FloatNote.prototype = {
                 this.dom = this.getDomElement(doc);
                 this.dom.id = 'floatnotes-note-' + this.data.id;
             }
-            else {
-                //this.detach();
-            }
             this.dom = doc.adoptNode(this.dom);
-            node = node || doc.body.parentNode;
+            node = node || doc.body;
             node.appendChild(this.dom);
             this.updateStatus();
         }
@@ -186,14 +207,6 @@ FloatNote.prototype = {
 
     updateDOM: function() {
         if(this.dom) {
-            var style = this.dom.style;
-            //style.cssText = [ 'background-color:' + this.data.color, 
-                //'left:' + this.data.x + "px",
-                //'top:' + this.data.y  + "px",
-                //'width:' + this.data.w  + "px",
-               //'height:' + this.data.h  + "px",
-                //'z-index:' + style.zIndex
-            //].join(';');
             this.setData(this.ele);
             this.updateStatus();
         }
@@ -321,6 +334,7 @@ FloatNote.prototype = {
             Y: parseInt(this.dom.style.top, 10) - e.pageY,
             opacity: this.dom.style.opacity || 1
         };
+        this.dom.style.opacity = 0.7;
 
         this.setStatus(note_status.DRAGGING);
         this.dom.removeEventListener('mouseout', this.outHandler, false);
@@ -370,6 +384,7 @@ FloatNote.prototype = {
             Y: parseInt(this.dom.style.height, 10) - e.pageY,
             opacity: this.dom.style.opacity || 1
         };
+        this.dom.style.opacity = 0.7;
 
         if(this.hasStatus(note_status.FIXED)) {
             updateFix = _updateFix;
@@ -414,7 +429,7 @@ FloatNote.prototype = {
             var that = this;
             that.unsetStatus(note_status.NEEDS_SAVE);
             this.view.saveNote(this, function(id, guid) {
-                if(id) {
+                if(id > -1) {
                     that.dom.id =  'floatnotes-note-' + id;
                 }
             });
@@ -436,7 +451,7 @@ FloatNote.prototype = {
     fix : function(e) {
         this.setFix();
         var style = this.dom.style;
-        var newTop = (e.clientY - e.layerY);
+        var newTop = (this.data.y - this.view.currentDocument.defaultView.pageYOffset);
         style.top =  newTop + "px";
         this.data.y = newTop;
         this.setStatus(note_status.NEEDS_SAVE);
@@ -446,7 +461,7 @@ FloatNote.prototype = {
     unfix: function(e) {
         this.unsetStatus(note_status.FIXED);
         var style = this.dom.style;
-        var newTop = (e.pageY - e.layerY);
+        var newTop = (this.data.y + this.view.currentDocument.defaultView.pageYOffset);
         style.top = newTop + "px";
         this.data.y = newTop;
         util.removeClass(this.dom, "fixed");
@@ -480,18 +495,34 @@ FloatNote.prototype = {
     },
 
     createDOMElements: function(doc) {
-        var container, drag, resize, content, text, fixer;
+        var container, drag, resize, content, text, fixer, edit, del, menu;
 
         container = doc.createElement('div');
         container.className = 'floatnotes-note';
 
         drag = doc.createElement('div');
         drag.className = 'floatnotes-drag';
+        drag.innerHTML = '<div class="floatnotes-drag-handler"></div>';
+        
+        menu = doc.createElement('div');
+        menu.className = 'floatnotes-menu';
 
         fixer = doc.createElement('span');
-        fixer.className= 'floatnotes-togglefix';	
+        fixer.className = 'floatnotes-togglefix floatnotes-menu-entry';	
         fixer.appendChild(doc.createTextNode('\u25CF'));
 
+        edit = doc.createElement('span');
+        edit.className= 'floatnotes-edit floatnotes-menu-entry';	
+        edit.appendChild(doc.createTextNode('E'));
+
+        del = doc.createElement('span');
+        del.className= 'floatnotes-delete floatnotes-menu-entry';	
+        del.appendChild(doc.createTextNode('D'));
+
+        menu.appendChild(fixer);
+        menu.appendChild(edit);
+        menu.appendChild(del);
+        
 
         content = doc.createElement('div');
         content.className = 'floatnotes-content';
@@ -501,7 +532,7 @@ FloatNote.prototype = {
 
         text = doc.createElement('textarea');
         text.className = 'floatnotes-text';
-        text.style.cssText = "display: none;";
+        text.style.cssText = "display: none;"
         text.rows = 1;
         text.cols = 1;
 
@@ -511,32 +542,42 @@ FloatNote.prototype = {
             resize: resize, 
             content: content, 
             text: text,
-            fixer: fixer};
+            fixer: fixer,
+            edit: edit,
+            del: del,
+            menu: menu
+        };
 
-            drag = content = resize = text = fixer = null;
+        drag = content = resize = text = fixer = edit = del = menu = null;
 
-            FloatNote.prototype.createDOMElements = function(doc) {
-                var elements = FloatNote.prototype.dom;
-                var new_elements = {
-                    container: elements.container.cloneNode(false), 
-                    drag: elements.drag.cloneNode(false), 
-                    resize: elements.resize.cloneNode(false), 
-                    content: elements.content.cloneNode(false), 
-                    text: elements.text.cloneNode(false),
-                    fixer: elements.fixer.cloneNode(true)
-                };
-
-                var container = new_elements.container;
-                new_elements.drag.appendChild(new_elements.fixer);
-                container.appendChild(new_elements.drag);
-                container.appendChild(new_elements.content);
-                container.appendChild(new_elements.text);
-                container.appendChild(new_elements.resize);
-
-                return new_elements;
+        FloatNote.prototype.createDOMElements = function(doc) {
+            var elements = FloatNote.prototype.dom;
+            var new_elements = {
+                container: elements.container.cloneNode(false), 
+                drag: elements.drag.cloneNode(true), 
+                resize: elements.resize.cloneNode(false), 
+                content: elements.content.cloneNode(false), 
+                text: elements.text.cloneNode(false),
+                fixer: elements.fixer.cloneNode(true),
+                edit: elements.edit.cloneNode(true),
+                del: elements.del.cloneNode(true),
+                menu: elements.menu.cloneNode(false)
             };
 
-            return this.createDOMElements(doc);
+            var container = new_elements.container;
+            new_elements.menu.appendChild(new_elements.fixer);
+            new_elements.menu.appendChild(new_elements.edit);
+            new_elements.menu.appendChild(new_elements.del);
+            container.appendChild(new_elements.drag);
+            container.appendChild(new_elements.menu);
+            container.appendChild(new_elements.content);
+            container.appendChild(new_elements.text);
+            container.appendChild(new_elements.resize);
+
+            return new_elements;
+        };
+
+        return this.createDOMElements(doc);
     },
 
     setData: function(elements) {
@@ -548,8 +589,7 @@ FloatNote.prototype = {
             'height:' + this.data.h  + "px",
             'z-index:' + ZINDEX
         ].join(';');
-
-        elements.text.style.backgroundColor = this.data.color;
+        elements.drag.style.backgroundColor = elements.text.style.backgroundColor =  this.data.color;
         elements.content.innerHTML = this.markdownParser.makeHtml(this.data.content);
     },
 
@@ -570,6 +610,23 @@ FloatNote.prototype = {
             e.stopPropagation();
             e.preventDefault();
         }, true);
+
+        elements.edit.addEventListener('click', function(e) {
+            note.view.openEditPopup(note, elements.edit, function(color, url) {
+                note.url = url;
+                note.color = color;
+                note.save();
+                note.update();
+                elements.container.addEventListener('mouseout', note.outHandler, false);
+                note.outHandler();
+            });
+            elements.container.removeEventListener('mouseout', note.outHandler, false);
+        }, false);
+
+        elements.del.addEventListener('click', function(e) {
+            gFloatNotesView.deleteNote(note);    
+        }, false);
+
 
         // note minimize
         elements.drag.addEventListener('dblclick', function(e) {
@@ -602,7 +659,7 @@ FloatNote.prototype = {
 
         // note extend
         elements.container.addEventListener('click', function(e) {
-            if(note.hasStatus(note_status.MINIMIZED) && e.target.className != 'floatnotes-drag' && e.target.className != 'floatnotes-resize') {
+            if(note.hasStatus(note_status.MINIMIZED) && e.target.className != 'floatnotes-drag' &&  e.target.className != 'floatnotes-drag-handler' && e.target.className != 'floatnotes-resize') {
                 note.unminimizeAndSave();
             }
             if(note.hasStatus(note_status.EDITING)) {

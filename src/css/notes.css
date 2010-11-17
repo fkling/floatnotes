@@ -5,17 +5,20 @@
 
 /*  ----- Note style ----- */
 
+@media screen,print {
+
+
 .floatnotes-note {
     border: 1px solid black !important;
     font-family: Arial, sans-serif !important;
     text-align:left !important;
-    min-height: 8px !important;
-    min-width:16px !important;
-    opacity:1 !important;
+    min-height: 42px !important;
+    min-width: 40px !important;
+    opacity:0.9 !important;
     -moz-box-shadow: 0px 0px 5px #888 !important;
     -moz-border-radius: 5px !important;
-    padding:5px !important;
     position: absolute !important;
+    padding-bottom:16px !important;
 }
 
 .floatnotes-note * {
@@ -26,12 +29,15 @@
 }
 
 .floatnotes-note.small {
-    max-height:8px !important;
-    max-width:16px !important;
+    min-height: 16px !important;
+    min-width: 24px !important;
+    max-height: 16px !important;
+    max-width: 24px !important;
     -moz-border-radius: 7px !important;
     -moz-border-radius-bottomright: 0 !important;
     opacity: 0.8 !important;
     -moz-box-shadow: none !important;
+    padding: 0px !important;
 }
 
 .floatnotes-note.fixed {
@@ -46,59 +52,89 @@
 
 .floatnotes-note.note-edit {
     border-color: red !important;
-    border-width:2px !important;
-}
-
-.floatnotes-note ul, .floatnotes-note ol {
-    padding-left:30px !important;;
+    border-width: 2px !important;
 }
 
 .floatnotes-note .floatnotes-drag{
-    background-color: #706C6C !important;
     height: 20px !important;
     cursor: move !important;
-    margin-top:-17px !important;
-    border:1px solid black !important;
+    margin-top:-15px !important;
+    margin-left: -1px !important;
+    border: 1px solid black !important;
+    border-bottom: none !important;
     width: 100% !important;
     display: none;
-    -moz-box-shadow: 0px 0px 5px #888 !important;
+    -moz-box-shadow: 0px -3px 2px #CCC !important;
+    -moz-border-radius: 5px 5px 0px 0px;
     text-align: right !important;
     vertical-align: middle !important;
     line-height: 20px !important;
 }
 
-.floatnotes-note .floatnotes-togglefix {
-	display: inline-block !important;
-	font-size:28px !important;
-	color:white !important;
-    line-height: 20px !important;
-    cursor: pointer !important;
+.floatnotes-note.note-edit .floatnotes-drag {
+    border-color: red !important;
+    border-width: 2px !important;
+    margin-left: -2px !important;
 }
 
-.floatnotes-note.fixed .floatnotes-togglefix{
-    color: black !important;
+.floatnotes-note.fixed .floatnotes-drag {
+    border-width: 2px !important;
+    margin-left: -2px !important;
+}
+
+
+.floatnotes-note .floatnotes-drag-handler {
+    background-color: #333 !important;
+    opacity: 0.3 !important;
+    height: 15px !important;
+    cursor: move !important;
+    margin-top: 3px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 90% !important;
+    -moz-border-radius: 5px;
+}
+
+
+.floatnotes-note .floatnotes-menu {
+    position: absolute !important;
+    top:-12px !important;
+    left:-40px !important;
+    height: 80px !important;
+    display: none;
+    width:40px !important;
+}
+
+.floatnotes-note.note-edit .floatnotes-menu {
+   display: none !important; 
+}
+
+
+.floatnotes-note .floatnotes-menu-entry {
+    clear: both;
+    float: right;
+	display: block !important;
+    cursor: pointer !important;
+    width: 20px;
+    height: 20px;
+    border: 1px solid black;
+    margin: 0px 5px 0px 5px;
 }
 
 .floatnotes-note .floatnotes-resize{
-    border:1px solid black !important;
-    background-color: #706C6C !important;
-    width: 20px !important;
-    height: 20px !important;
+    bottom: 0px !important;
+    right: 0px !important;
+    width: 16px !important;
+    height: 16px !important;
     position: absolute !important;
-    right: -5px !important;
-    bottom: -5px !important;
     cursor: se-resize !important;
     display: none;
-    -moz-box-shadow: 0px 0px 5px #888 !important;
-}
-
-.floatnotes-note.note-edit .floatnotes-drag, .floatnotes-note.note-edit .floatnotes-resize {
-    border-color: red !important;
-    background-color: red !important;
+    background-image: url('chrome://floatnotes/skin/resize.png');
 }
 
 .floatnotes-note .floatnotes-content{
 	padding: 5px !important;
+    padding-top: 3px !important;
     overflow:auto !important;
     position:absolute !important;
     top: 0 !important;
@@ -170,8 +206,8 @@
     font-size: inherit !important;
 }
 
-.floatnotes-note ul{   
-    padding-left: 20px !important;
+.floatnotes-note ul, .floatnotes-note ol {
+    padding-left:30px !important;
 }
 
 .floatnotes-note ul li{   
@@ -215,4 +251,6 @@
 
 .floatnotes-indicator .floatnotes-indicator-text:hover {
     background-color: #FCFACF !important;
+}
+
 }

@@ -44,6 +44,11 @@ var util = {
             node.className = node.className.replace(pattern, ' ');
         }
     },
+    removeChildren: function(node) {
+        while(node.hasChildNodes()) {
+            node.removeChild(node.firstChild);
+        }
+    },
     fireEvent: function(element,event) {
         // dispatch for firefox + others
         var evt = document.createEvent("HTMLEvents");
@@ -106,16 +111,12 @@ var util = {
     },
     /* compute the possible locations for the current URL */
     getLocations: function(location) {
-        location = location || window.content.document.location;
-        var urls = Array();
+        var urls = [];
         if(location.protocol == 'http:' || location.protocol == 'https:') {
-            var url =  location.href.replace(location.hash, '').replace(location.protocol + '//', '');
-            var url_with_search = '';
-            if(location.search) {
-                url_with_search = url;
-                url = url_with_search.replace(location.search, '');
-            }
-            var parts = url.split('/');
+            var parts = [location.hostname];
+            var steps = location.pathname.split('/');
+            steps.shift();
+            parts = parts.concat(steps);
             var path = '';
             if(parts[parts.length-1] === '') {
                 parts.pop();
@@ -125,15 +126,12 @@ var util = {
                 urls.push( path + '*');
                 path += '/';
             }
-            var last = urls[urls.length-1];
-            last = last.substring(0,last.length-1);
-            if(last.charAt(last.length-1) == '/') {
-                last = last.substring(0,last.length-1);
-            }
-            urls.push(last);
-            if(location.search) {
-                urls.push(url_with_search);
-            }
+            path = path.substring(0, path.length - 1);
+            urls.push(path);
+            path += location.search;
+            urls.push(path);
+            path += location.hash;
+            urls.push(path);
         }
         else {
             urls.push(location.href.replace(location.hash,''));

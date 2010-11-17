@@ -3,6 +3,8 @@
 
 //!#include "../util.js"
 
+Components.utils.import("resource://floatnotes/URLHandler.jsm");
+
 var EXPORTED_SYMBOLS = ['getManager'];
 
 var manager = null;
@@ -42,7 +44,7 @@ FloatNotesManager.prototype = {
         }
 
         var that = this;
-        var domains = util.getLocations(location);
+        var domains = URLHandler.getSearchUrls(location);
         var domainsToFetch = [];
         var notesToReturn = [];
 
@@ -143,7 +145,7 @@ FloatNotesManager.prototype = {
     },
 
     createNote: function(document) {
-        var domain = util.getDefaultUrl(document);
+        var domain = URLHandler.getDefaultUrl(document.location);
         var data = {
             w: util.getPreferencesService().getIntPref('width'),
             h: util.getPreferencesService().getIntPref('height'),
@@ -182,7 +184,7 @@ FloatNotesManager.prototype = {
     },
 
     siteHasNotes: function(location) {
-        var domains = util.getLocations(location);
+        var domains = URLHandler.getSearchUrls(location);
         for(var i = domains.length -1; i > -1; --i) {
             var domain = domains[i];
             if( this.notesByUrl[domain] && this.notesByUrl[domain].length) {

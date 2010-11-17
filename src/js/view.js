@@ -5,6 +5,55 @@
 //!#include "indicator.js"
 //!#include "note.js"
 
+Components.utils.import("resource://floatnotes/URLHandler.jsm");
+
+
+var locationBuilder = {
+    buildLocationList: function(location, noteUrl) {
+        var item;
+        var group = document.getElementById('floatnotes-edit-location-list');
+        util.removeChildren(group);
+        
+        this._addItem(group, 'This page',  URLHandler.getPageUrl(location), noteUrl);
+        this._addItem(group, 'This page with query (including ?)',  URLHandler.getPageQueryUrl(location), noteUrl);
+        this._addItem(group, 'This page with anchor (including #)',  URLHandler.getPageAnchorUrl(location), noteUrl);
+        this._addItem(group, 'This website',  URLHandler.getSiteUrl(location), noteUrl);
+        this._addItem(group, 'All websites (global)',  URLHandler.getAllSitesUrl(location), noteUrl);
+        var moreOptions = document.createElement('label');
+        moreOptions.setAttribute('value', 'On sites starting with...');
+        moreOptions.style.cssText = 'color:blue;font-style:underline;';
+        group.appendChild(moreOptions);
+
+
+        var steps = URLHandler.getStartsWithUrls(location);
+        for(var i = 0; i < steps.length; i++) {
+            var step = steps[i];
+            var text = step.substring(0, step.length-1);
+            if(step.length > 60) {
+                var parts = text.split('/');
+                 text = parts[0] + '/';
+                if(parts.length > 2) {
+                    text += '(...)/';
+                }
+                var lastStep = parts[parts.length - 1];
+                if(lastStep.length > 20) {
+                    lastStep = lastStep.substr(0,15) + '(...)' + ((lastStep.lastIndexOf('.') > -1) ? lastStep.substr(lastStep.lastIndexOf('.')) : '');
+                }
+                text += lastStep;
+            }
+            this._addItem(group, text, step, noteUrl);
+        }
+    },
+    _addItem: function(group, text, url, noteUrl) {
+        var item = group.appendItem(text, url);
+        item.disabled = !url;
+        if(noteUrl == url) {  
+            group.selectedItem = item;
+        }
+        return item;
+    }
+};
+
 
 
 function FloatNotesView(manager) {
@@ -18,7 +67,7 @@ function FloatNotesView(manager) {
     this._editMenuEntry = document.getElementById('floatnotes-edit-note');
     this._hideMenuEntry = document.getElementById('floatnotes-hide-note');
     this._newMenuEntry = document.getElementById('floatnotes-new-note');
-
+    this.popup = document.getElementById('floatnotes-edit-popup');
     // create indicators
     IndicatorProxy.init(this);
 
@@ -26,7 +75,6 @@ function FloatNotesView(manager) {
     this.registerEventHandlers();
     this.registerObserver();
 }
-
 FloatNotesView.GLOBAL_NAME = 'gFloatNotesView';
 
 FloatNotesView.prototype = {
@@ -101,7 +149,7 @@ FloatNotesView.prototype = {
                         note.detach();
                     }
                 case 'floatnotes-note-add':
-                    var locations = util.getLocations(this.currentDocument.location);
+                    var locations =  URLHandler.getSearchUrls(this.currentDocument.location);
                     var note = this.notes[data] || this._createNotesWith([this.notesManager.notes[data]])[0];
                     if (locations.indexOf(note.data.url) > -1) {
                         this._attachNotesToCurrentDocument([note]);
@@ -273,13 +321,14 @@ FloatNotesView.prototype = {
         });
     },
 
-    deleteNote: function() {
-        if(this.contextNote) {
+    deleteNote: function(note) {
+        note = note || this.contextNote
+        if(note) {
             var that = this;
             this.doObserve = false;
-            this.notesManager.deleteNote(this.contextNote.data, function() {
-                that.contextNote.detach();
-                delete that.notes[that.contextNote.data.guid];
+            this.notesManager.deleteNote(note.data, function() {
+                note.detach();
+                delete that.notes[note.data.guid];
                 that.contextNote = null;
                 that.doObserve = true;
             }); 
@@ -368,6 +417,19 @@ FloatNotesView.prototype = {
 
     _notesHiddenFor: function(location) {
         return this.status[location] && !this.status[location].visible;
+    },
+
+    openEditPopup: function(note, anchor, cb) {
+        this.popup.hidePopup();
+        locationBuilder.buildLocationList(this.currentDocument.location, note.url);
+        document.getElementById('floatnotes-edit-color').color = note.color;
+        this.saveChanges = function() {
+            if(this.popup.state == 'closed') {
+                LOG('Edit popup hidden');
+                cb(document.getElementById('floatnotes-edit-color').color,document.getElementById('floatnotes-edit-location-list').selectedItem.value);
+            }
+        };
+        this.popup.openPopup(anchor, "end_before", 0, 0, false, false); 
     },
 
     updateMenuLocations: function() {

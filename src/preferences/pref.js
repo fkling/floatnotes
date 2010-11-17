@@ -7,6 +7,7 @@ pref("extensions.floatnotes.color", "#FCFACF");
  -1 : Complete URL inluding search string (if any)
  -2 : URL without search string
  -3 : Wildcard URL
+ -4 : Complete URL with hash
  0 : Wildcard host
 */
 pref("extensions.floatnotes.location", -2);

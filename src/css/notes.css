@@ -69,6 +69,7 @@
     text-align: right !important;
     vertical-align: middle !important;
     line-height: 20px !important;
+    background-color: inherit !important;
 }
 
 .floatnotes-note.note-edit .floatnotes-drag {
@@ -119,6 +120,7 @@
     height: 20px;
     border: 1px solid black;
     margin: 0px 5px 0px 5px;
+    background-color: inherit !important;
 }
 
 .floatnotes-note .floatnotes-resize{
@@ -146,6 +148,7 @@
     width: 100% !important;
     height: 100% !important;
     -moz-border-radius: 5px !important;
+    background-color: inherit !important;
 }
 
 .floatnotes-note  textarea.floatnotes-text {
@@ -162,6 +165,7 @@
 	border: none !important;
 	outline: none !important;
 	resize: none !important;
+    background-color: inherit !important;
 }
 
 /* ------ Note content style ---- */

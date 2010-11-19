@@ -166,6 +166,8 @@ FloatNote.prototype = {
         }
     },
 
+    set title(value) {},
+
     /* end getter and setter */
 
     markdownParser: new Showdown.converter(),
@@ -532,7 +534,7 @@ FloatNote.prototype = {
 
         text = doc.createElement('textarea');
         text.className = 'floatnotes-text';
-        text.style.cssText = "display: none;"
+        text.style.cssText = "display: none;";
         text.rows = 1;
         text.cols = 1;
 
@@ -589,7 +591,6 @@ FloatNote.prototype = {
             'height:' + this.data.h  + "px",
             'z-index:' + ZINDEX
         ].join(';');
-        elements.drag.style.backgroundColor = elements.text.style.backgroundColor =  this.data.color;
         elements.content.innerHTML = this.markdownParser.makeHtml(this.data.content);
     },
 

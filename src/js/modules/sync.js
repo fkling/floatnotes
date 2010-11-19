@@ -1,4 +1,4 @@
-//!#include "util.js"
+//!#include "../util.js"
 
 Components.utils.import("resource://services-sync/engines.js");
 Components.utils.import("resource://services-sync/base_records/crypto.js");

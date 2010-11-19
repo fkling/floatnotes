@@ -1,7 +1,7 @@
 //!#ifndef __INCLUDE_MANAGER_
 //!#define __INCLUDE_MANAGER_
 
-//!#include "util.js"
+//!#include "../util.js"
 
 var EXPORTED_SYMBOLS = ['getManager'];
 
@@ -57,23 +57,28 @@ FloatNotesManager.prototype = {
                 notesToReturn = notesToReturn.concat(notes); 
             }
         }
+        if(domainsToFetch.length > 0) {
+            this._db.getNotesForURLs(domainsToFetch, function(notesdata) {
+                LOG('Manager loaded from DB: ' + notesdata.length + ' notes');
+                var notesByUrl = that.notesByUrl;
 
-        this._db.getNotesForURLs(domainsToFetch, function(notesdata) {
-            LOG('Manager loaded from DB: ' + notesdata.length + ' notes');
-            var notesByUrl = that.notesByUrl;
+                for (var i = 0, length = notesdata.length; i < length;i++) {
+                    var data = notesdata[i];
 
-            for (var i = 0, length = notesdata.length; i < length;i++) {
-                var data = notesdata[i];
-
-                if(typeof notesByUrl[data.url] == "undefined") {
-                    notesByUrl[data.url] = [];
+                    if(typeof notesByUrl[data.url] == "undefined") {
+                        notesByUrl[data.url] = [];
+                    }
+                    notesByUrl[data.url].push(data);
+                    that.notes[data.guid] = data;
                 }
-                notesByUrl[data.url].push(data);
-                that.notes[data.guid] = data;
-            }
 
-            cb(notesToReturn.concat(notesdata));
-        });
+                cb(notesToReturn.concat(notesdata));
+            });
+        }
+        else {
+            LOG('Everything cached');
+            cb(notesToReturn);
+        }
 
     },
 
@@ -118,13 +123,13 @@ FloatNotesManager.prototype = {
             }
         }
         this._db.updateNote(note, function() {
-            that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.guid);
             if(data._prevURL) {
-                this.updateCacheForNewURL(note, data._prevURL, data.url);
-                this._observer_service.notifyObservers(null, 'floatnotes-note-urlchange', note.guid);
+                that.updateCacheForNewURL(note, data._prevURL, data.url);
+                that._observer_service.notifyObservers(null, 'floatnotes-note-urlchange', note.guid);
             }
+            that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.guid);
             if(typeof cb == 'function') {
-                cb(id, guid);
+                cb(-1, note.guid);
             }
         });
     },

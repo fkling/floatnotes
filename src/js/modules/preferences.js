@@ -1,4 +1,4 @@
-//!#include "util.js"
+//!#include "../util.js"
 
 
 var EXPORTED_SYMBOLS = ['getPreferences'];

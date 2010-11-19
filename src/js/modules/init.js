@@ -1,7 +1,7 @@
 //!#ifndef __INCLUDE_UPDATE__
 //!#define __INCLUDE_UPDATE__
 
-//!#include "util.js"
+//!#include "../util.js"
 
 var EXPORTED_SYMBOLS = ['Init'];
 

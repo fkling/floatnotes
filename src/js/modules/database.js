@@ -1,6 +1,6 @@
 //!#ifndef __INCLUDE_DB__
 //!#define __INCLUDE_DB__
-//!#include "util.js"
+//!#include "../util.js"
 
 var EXPORTED_SYMBOLS = ['getDatabase'];
 

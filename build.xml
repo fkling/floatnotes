@@ -120,7 +120,7 @@
 			<globmapper from="main.js" to="floatnotes.js" />
             </apply>
         <apply executable="cpp" dest="${build.dir}/modules">
-			<fileset dir="${tmp.dir}" includes="database.js, loader.js, manager.js, init.js, preferences.js, sync.js"/>
+            <fileset dir="${tmp.dir}/modules" />
             <arg line="-P -C -DDEBUG=${cpp.debug} -DTESTRUN=${cpp.testrun}" />
             <srcfile />
 			<targetfile />

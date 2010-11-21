@@ -242,7 +242,7 @@ function clear() {
 var tree = document.getElementById('notes');
 var db = getDatabase();
 var manager = getManager();
-var pref = getPreferences();
+var pref = Preferences;
 var searchList = document.getElementById('searches');
 
 var searchManager = {

@@ -1,7 +1,7 @@
 //!#include "../util.js"
 
 
-var EXPORTED_SYMBOLS = ['getPreferences'];
+var EXPORTED_SYMBOLS = ['Preferences'];
 
 var init = false;
 
@@ -97,10 +97,5 @@ var Preferences = {
     }
 }
 
-function getPreferences() {
-    if(!init) {
-        init = true;
-        Preferences.register();
-    }
-    return Preferences;
-}
+Preferences.register();
+LOG('Preferences registered!!!!!!!!!!!')

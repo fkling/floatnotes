@@ -62,9 +62,6 @@ function FloatNotesView(manager) {
     this.notes = {};
 
     // get references to menu items
-    this._deleteMenuEntry = document.getElementById('floatnotes-delete-note');
-    this._locationsMenu = document.getElementById('floatnotes-edit-note');
-    this._editMenuEntry = document.getElementById('floatnotes-edit-note');
     this._hideMenuEntry = document.getElementById('floatnotes-hide-note');
     this._newMenuEntry = document.getElementById('floatnotes-new-note');
     this.popup = document.getElementById('floatnotes-edit-popup');
@@ -384,12 +381,9 @@ FloatNotesView.prototype = {
     updateContextMenu: function(event) {
         if(this.contextNote) {
             // don't show any menu items if in editing mode
-            var showOrHide = (this.contextNote.hasStatus(note_status.EDITING) ? this._hideMenuItems : this._showMenuItems);
-            showOrHide([this._deleteMenuEntry, this._editMenuEntry]);
             this._hideMenuItems([this._newMenuEntry]);
         }
         else {
-            this._hideMenuItems([this._deleteMenuEntry, this._editMenuEntry]);
             this._showMenuItems([this._newMenuEntry]);
         }
         var doc = this.currentDocument || gBrowser.contentDocument;
@@ -430,24 +424,6 @@ FloatNotesView.prototype = {
             }
         };
         this.popup.openPopup(anchor, "end_before", 0, 0, false, false); 
-    },
-
-    updateMenuLocations: function() {
-        var locations = util.getLocations(this.currentDocument.location);
-        for(var i = 0, l = locations.length; i < l; i++) {
-            var location = locations[i];
-            var item = this._locationsMenu.appendItem(location, location);
-            item.setAttribute('type','radio');
-            item.setAttribute('name', 'floatnotes-menu-location');
-            item.setAttribute('checked', (this.contextNote.data.url == location));
-            item.setAttribute('oncommand', FloatNotesView.GLOBAL_NAME + ".contextNote.updateLocation(this.value);");
-        }
-    },
-
-    removeMenuLocations: function() {
-        for(var i  = this._locationsMenu.itemCount-1; i >= 0; i--) {
-            this._locationsMenu.removeItemAt(i);
-        }
     },
 
     _updateMenuText: function(hide) { 

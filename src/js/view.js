@@ -62,8 +62,9 @@ function FloatNotesView(manager) {
     this.notes = {};
 
     // get references to menu items
-    this._hideMenuEntry = document.getElementById('floatnotes-hide-note');
+    this._toggleNotesBrdc = document.getElementById('floatnotes-toggle-brdc');
     this._newMenuEntry = document.getElementById('floatnotes-new-note');
+    this._hideMenuEntry = document.getElementById('floatnotes-hide-note');
     this.popup = document.getElementById('floatnotes-edit-popup');
     // create indicators
     IndicatorProxy.init(this);
@@ -191,10 +192,29 @@ FloatNotesView.prototype = {
             that.currentNotes = that._createNotesWith(data);
             that._attachNotesToCurrentDocument();
             that._attachAndShowIndicators();
+            that._updateToggleBroadcast();
             if(doc.location.hash && doc.location.hash.indexOf('#floatnotes-note') === 0) {
                 doc.location.hash = doc.location.hash;
             }
         });
+    },
+
+    _updateToggleBroadcast: function() {
+       if(this._notesHiddenFor(this.currentDocument.location)) {
+            var text = util.getString('showNotesString', [this.currentNotes.length]);
+            this._toggleNotesBrdc.setAttribute('label', text);
+            this._toggleNotesBrdc.setAttribute('tooltiptext', text);
+            this._toggleNotesBrdc.setAttribute('disabled', true);
+            this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
+       }
+        else {
+            var text = util.getString('hideNotesString');
+            this._toggleNotesBrdc.setAttribute('label', text);
+            this._toggleNotesBrdc.setAttribute('tooltiptext', text);
+            this._toggleNotesBrdc.setAttribute('disabled', false);
+            this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
+        }
+            
     },
 
     _createNotesWith: function(dataSet) {
@@ -348,8 +368,7 @@ FloatNotesView.prototype = {
         this._setNotesVisibilityForTo(location, true);
         util.show(this._container);
         this._attachAndShowIndicators();
-        this._updateMenuText(false);
-
+        this._updateToggleBroadcast();
     },
 
     hideNotes: function() {
@@ -357,7 +376,7 @@ FloatNotesView.prototype = {
         this._setNotesVisibilityForTo(location, false);
         util.hide(this._container);
         this._detachIndicators();
-        this._updateMenuText(true);
+        this._updateToggleBroadcast();
     },
 
     _setNotesVisibilityForTo: function(location, visible) {
@@ -390,7 +409,6 @@ FloatNotesView.prototype = {
         var domain = doc.location;
         if(this.notesManager.siteHasNotes(domain) && !this.contextNote) {
             this._showMenuItems([this._hideMenuEntry]); 
-            this._updateMenuText(this._notesHiddenFor(domain));
         }
         else {
             this._hideMenuItems([this._hideMenuEntry]);
@@ -424,17 +442,6 @@ FloatNotesView.prototype = {
             }
         };
         this.popup.openPopup(anchor, "end_before", 0, 0, false, false); 
-    },
-
-    _updateMenuText: function(hide) { 
-        if(!hide) {
-            this._hideMenuEntry.setAttribute('label', util.getString('hideNotesString'));
-            this._hideMenuEntry.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
-        }
-            else {
-                this._hideMenuEntry.setAttribute('label', util.getString('showNotesString', [this.currentNotes.length]));
-                this._hideMenuEntry.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
-            }
     }
 };
 

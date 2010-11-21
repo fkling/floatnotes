@@ -2,55 +2,64 @@
 <!DOCTYPE window SYSTEM "chrome://floatnotes/locale/floatnotes.dtd">
 <overlay id="floatnotesOverlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <broadcasterset id="mainBroadcasterSet">
+        <broadcaster id="floatnotes-toggle-brdc" oncommand="gFloatNotesView.toggleNotes()"/>
+    </broadcasterset>
+
+    <toolbarpalette id="BrowserToolbarPalette">
+        <toolbarbutton id="floatnotes-toolbar-hide" class="" label="FloatNotes">
+            <observes element="floatnotes-toggle-brdc" attribute="tooltiptext" />
+            <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
+        </toolbarbutton>
+    </toolbarpalette>
+
     <popupset id="mainPopupSet">
-    <panel id="floatnotes-edit-popup" style="padding:5px;" onpopuphidden="gFloatNotesView.saveChanges()">
-        <vbox>
-            <hbox align="center">
-                <label value="Color:" />
-                <colorpicker id="floatnotes-edit-color" type="button" />
-            </hbox>
+        <panel id="floatnotes-edit-popup" style="padding:5px;" onpopuphidden="gFloatNotesView.saveChanges()">
             <vbox>
-                <groupbox>
-                    <caption label="Location" />
-                    <radiogroup id="floatnotes-edit-location-list"> </radiogroup>
-                </groupbox>
+                <hbox align="center">
+                    <label value="Color:" />
+                    <colorpicker id="floatnotes-edit-color" type="button" />
+                </hbox>
+                <vbox>
+                    <groupbox>
+                        <caption label="Location" />
+                        <radiogroup id="floatnotes-edit-location-list"> </radiogroup>
+                    </groupbox>
+                </vbox>
             </vbox>
-        </vbox>
+        </panel>
+    </popupset>
 
-    </panel>
-</popupset>
-<menupopup id="menu_ToolsPopup">
-  <menu id="xulschoolhello-hello-menu" label="FloatNotes"
-    accesskey=""
-    insertafter="javascriptConsole,devToolsSeparator">
-    <menupopup>
-<menuitem label="NoteManager"
-    oncommand="window.open('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome=yes')" />
-    </menupopup>
-  </menu>
-</menupopup>     
-	<popup id="contentAreaContextMenu">
-		<menuseparator />
-		<menuitem id="floatnotes-hide-note" label='&floatnotes.hide;'
-			oncommand='gFloatNotesView.toggleNotes();' class="menuitem-iconic"
-			image='chrome://floatnotes/skin/hide_note_small.png' />
+    <menupopup id="menu_ToolsPopup">
+        <menu id="xulschoolhello-hello-menu" label="FloatNotes"
+            accesskey=""
+            insertafter="javascriptConsole,devToolsSeparator">
+            <menupopup>
+                <menuitem label="NoteManager"
+                    oncommand="window.open('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome=yes')" />
+            </menupopup>
+        </menu>
+    </menupopup>     
 
-
-		<menu id="floatnotes-edit-note" label="&floatnotes.edit;"
-			onpopupshowing='gFloatNotesView.updateMenuLocations()' onpopuphiding='gFloatNotesView.removeMenuLocations()'>
-			<menupopup id="floatnotes-edit-note-menu"></menupopup>
-		</menu>
-		<menuitem id="floatnotes-delete-note" label='&floatnotes.delete;'
-			oncommand='gFloatNotesView.deleteNote();' class="menuitem-iconic"
-			image='chrome://floatnotes/skin/delete_note16.png' />
-		<menuitem id="floatnotes-new-note" label='&floatnotes.new;'
-			oncommand='gFloatNotesView.addNote();' class="menuitem-iconic"
-			image='chrome://floatnotes/skin/new_note16.png' />
-	</popup>
+    <popup id="contentAreaContextMenu">
+        <menuseparator />
+            <menuitem id="floatnotes-hide-note"  class="menuitem-iconic">
+                <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
+                <observes element="floatnotes-toggle-brdc" attribute="image" />
+                <observes element="floatnotes-toggle-brdc" attribute="label" />
+            </menuitem>
+            <menuitem id="floatnotes-new-note" label='&floatnotes.new;'
+                oncommand='gFloatNotesView.addNote();' class="menuitem-iconic"
+                image='chrome://floatnotes/skin/new_note16.png'>
+                <observes element="floatnotes-toggle-brdc" attribute="disabled" />
+            </menuitem>
+    </popup>
 	
-	<stringbundleset id="stringbundleset">
-        <stringbundle id="floatnotes-stringbundle" src="chrome://floatnotes/locale/floatnotes.properties"/>
+    <stringbundleset id="stringbundleset">
+            <stringbundle id="floatnotes-stringbundle" src="chrome://floatnotes/locale/floatnotes.properties"/>
     </stringbundleset>
+
     <script type="application/javascript" src="resource://floatnotes/showdown/showdown.js" />
 	<script type="application/javascript" src="chrome://floatnotes/content/floatnotes.js" />
 </overlay>

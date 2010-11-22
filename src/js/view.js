@@ -9,14 +9,40 @@ Components.utils.import("resource://floatnotes/URLHandler.jsm");
 
 
 var locationBuilder = {
+    get locationListElement() {
+        if(!this._ele) {
+            this._ele =  document.getElementById('floatnotes-edit-location-list');
+        }
+        return this._ele;
+    },
+
+    updateSelectedElement: function(noteUrl) {
+        var item = this.locationListElement.querySelector("radio[value='" + noteUrl + "']");LOG('Selection updated');
+        if(item) {
+            this.locationListElement.selectedItem = item;
+        }
+    },
+
     buildLocationList: function(location, noteUrl) {
         var item;
-        var group = document.getElementById('floatnotes-edit-location-list');
+        var group = this.locationListElement;
         util.removeChildren(group);
         
         this._addItem(group, 'This page',  URLHandler.getPageUrl(location), noteUrl);
-        this._addItem(group, 'This page with query (including ?)',  URLHandler.getPageQueryUrl(location), noteUrl);
-        this._addItem(group, 'This page with anchor (including #)',  URLHandler.getPageAnchorUrl(location), noteUrl);
+        var queryUrl = URLHandler.getPageQueryUrl(location);
+        if(queryUrl) {
+            var query = location.search;
+            item = this._addItem(group, '...including query (?)',  queryUrl, noteUrl);
+            item.style.marginLeft="20px";
+            item.setAttribute('tooltiptext', query);
+        }
+        var hashUrl =  URLHandler.getPageAnchorUrl(location);
+        if(hashUrl) {
+            var hash = location.hash;
+            item = this._addItem(group, '...including anchor (#)', hashUrl, noteUrl);
+            item.style.marginLeft="20px";
+            item.setAttribute('tooltiptext', hash);
+        }
         this._addItem(group, 'This website',  URLHandler.getSiteUrl(location), noteUrl);
         this._addItem(group, 'All websites (global)',  URLHandler.getAllSitesUrl(location), noteUrl);
         var moreOptions = document.createElement('label');
@@ -25,25 +51,13 @@ var locationBuilder = {
         group.appendChild(moreOptions);
 
 
-        var steps = URLHandler.getStartsWithUrls(location);
-        for(var i = 0; i < steps.length; i++) {
-            var step = steps[i];
-            var text = step.substring(0, step.length-1);
-            if(step.length > 60) {
-                var parts = text.split('/');
-                 text = parts[0] + '/';
-                if(parts.length > 2) {
-                    text += '(...)/';
-                }
-                var lastStep = parts[parts.length - 1];
-                if(lastStep.length > 20) {
-                    lastStep = lastStep.substr(0,15) + '(...)' + ((lastStep.lastIndexOf('.') > -1) ? lastStep.substr(lastStep.lastIndexOf('.')) : '');
-                }
-                text += lastStep;
-            }
-            this._addItem(group, text, step, noteUrl);
+        var urls = URLHandler.getStartsWithUrls(location);
+        for(var i = 0; i < urls.length; i++) {
+            var url = urls[i];
+            this._addItem(group, this._shortenUrl(url), url, noteUrl);
         }
     },
+
     _addItem: function(group, text, url, noteUrl) {
         var item = group.appendItem(text, url);
         item.disabled = !url;
@@ -51,10 +65,25 @@ var locationBuilder = {
             group.selectedItem = item;
         }
         return item;
+    },
+
+    _shortenUrl: function(url) {
+        var text = url.replace(/\*$/, '');
+        if(url.length > 40) {
+            var parts = text.split('/');
+            text = parts[0] + '/';
+            if(parts.length > 2) {
+                text += '(...)/';
+            }
+            var lastStep = parts[parts.length - 1];
+            if(lastStep.length > 20) {
+                lastStep = lastStep.substr(0,15) + '(...)' + ((lastStep.lastIndexOf('.') > -1) ? lastStep.substr(lastStep.lastIndexOf('.')) : '');
+            }
+            text += lastStep;
+        }
+        return text;
     }
 };
-
-
 
 function FloatNotesView(manager) {
     this.notesManager = manager;  
@@ -69,6 +98,8 @@ function FloatNotesView(manager) {
     // create indicators
     IndicatorProxy.init(this);
 
+
+    this.isLocationListGenerated = false;
     this.doObserve = true;
     this.registerEventHandlers();
     this.registerObserver();
@@ -101,6 +132,7 @@ FloatNotesView.prototype = {
         container.addEventListener("TabSelect", function(e){that.onTabSelect(e);}, false);
         window.addEventListener("contextmenu", function(e) {that.updateContext(e);}, true);
         window.addEventListener("contextmenu", function(e) {that.updateContextMenu(e);}, false);
+        gBrowser.addEventListener("hashchange", function(e) {that.onHashChange(e);}, true);
     },
 
     registerObserver: function() {
@@ -157,6 +189,7 @@ FloatNotesView.prototype = {
     },
 
     onPageLoad: function (event) {
+        this.isLocationListGenerated = false;
         this.updatePreferences();  
         var win = event.originalTarget.defaultView;
         var doc = win.document; // doc is document that triggered "onload" event                       
@@ -173,11 +206,16 @@ FloatNotesView.prototype = {
         this.show_indicators = util.getPreferencesService().getBoolPref('showIndicator');
     },
 
+    onHashChange: function(e) {
+       this.isLocationListGenerated = false;
+    },
+
     /**
        * Load and/or show notes
 */
     onTabSelect: function(e) {
         this.currentDocument = gBrowser.contentDocument;
+        this.isLocationListGenerated = false;
         this.loadNotes();
     },
 
@@ -433,7 +471,13 @@ FloatNotesView.prototype = {
 
     openEditPopup: function(note, anchor, cb) {
         this.popup.hidePopup();
-        locationBuilder.buildLocationList(this.currentDocument.location, note.url);
+        if(this.isLocationListGenerated) {
+            locationBuilder.updateSelectedElement(note.url);
+        }
+        else {
+            locationBuilder.buildLocationList(this.currentDocument.location, note.url);
+            this.isLocationListGenerated = true;
+        }
         document.getElementById('floatnotes-edit-color').color = note.color;
         this.saveChanges = function() {
             if(this.popup.state == 'closed') {

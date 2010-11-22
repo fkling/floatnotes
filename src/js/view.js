@@ -127,7 +127,7 @@ FloatNotesView.prototype = {
     registerEventHandlers: function() {
         // attach load handler
         var that = this; 
-        gBrowser.addEventListener("DOMContentLoaded", function(e){that.onPageLoad(e);}, true);
+        gBrowser.addEventListener("pageshow", function(e){that.onPageLoad(e);}, true);
         var container = gBrowser.tabContainer;
         container.addEventListener("TabSelect", function(e){that.onTabSelect(e);}, false);
         window.addEventListener("contextmenu", function(e) {that.updateContext(e);}, true);

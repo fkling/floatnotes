@@ -208,6 +208,10 @@ FloatNotesView.prototype = {
 
     onHashChange: function(e) {
        this.isLocationListGenerated = false;
+       this.currentNotes.forEach(function(note){
+            note.detach();
+       });
+       this.loadNotes();
     },
 
     /**

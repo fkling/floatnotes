@@ -151,6 +151,7 @@ FloatNote.prototype = {
 
     set text(value) {
         this.setStatus(note_status.NEEDS_SAVE);
+        this.data.content = value;
         if(this.ele && this.ele.content) {
             this.ele.content.innerHTML = this.markdownParser.makeHtml(value);
         }
@@ -285,9 +286,11 @@ FloatNote.prototype = {
 
     endEdit: function(e) {
         var finish = false;
+        var abort = false;
         var note = FloatNote.editedNote;
         if(e.type == "keydown" && e.keyCode == e.DOM_VK_ESCAPE	) { //escape was pressed
             finish = true;
+            abort = true;
         }
         else if((e.type == "keydown" && e.keyCode == 13 && e.ctrlKey) || (e.type == "click" && (e.button === undefined || e.button != 2))) {
             // If a context menu item is clicked, don't trigger end of edit
@@ -298,10 +301,7 @@ FloatNote.prototype = {
                 }
             } while((target = target.parentNode));
 
-            var content = note.ele.text.value;
-            note.data.title = content.substring(0, content.indexOf('\n'));
-            note.data.content = content;
-            note.ele.content.innerHTML = note.markdownParser.makeHtml(content);
+            note.text = note.ele.text.value;
             note.unsetStatus(note_status.EDITING);
             note.setStatus(note_status.NEEDS_SAVE);
             note.save();
@@ -309,9 +309,6 @@ FloatNote.prototype = {
         }
 
         if(finish) {
-            //e.preventDefault();
-            //e.stopPropagation();
-
             window.removeEventListener('click', note.endEdit, false);
             window.removeEventListener('keydown', note.endEdit, true);
 
@@ -323,6 +320,10 @@ FloatNote.prototype = {
                 note.unsetStatus(note_status.EDITING);
             }
             FloatNote.editedNote = null;
+
+            if(abort && !note.data.id && note.ele.text.value == '') {
+                note.detach();
+            }
         }
     },
 

@@ -51,12 +51,13 @@ FloatNotesManager.prototype = {
 
         for(var i = domains.length -1; i > -1; --i) {
             var domain = domains[i];
-            LOG('Check ' + domain);
             var notes = this.notesByUrl[domain];
             if(!notes) {
+                LOG('New to fetch: ' + domain);
                 domainsToFetch.push(domain);
             }
             else {
+                LOG('Chached for ' + domain + ': ' + notes.map(function(n){return n.guid;}).join(','));
                 notesToReturn = notesToReturn.concat(notes); 
             }
         }
@@ -129,6 +130,7 @@ FloatNotesManager.prototype = {
             if(data._prevURL) {
                 that.updateCacheForNewURL(note, data._prevURL, data.url);
                 that._observer_service.notifyObservers(null, 'floatnotes-note-urlchange', note.guid);
+                data._prevURL = null;
             }
             that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.guid);
             if(typeof cb == 'function') {

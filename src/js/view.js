@@ -170,8 +170,10 @@ FloatNotesView.prototype = {
                     }
                 break;
                 case 'floatnotes-note-delete':
-                    if(this.notes[data]) {
-                        this.notes[data].detach();
+                    var note = this.notes[data];
+                    if(note) {
+                        note.detach();
+                        util.removeObjectFromArray(note, this.currentNotes);
                         delete this.notes[data];
                     }
                 break;
@@ -180,11 +182,13 @@ FloatNotesView.prototype = {
                     LOG('URL changed for: ' + data);
                     if(note) {
                         note.detach();
+                        util.removeObjectFromArray(note, this.currentNotes);
                     }
                 case 'floatnotes-note-add':
                     var locations =  URLHandler.getSearchUrls(this.currentDocument.location);
                     var note = this.notes[data] || this._createNotesWith([this.notesManager.notes[data]])[0];
                     if (locations.indexOf(note.data.url) > -1) {
+                        this.currentNotes.push(note);
                         this._attachNotesToCurrentDocument([note]);
                     }
             }
@@ -370,8 +374,9 @@ FloatNotesView.prototype = {
         this.doObserve = false;
         var that = this;
         this.notesManager.saveNote(note.data, function(id, guid) {
-            if(guid) {
+            if(id > -1) {
                 that.notes[guid] = note;
+                that.currentNotes.push(note);
             }
             that.doObserve = true;
             cb(id, guid);
@@ -395,6 +400,7 @@ FloatNotesView.prototype = {
                 this.doObserve = false;
                 this.notesManager.deleteNote(note.data, function() {
                     note.detach();
+                    util.removeObjectFromArray(note, that.currentNotes);
                     delete that.notes[note.data.guid];
                     that.contextNote = null;
                     that.doObserve = true;

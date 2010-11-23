@@ -132,9 +132,11 @@ FloatNote.prototype = {
     },
 
     set url(value) {
-        this.data._prevURL = this.data.url;
-        this.data.url = value;
-        this.setStatus(note_status.NEEDS_SAVE);
+        if(this.data.url != value) {
+            this.data._prevURL = this.data.url;
+            this.data.url = value;
+            this.setStatus(note_status.NEEDS_SAVE);
+        }
     },
 
     get color() {

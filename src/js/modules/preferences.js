@@ -29,6 +29,13 @@ var Preferences = {
         return this._color;
     },
 
+    get transparency() {
+        if(!this._transparency) {
+            this._transparency = this._branch.getCharPref('transparency');
+        }
+        return this._transparency;
+    },
+
     get location() {
         if(!this._location) {
             this._location = this._branch.getIntPref('location');
@@ -50,11 +57,36 @@ var Preferences = {
         return this._fadeOutAfter;
     },
 
-    get scrollTime() {
+    get scrollTimer() {
         if(!this._scrolltimer) {
             this._scrolltimer = this._branch.getIntPref('scrolltimer');
         }
         return this._scrolltimer;
+    },
+
+    get confirmDelete() {
+        if(!this._confirmDelete) {
+            this._confirmDelete = this._branch.getBoolPref('confirmDelete');
+        }
+        return this._confirmDelete ;
+    },
+
+    set confirmDelete(value) {
+        this._branch.setBoolPref('confirmDelete', !!value);
+    },
+
+    get updateOnHashChange() {
+        if(!this._updateOnHashChange) {
+            this._updateOnHashChange= this._branch.getBoolPref('updateOnHashChange');
+        }
+        return this._updateOnHashChange;
+    },
+
+    get includePageForHashURLs() {
+        if(!this._includePageForHashURLs) {
+            this._includePageForHashURLs = this._branch.getBoolPref('includePageForHashURLs');
+        }
+        return this._includePageForHashURLs;
     },
 
     get savedSearches() {
@@ -74,6 +106,30 @@ var Preferences = {
         Components.interfaces.nsISupportsString, str);
     },
 
+    get version() {
+        if(!this._version) {
+            this._version = this._branch.getCharPref('version');
+        }
+        return this._version;
+    },
+
+    set version(value) {
+        this._branch.setCharPref('version', value);
+    },
+
+    get firstrun() {
+        if(!this._firstrun) {
+            this._firstrun = this._branch.getBoolPref('firstrun');
+        }
+        return this._firstrun;
+    },
+
+    set firstrun(value) {
+        this._branch.setBoolPref('firstrun', !!value);
+    },
+
+
+
     register: function() {  
         var prefService = Components.classes["@mozilla.org/preferences-service;1"]  
         .getService(Components.interfaces.nsIPrefService);  
@@ -90,7 +146,7 @@ var Preferences = {
 
     observe: function(aSubject, aTopic, aData) {  
         if(aTopic != "nsPref:changed") return;  
-        if(this['_' + aData]) {
+        if(('_' + aData) in this) {
             LOG('Preference changed: ' + aData);
             this['_' + aData] = null;
         }
@@ -98,4 +154,3 @@ var Preferences = {
 }
 
 Preferences.register();
-LOG('Preferences registered!!!!!!!!!!!')

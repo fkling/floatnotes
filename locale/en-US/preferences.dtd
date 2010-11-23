@@ -1,16 +1,26 @@
-<!ENTITY preferences.title "Floatnotes Settings" >
+<!ENTITY preferences.note.title "Notes" >
+<!ENTITY preferences.note.default_val "Default values" >
+<!ENTITY preferences.note.width "Width:" >
+<!ENTITY preferences.note.height "Height:" >
+<!ENTITY preferences.note.color "Color:" >
+<!ENTITY preferences.note.deletion "Confirm deletion of notes" >
 
-<!ENTITY preferences_dimensions.title "Default Dimensions" >
-<!ENTITY preferences_dimensions.width "Width:" >
-<!ENTITY preferences_dimensions.height "Height:" >
+<!ENTITY preferences.location.title "Location" >
+<!ENTITY preferences.location.default_loc "Default location" >
+<!ENTITY preferences.location.query "... including query, EXAMPLE: www.example.com/page?s=floatnotes" >
+<!ENTITY preferences.location.hash "... including anchor, EXAMPLE: www.example.com/page?s=floatnotes#note" >
+<!ENTITY preferences.location.page "Current page, EXAMPLE: www.example.com/page" >
+<!ENTITY preferences.location.wild_page "Current page and subpages, EXAMPLE: Pages staring with www.example.com/page" >
+<!ENTITY preferences.location.website "Whole website, EXAMPLE: Pages starting with www.example.com" >
+<!ENTITY preferences.location.updateHash "Update notes when anchor changes" >
+<!ENTITY preferences.location.includePageHash "Show notes from page (including query string)" >
+<!ENTITY preferences.location.ajaxDescription "This option makes it possible to create notes on websites that use Ajax and the anchor to load subpages. Otherwise, anchors are ignored as they normally reference the same page." >
 
-<!ENTITY preferences_location.title "Default Location" >
-<!ENTITY preferences_location.query "URL with query string, EXAMPLE: www.example.com/foo/bar?search=floatnotes" >
-<!ENTITY preferences_location.url "URL, EXAMPLE: www.example.com/foo/bar" >
-<!ENTITY preferences_location.wild_url "Wildcard URL, EXAMPLE: www.example.com/foo/bar*" >
-<!ENTITY preferences_location.wild_host "Wildcard host, EXAMPLE: www.example.com*" >
+<!ENTITY preferences.view.title "View" >
+<!ENTITY preferences.view.show_indicator "Show info if notes are outside the current view on the website" >
+<!ENTITY preferences.view.indicator_timeout "Time after the info fades out (0 = don't fade out):" >
+<!ENTITY preferences.view.indicator_timeout_unit "seconds" >
 
-<!ENTITY preferences_misc.title "Misc" >
-<!ENTITY preferences_misc.show_indicator "Show info if notes are outside the current view on the website" >
-<!ENTITY preferences_misc.indicator_timeout "Time after the info fades out (0 = don't fade out):" >
-<!ENTITY preferences_misc.indicator_timeout_unit "seconds" >
+<!ENTITY preferences.sync.title "Sync" >
+<!ENTITY preferences.sync.enable "Enable synchronisation of notes" >
+<!ENTITY preferences.sync.description "Your notes will be synchronized using Firefox Sync (must be installed for Firefox 3.6)" >

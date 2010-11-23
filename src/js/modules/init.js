@@ -3,6 +3,8 @@
 
 //!#include "../util.js"
 
+Components.utils.import("resource://floatnotes/preferences.jsm");
+
 var EXPORTED_SYMBOLS = ['Init'];
 
 var Init = {
@@ -11,21 +13,14 @@ var Init = {
         var that = this;
         util.getCurrentVersion(function(newVersion) {
             that.init = function(cb) {cb();};
-            var lastVersion = "0.0", firstrun = true;
-            var preferences = util.getPreferencesService();
-            try{
-                firstrun = preferences.getBoolPref("firstrun");
-                lastVersion = preferences.getCharPref("version");                   
+            var lastVersion = Preferences.version;
+            var firstrun = Preferences.firstrun;
+            if (firstrun){
+                LOG('First run, version ' + newVersion);
+                that.runOnFirstRun();
             }
-            catch(e){}
-            finally{
-                if (firstrun){
-                    LOG('First run, version ' + newVersion);
-                    that.runOnFirstRun();
-                }
-                else {
-                    that.upgrade(lastVersion, newVersion);
-                }
+            else {
+                that.upgrade(lastVersion, newVersion);
             }
             cb();
         });
@@ -48,9 +43,9 @@ var Init = {
         var preferences = util.getPreferencesService(); 
 
         this.getDatabase().createTables();
-        preferences.setBoolPref("firstrun",false);
+        Preferences.firstrun = false;
         util.getCurrentVersion(function(version) {
-            preferences.setCharPref("version", version);
+            Preferences.version = version;
         });
     },
     getDatabase: function() {
@@ -63,7 +58,7 @@ var Init = {
 
     upgrade: function(from, to) {
         LOG("Update: " + from + " to " + to);
-        util.getPreferencesService().setCharPref("version",to);
+        Preferences.version = to;
         var db = this.getDatabase();
 
         var versionChecker = CC["@mozilla.org/xpcom/version-comparator;1"]

@@ -5,8 +5,9 @@
 
 
 IndicatorProxy = {
-    init: function(view) {
+    init: function(view, preferences) {
         this.view = view;
+        this.preferences = preferences;
         this.above = new Indicator(Indicator.BELOW);
         this.below = new Indicator(Indicator.ABOVE);
     },
@@ -34,7 +35,7 @@ IndicatorProxy = {
         this._timer = window.setTimeout(function(){ 
             that.hideAll();
         }, 
-        this.view.indicator_timeout*1000);
+        this.preferences.fadeOutTime*1000);
     },
 
     stopTimeout: function() {

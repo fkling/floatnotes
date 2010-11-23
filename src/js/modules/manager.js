@@ -4,6 +4,7 @@
 //!#include "../util.js"
 
 Components.utils.import("resource://floatnotes/URLHandler.jsm");
+Components.utils.import("resource://floatnotes/preferences.jsm");
 
 var EXPORTED_SYMBOLS = ['getManager'];
 
@@ -105,7 +106,7 @@ FloatNotesManager.prototype = {
             }
             that.notesByUrl[domain].push(data);       
             that.notes[guid] = data;
-            data.guid = guid
+            data.guid = guid;
             data.id = id;
             that._observer_service.notifyObservers(null, 'floatnotes-note-add', guid);
             if(typeof cb == 'function') {
@@ -147,11 +148,11 @@ FloatNotesManager.prototype = {
     createNote: function(document) {
         var domain = URLHandler.getDefaultUrl(document.location);
         var data = {
-            w: util.getPreferencesService().getIntPref('width'),
-            h: util.getPreferencesService().getIntPref('height'),
+            w: Preferences.width,
+            h: Preferences.height,
             content: "",
             url: domain,
-            color: util.getPreferencesService().getCharPref('color'),
+            color: Preferences.color,
             status: 0};
 
         return data;

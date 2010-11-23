@@ -110,7 +110,7 @@ var HTTPURLParser = {
         return '';
     },
     getPageAnchorUrl: function(location) {
-        if(location.hash) {
+        if(location.hash && Preferences.updateOnHashChange) {
             return location.hostname + location.pathname + location.search + location.hash;
         }
         return '';
@@ -133,11 +133,17 @@ var HTTPURLParser = {
         return urls;
     },
     getSearchUrls: function(location) {
-        var urls = this.getStartsWithUrls(location).concat([this.getAllSitesUrl(location), this.getPageUrl(location), this.getSiteUrl(location)]);
-        if(location.search) {
+        var urls = this.getStartsWithUrls(location);
+        urls.push(this.getAllSitesUrl(location));
+        var includePageUrl = (!Preferences.updateOnHashChange || Preferences.includePageForHashURLs);
+        if(includePageUrl) {
+            urls.push(this.getPageUrl(location));
+            urls.push(this.getSiteUrl(location));
+        }
+        if(location.search && includePageUrl) {
             urls.push(this.getPageQueryUrl(location));
         }
-        if(location.hash) {
+        if(location.hash && Preferences.updateOnHashChange) {
             urls.push(this.getPageAnchorUrl(location));
         }
         return urls;

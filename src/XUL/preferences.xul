@@ -7,65 +7,94 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml" style="">
 
-	<script type="application/x-javascript"></script>
-	<prefpane id="floatnotes-option-pane" label="&preferences.title;">
+    <prefpane id="note" label="&preferences.note.title;" selected="true">
 		<preferences>
-			<preference id="pref-width" name="extensions.floatnotes.width"
-				type="int" />
-			<preference id="pref-height" name="extensions.floatnotes.height"
-				type="int" />
-			<preference id="pref-color" name="extensions.floatnotes.color"
-				type="string" />
-			<preference id="pref-location" name="extensions.floatnotes.location"
-				type="int" />
-			<preference id="pref-indicator" name="extensions.floatnotes.showIndicator"
-				type="bool" />
-			<preference id="pref-fadeout" name="extensions.floatnotes.fadeOutAfter"
-				type="int" />
+			<preference id="pref-width" name="extensions.floatnotes.width" type="int" />
+			<preference id="pref-height" name="extensions.floatnotes.height" type="int" />
+			<preference id="pref-color" name="extensions.floatnotes.color" type="string" />
+			<preference id="pref-delete" name="extensions.floatnotes.confirmDelete" type="bool" />
 		</preferences>
-		<vbox>
 			<groupbox>
-				<caption label="&preferences_dimensions.title;" />
-				<hbox>
-					<label value="&preferences_dimensions.width;" style="padding-top:5px" />
-					<spacer size="5" />
-					<textbox id="floatnotes-width" size="2" maxlength="3"
-						preference="pref-width" />
-					<label value="px" style="padding-top:5px" />
-				</hbox>
-				<hbox>
-					<label value="&preferences_dimensions.height;" style="padding-top:5px" />
-					<textbox id="floatnotes-height" size="2" maxlength="3"
-						preference="pref-height" />
-					<label value="px" style="padding-top:5px" />
-				</hbox>
-			</groupbox>
-			<groupbox>
-				<caption label="&preferences_location.title;" />
-				<radiogroup id="floatnotes-location" preference="pref-location">
-					<radio
-						label="&preferences_location.query;"
-						value="-1" />
-					<radio label="&preferences_location.url;" value="-2" />
-					<radio label="&preferences_location.wild_url;"
-						value="-3" />
-					<radio label="&preferences_location.wild_host;"
-						value="0" />
-				</radiogroup>
-			</groupbox>
-			<groupbox>
-				<caption label="&preferences_misc.title;" />
+				<caption label="&preferences.note.default_val;" />
+                <grid>
+                    <columns>
+                        <column flex="" />
+                        <column flex="" />
+                    </columns>
+                    <rows>
+                        <row align="center">
+                            <label value="&preferences.note.width;"/>
+                            <textbox id="floatnotes-width" size="2" maxlength="3" preference="pref-width" />
+                            <label value="px" />
+                        </row>
+                        <row align="center">
+                            <label value="&preferences.note.height;" style="padding-top:5px" />
+                            <textbox id="floatnotes-height" size="2" maxlength="3" preference="pref-height" />
+                            <label value="px" style="padding-top:5px" />
+                        </row>
+                        <row align="center">
+                            <label value="&preferences.note.color;" />
+                            <colorpicker type="button" preference="pref-color"/>
+                        </row>
+                    </rows>
+                </grid>
+            </groupbox>
+            <checkbox label="&preferences.note.deletion;" preference="pref-delete" />
+    </prefpane>
+    <prefpane id="location" label="&preferences.location.title;">
+        <preferences>
+			<preference id="pref-location" name="extensions.floatnotes.location" type="int" />
+			<preference id="pref-updateHash" name="extensions.floatnotes.updateOnHashChange" type="bool" />
+			<preference id="pref-includePageHash" name="extensions.floatnotes.includePageForHashURLs" type="bool" />
+        </preferences>
+        <groupbox>
+            <caption label="&preferences.location.default_loc;" />
+            <radiogroup id="floatnotes-location" preference="pref-location">
+                <radio label="&preferences.location.page;" value="-2" />
+                <radio label="&preferences.location.query;" value="-1" style="margin-left: 15px;"/>
+                <radio id="location-hash-url" label="&preferences.location.hash;" value="-4" style="margin-left: 15px;"/>
+                <radio label="&preferences.location.wild_page;" value="-3" />
+                <radio label="&preferences.location.website;" value="0" />
+            </radiogroup>
+        </groupbox>
+        <checkbox id="location-enableHash" preference="pref-updateHash" label="&preferences.location.updateHash;" oncommand="enableHashUrls()"/>
+        <checkbox id="location-includePageHash" preference="pref-includePageHash" style="margin-left:15px" label="&preferences.location.includePageHash;" />
+        <description style="width:300px;height:30px;">&preferences.location.ajaxDescription;</description>
+    </prefpane>
+    <prefpane id="view" label="&preferences.view.title;">
+        <preferences>
+            <preference id="pref-indicator" name="extensions.floatnotes.showIndicator" type="bool" />
+			<preference id="pref-fadeout" name="extensions.floatnotes.fadeOutAfter" type="int" />
+		</preferences>
+
+        <groupbox>
+				<caption label="&preferences.view.title;" />
 				<checkbox id="floatnotes-indicator"
-					label="&preferences_misc.show_indicator;"
+					label="&preferences.view.show_indicator;"
 					preference="pref-indicator" />
 				<hbox>
-					<label value="&preferences_misc.indicator_timeout;"
+					<label value="&preferences.view.indicator_timeout;"
 						style="padding-top:3px;" />
 					<textbox id="floatnotes-fadeout" size="2" maxlength="2"
 						preference="pref-fadeout" />
-					<label value="&preferences_misc.indicator_timeout_unit;" style="padding-top:3px;" />
+					<label value="&preferences.view.indicator_timeout_unit;" style="padding-top:3px;" />
 				</hbox>
 			</groupbox>
-		</vbox>
 	</prefpane>
+    <prefpane id="sync" label="&preferences.sync.title;">
+        <preferences>
+            <preference id="pref-sync" name="services.sync.engine.floatnotes" type="bool" />
+		</preferences>
+        <checkbox  label="&preferences.sync.enable;" preference="pref-sync" />
+        <description style="width:300px;">&preferences.sync.description;</description>
+    </prefpane>
+    <script type="application/x-javascript">
+    <![CDATA[
+    function enableHashUrls() {
+        var value = document.getElementById('location-enableHash').checked;
+        document.getElementById('location-hash-url').disabled = document.getElementById('location-includePageHash').disabled = !value;
+    } 
+    enableHashUrls();
+    ]]>
+    </script>
 </prefwindow>

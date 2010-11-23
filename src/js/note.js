@@ -4,6 +4,7 @@
 //!#include "util.js"
 
 Components.utils.import("resource://floatnotes/showdown/showdown.js");
+Components.utils.import("resource://floatnotes/preferences.jsm");
 
 var note_status = {
     SAVED: 1,
@@ -590,7 +591,8 @@ FloatNote.prototype = {
             'top:' + this.data.y  + "px",
             'width:' + this.data.w  + "px",
             'height:' + this.data.h  + "px",
-            'z-index:' + ZINDEX
+            'z-index:' + ZINDEX,
+            'opacity:' + Preferences.transparency
         ].join(';');
         elements.content.innerHTML = this.markdownParser.makeHtml(this.data.content);
     },

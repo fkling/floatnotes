@@ -6,6 +6,7 @@
 //!#include "note.js"
 
 Components.utils.import("resource://floatnotes/URLHandler.jsm");
+Components.utils.import("resource://floatnotes/preferences.jsm");
 
 
 var locationBuilder = {
@@ -15,6 +16,8 @@ var locationBuilder = {
         }
         return this._ele;
     },
+
+    set locationListElement(value) {},
 
     updateSelectedElement: function(noteUrl) {
         var item = this.locationListElement.querySelector("radio[value='" + noteUrl + "']");LOG('Selection updated');
@@ -96,7 +99,7 @@ function FloatNotesView(manager) {
     this._hideMenuEntry = document.getElementById('floatnotes-hide-note');
     this.popup = document.getElementById('floatnotes-edit-popup');
     // create indicators
-    IndicatorProxy.init(this);
+    IndicatorProxy.init(this, Preferences);
 
 
     this.isLocationListGenerated = false;
@@ -190,7 +193,6 @@ FloatNotesView.prototype = {
 
     onPageLoad: function (event) {
         this.isLocationListGenerated = false;
-        this.updatePreferences();  
         var win = event.originalTarget.defaultView;
         var doc = win.document; // doc is document that triggered "onload" event                       
         var isFocusedDocument = (doc === gBrowser.contentDocument); 
@@ -200,18 +202,14 @@ FloatNotesView.prototype = {
         }
     },
 
-    updatePreferences: function() {
-        this._scrolltimeout = util.getPreferencesService().getIntPref('scrolltimer');
-        this.indicator_timeout = util.getPreferencesService().getIntPref('fadeOutAfter');
-        this.show_indicators = util.getPreferencesService().getBoolPref('showIndicator');
-    },
-
     onHashChange: function(e) {
-       this.isLocationListGenerated = false;
-       this.currentNotes.forEach(function(note){
-            note.detach();
-       });
-       this.loadNotes();
+       if(Preferences.updateOnHashChange) {
+           this.isLocationListGenerated = false;
+           this.currentNotes.forEach(function(note){
+                note.detach();
+           });
+           this.loadNotes();
+       }
     },
 
     /**
@@ -282,7 +280,7 @@ FloatNotesView.prototype = {
 
 
     _attachAndShowIndicators: function() {
-        if(this.show_indicators) {
+        if(Preferences.showIndicator) {
             IndicatorProxy.attachTo(this.currentDocument, this._container);
             this._attachScrollHandlerTo(this.currentDocument);
             util.fireEvent(this.currentDocument, 'scroll');
@@ -294,7 +292,7 @@ FloatNotesView.prototype = {
         this._stopScrollTimeout();
         this._scrolltimer = window.setTimeout(function(){
             that._updateAndShowIndicators();
-        }, this._scrolltimeout);
+        }, Preferences.scrollTimer);
     },
 
     _stopScrollTimeout: function() {
@@ -381,16 +379,27 @@ FloatNotesView.prototype = {
     },
 
     deleteNote: function(note) {
-        note = note || this.contextNote
+        note = note || this.contextNote;
         if(note) {
-            var that = this;
-            this.doObserve = false;
-            this.notesManager.deleteNote(note.data, function() {
-                note.detach();
-                delete that.notes[note.data.guid];
-                that.contextNote = null;
-                that.doObserve = true;
-            }); 
+            var del = true;
+            if(Preferences.confirmDelete) {
+                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                                .getService(Components.interfaces.nsIPromptService);
+                var checkState = {value: !Preferences.confirmDelete}; 
+                del = promptService.confirmCheck(null, 'Delete note', 'Are you sure you want to delete this note?', "Don't ask me again.", checkState);
+                Preferences.confirmDelete = !checkState.value;
+            }
+
+            if(del) {
+                var that = this;
+                this.doObserve = false;
+                this.notesManager.deleteNote(note.data, function() {
+                    note.detach();
+                    delete that.notes[note.data.guid];
+                    that.contextNote = null;
+                    that.doObserve = true;
+                }); 
+            }
         }
     },
 

@@ -89,7 +89,7 @@ var locationBuilder = {
 };
 
 function FloatNotesView(manager) {
-    this.notesManager = manager;  
+    this.notesManager = manager;
     this.status = {};
     this.notes = {};
 
@@ -105,11 +105,12 @@ function FloatNotesView(manager) {
     IndicatorProxy.init(this, Preferences);
 
 
-    this.isLocationListGenerated = false;
+    this._isLocationListGenerated = false;
     this.doObserve = true;
     this.registerEventHandlers();
     this.registerObserver();
 }
+
 FloatNotesView.GLOBAL_NAME = 'gFloatNotesView';
 
 FloatNotesView.prototype = {
@@ -132,13 +133,14 @@ FloatNotesView.prototype = {
 
     registerEventHandlers: function() {
         // attach load handler
-        var that = this; 
+        var that = this;
         gBrowser.addEventListener("pageshow", function(e){that.onPageLoad(e);}, true);
         var container = gBrowser.tabContainer;
         container.addEventListener("TabSelect", function(e){that.onTabSelect(e);}, false);
         window.addEventListener("contextmenu", function(e) {that.updateContext(e);}, true);
         window.addEventListener("contextmenu", function(e) {that.updateContextMenu(e);}, false);
         gBrowser.addEventListener("hashchange", function(e) {that.onHashChange(e);}, true);
+        //window.addEventListener("activate", function(e) {that.onWindowActivated(e);}, true);
     },
 
     registerObserver: function() {
@@ -164,8 +166,9 @@ FloatNotesView.prototype = {
         obsService.removeObserver(this, 'floatnotes-note-delete');
     },
 
-    observe: function(subject, topic, data) {  
+    observe: function(subject, topic, data) {
         if(this.doObserve) { LOG('Notification received: ' + topic + ' Data: ' + data);
+            var note;
             switch(topic) {
                 case 'floatnotes-note-update':
                     if(this.notes[data]) {
@@ -173,7 +176,7 @@ FloatNotesView.prototype = {
                     }
                 break;
                 case 'floatnotes-note-delete':
-                    var note = this.notes[data];
+                    note = this.notes[data];
                     if(note) {
                         note.detach();
                         util.removeObjectFromArray(note, this.currentNotes);
@@ -181,7 +184,7 @@ FloatNotesView.prototype = {
                     }
                 break;
                 case 'floatnotes-note-urlchange':
-                    var note = this.notes[data];
+                    note = this.notes[data];
                     LOG('URL changed for: ' + data);
                     if(note) {
                         note.detach();
@@ -189,7 +192,7 @@ FloatNotesView.prototype = {
                     }
                 case 'floatnotes-note-add':
                     var locations =  URLHandler.getSearchUrls(this.currentDocument.location);
-                    var note = this.notes[data] || this._createNotesWith([this.notesManager.notes[data]])[0];
+                    note = this.notes[data] || this._createNotesWith([this.notesManager.notes[data]])[0];
                     if (locations.indexOf(note.data.url) > -1) {
                         this.currentNotes.push(note);
                         this._attachNotesToCurrentDocument([note]);
@@ -199,33 +202,34 @@ FloatNotesView.prototype = {
     },
 
     onPageLoad: function (event) {
-        this.isLocationListGenerated = false;
+        this._isLocationListGenerated = false;
         var win = event.originalTarget.defaultView;
-        var doc = win.document; // doc is document that triggered "onload" event                       
-        var isFocusedDocument = (doc === gBrowser.contentDocument); 
+        var doc = win.document; // doc is document that triggered "onload" event
+        var isFocusedDocument = (doc === gBrowser.contentDocument);
         if(isFocusedDocument) {
             this.currentDocument = doc;
             this.loadNotes();
         }
     },
 
+    onTabSelect: function(e) {
+        this.currentDocument = gBrowser.contentDocument;
+        this._isLocationListGenerated = false;
+        this.loadNotes();
+    },
+
+    onWindowActivated: function(e) {
+
+    },
+
     onHashChange: function(e) {
        if(Preferences.updateOnHashChange) {
-           this.isLocationListGenerated = false;
+           this._isLocationListGenerated = false;
            this.currentNotes.forEach(function(note){
                 note.detach();
            });
            this.loadNotes();
        }
-    },
-
-    /**
-       * Load and/or show notes
-*/
-    onTabSelect: function(e) {
-        this.currentDocument = gBrowser.contentDocument;
-        this.isLocationListGenerated = false;
-        this.loadNotes();
     },
 
     /**
@@ -261,7 +265,7 @@ FloatNotesView.prototype = {
             this._toggleNotesBrdc.setAttribute('disabled', false);
             this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
         }
-            
+
     },
 
     _createNotesWith: function(dataSet) {
@@ -281,7 +285,7 @@ FloatNotesView.prototype = {
         var container = this._container;
         notes = notes || this.currentNotes;
         for (var i = 0, length = notes.length; i < length; ++i) {
-            notes[i].attachToDocument(doc, container);	
+            notes[i].attachToDocument(doc, container);
         }
     },
 
@@ -291,7 +295,7 @@ FloatNotesView.prototype = {
             IndicatorProxy.attachTo(this.currentDocument, this._container);
             this._attachScrollHandlerTo(this.currentDocument);
             util.fireEvent(this.currentDocument, 'scroll');
-        }	 
+        }
     },
 
     _startScrollTimeout: function() {
@@ -312,7 +316,8 @@ FloatNotesView.prototype = {
         var wintop = parseInt(doc.defaultView.pageYOffset, 10),
         winheight = parseInt(doc.defaultView.innerHeight, 10);
 
-        this.currentNotes.forEach(function(note) {
+        for(var i = this.currentNotes.length;i--;) {
+            var note = this.currentNotes[i];
             if(note.dom) {
                 var element = note.dom;
                 var top = parseInt(element.style.top, 10);
@@ -330,7 +335,7 @@ FloatNotesView.prototype = {
 
         });
 
-    }, 
+    },
 
     _attachScrollHandlerTo: function(doc) {
         var that = this;
@@ -385,7 +390,7 @@ FloatNotesView.prototype = {
             if(Preferences.confirmDelete) {
                 var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                                 .getService(Components.interfaces.nsIPromptService);
-                var checkState = {value: !Preferences.confirmDelete}; 
+                var checkState = {value: !Preferences.confirmDelete};
                 del = promptService.confirmCheck(null, 'Delete note', 'Are you sure you want to delete this note?', "Don't ask me again.", checkState);
                 Preferences.confirmDelete = !checkState.value;
             }
@@ -399,7 +404,7 @@ FloatNotesView.prototype = {
                     delete that.notes[note.data.guid];
                     that.contextNote = null;
                     that.doObserve = true;
-                }); 
+                });
             }
         }
     },
@@ -413,6 +418,10 @@ FloatNotesView.prototype = {
         else {
             this.hideNotes(); LOG('Nodes hidden.');
         }
+    },
+
+    _notesHiddenFor: function(location) {
+        return this.status[location] && !this.status[location].visible;
     },
 
     showNotes: function() {
@@ -436,7 +445,7 @@ FloatNotesView.prototype = {
             this.status[location] = {};
         }
         this.status[location].visible = visible;
-    }, 
+    },
 
     _detachIndicators: function() {
         this._removeScrollHandler();
@@ -450,48 +459,12 @@ FloatNotesView.prototype = {
     },
 
     updateContextMenu: function(event) {
-        if(this.contextNote) {
-            // don't show any menu items if in editing mode
-            this._hideMenuItems([this._newMenuEntry]);
-        }
-        else {
-            this._showMenuItems([this._newMenuEntry]);
-        }
-        var doc = this.currentDocument || gBrowser.contentDocument;
-        var domain = doc.location;
-        if(this.notesManager.siteHasNotes(domain) && !this.contextNote) {
-            this._showMenuItems([this._hideMenuEntry]); 
-        }
-        else {
-            this._hideMenuItems([this._hideMenuEntry]);
-        }
-    },
-
-    _hideMenuItems: function(items) {
-        for(var i = 0, l = items.length; i < l; i++) {
-            items[i].hidden = true;
-        }
-    },
-
-    _showMenuItems: function(items) {
-        for(var i = 0, l = items.length; i < l; i++) {
-            items[i].hidden = false;
-        }
-    },
-
-    _notesHiddenFor: function(location) {
-        return this.status[location] && !this.status[location].visible;
+        this._newMenuEntry.hidden = !!this.contextNote;
+        this._hideMenuEntry.hidden = this.notesManager.siteHasNotes(this.currentDocument.location) && !this.contextNote;
     },
 
     openEditPopup: function(note, anchor, cb) {
-        this.popup.hidePopup();
-        if(this.isLocationListGenerated) {
-            locationBuilder.updateSelectedElement(note.url);
-        }
-        else {
-            locationBuilder.buildLocationList(this.currentDocument.location, note.url);
-            this.isLocationListGenerated = true;
-        }
+        this._generateLocationList();
         document.getElementById('floatnotes-edit-color').color = note.color;
         this.saveChanges = function() {
             if(this.popup.state == 'closed') {
@@ -499,7 +472,17 @@ FloatNotesView.prototype = {
                 cb(document.getElementById('floatnotes-edit-color').color,document.getElementById('floatnotes-edit-location-list').selectedItem.value);
             }
         };
-        this.popup.openPopup(anchor, "end_before", 0, 0, false, false); 
+        this.popup.openPopup(anchor, "end_before", 0, 0, false, false);
+    },
+
+    _generateLocationList: function() {
+        if(this._isLocationListGenerated) {
+            locationBuilder.updateSelectedElement(note.url);
+        }
+        else {
+            locationBuilder.buildLocationList(this.currentDocument.location, note.url);
+            this._isLocationListGenerated = true;
+        }
     }
 };
 

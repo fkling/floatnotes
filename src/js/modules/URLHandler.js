@@ -135,10 +135,10 @@ var HTTPURLParser = {
     getSearchUrls: function(location) {
         var urls = this.getStartsWithUrls(location);
         urls.push(this.getAllSitesUrl(location));
-        var includePageUrl = (!Preferences.updateOnHashChange || Preferences.includePageForHashURLs);
+        urls.push(this.getSiteUrl(location));
+        var includePageUrl = !location.hash || !Preferences.updateOnHashChange || Preferences.includePageForHashURLs;
         if(includePageUrl) {
             urls.push(this.getPageUrl(location));
-            urls.push(this.getSiteUrl(location));
         }
         if(location.search && includePageUrl) {
             urls.push(this.getPageQueryUrl(location));

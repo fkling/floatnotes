@@ -4,10 +4,13 @@
 //!#include "util.js"
 
 
-IndicatorProxy = {
+var IndicatorProxy = {
     init: function(view, preferences) {
         this.view = view;
         this.preferences = preferences;
+        this._timer = Components.classes["@mozilla.org/timer;1"]
+            .createInstance(Components.interfaces.nsITimer);
+        
         this.above = new Indicator(Indicator.BELOW);
         this.below = new Indicator(Indicator.ABOVE);
     },
@@ -30,21 +33,16 @@ IndicatorProxy = {
     },
 
     startTimeout: function() {
-        this.stopTimeout();
         var that = this;
-        this._timer = window.setTimeout(function(){ 
+        this._timer.initWithCallback({notify: function(){ 
             that.hideAll();
-        }, 
-        this.preferences.fadeOutTime*1000);
+        }}, this.preferences.fadeOutTime*1000, this._timer.TYPE_ONE_SHOT);
     },
 
     stopTimeout: function() {
-        if(this._timer) {
-            window.clearTimeout(this._timer);
-            this._timer = null;
-        }
+        this._timer.cancel();
     }
-}
+};
 
 
 
@@ -185,7 +183,7 @@ Indicator.prototype = {
             if(e.target.className == 'floatnotes-indicator-text') {
                 that._hide();
                 var t = doc.getElementById(e.target.getAttribute('rel'));
-                doc.defaultView.scrollTo(0, Math.max(parseInt(t.style.top) - 20, 0));
+                doc.defaultView.scrollTo(0, Math.max(parseInt(t.style.top, 10) - 20, 0));
             }
         }, true);
 

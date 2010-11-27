@@ -93,6 +93,9 @@ function FloatNotesView(manager) {
     this.status = {};
     this.notes = {};
 
+    this._scrollTimer = Components.classes["@mozilla.org/timer;1"]
+                        .createInstance(Components.interfaces.nsITimer);
+
     // get references to menu items
     this._toggleNotesBrdc = document.getElementById('floatnotes-toggle-brdc');
     this._newMenuEntry = document.getElementById('floatnotes-new-note');
@@ -293,17 +296,9 @@ FloatNotesView.prototype = {
 
     _startScrollTimeout: function() {
         var that = this;
-        this._stopScrollTimeout();
-        this._scrolltimer = window.setTimeout(function(){
+        this._scrollTimer.initWithCallback({notify: function(){
             that._updateAndShowIndicators();
-        }, Preferences.scrollTimer);
-    },
-
-    _stopScrollTimeout: function() {
-        if(this._scrolltimer) {
-            window.clearTimeout(this._scrolltimer);
-            this._scrolltimer = null;
-        }
+        }}, Preferences.scrollTimer, this._scrollTimer.TYPE_ONE_SHOT);
     },
 
     _updateAndShowIndicators: function() {

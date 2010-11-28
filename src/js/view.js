@@ -207,14 +207,13 @@ FloatNotesView.prototype = {
         var doc = win.document; // doc is document that triggered "onload" event
         var isFocusedDocument = (doc === gBrowser.contentDocument);
         if(isFocusedDocument) {
-            this.currentDocument = doc;
+            this.currentDocument = gBrowser.contentDocument;
             this.loadNotes();
         }
     },
 
     onTabSelect: function(e) {
         this.currentDocument = gBrowser.contentDocument;
-        this._isLocationListGenerated = false;
         this.loadNotes();
     },
 
@@ -224,7 +223,6 @@ FloatNotesView.prototype = {
 
     onHashChange: function(e) {
        if(Preferences.updateOnHashChange) {
-           this._isLocationListGenerated = false;
            this.currentNotes.forEach(function(note){
                 note.detach();
            });
@@ -236,18 +234,37 @@ FloatNotesView.prototype = {
        * Load and attach the notes
 */
     loadNotes: function(doc) {
-        doc = doc || this.currentDocument;
         var that = this;
-        this.notesManager.getNotesFor(doc.location, function(data) {
-            LOG('Notes loaded for ' + doc.location + ': ' + data.length);
-            that.currentNotes = that._createNotesWith(data);
-            that._attachNotesToCurrentDocument();
-            that._attachAndShowIndicators();
-            that._updateToggleBroadcast();
-            if(doc.location.hash && doc.location.hash.indexOf('#floatnotes-note') === 0) {
-                doc.location.hash = doc.location.hash;
+        this._isLocationListGenerated = false;
+        doc = doc || this.currentDocument;
+        var domain = doc.location;
+        if(domain.protocol === 'about:') {
+            return false;
+        }
+
+        if(URLHandler.supports(domain)) {
+            this.notesManager.getNotesFor(domain, function(data) {
+                LOG('Notes loaded for ' + domain + ': ' + data.length);
+                that.currentNotes = that._createNotesWith(data);
+                that._attachNotesToCurrentDocument();
+                that._attachAndShowIndicators();
+                that._updateToggleBroadcast();
+                if(domain.hash && domain.hash.indexOf('#floatnotes-note') === 0) {
+                    domain.hash = domain.hash;
+                }
+            });
+        }
+        else {
+            if(Preferences.showUriNotSupported) {
+                var notifyBox = gBrowser.getNotificationBox();
+                var note = notifyBox.getNotificationWithValue('floatnotes');
+                if(note) {
+                    notifyBox.removeNotification(note);
+                }
+                notifyBox.appendNotification('FloatNotes does not support URIs starting with "' + domain.protocol + '".', 'floatnotes', null, notifyBox.PRIORITY_INFO_MEDIUM, [{label: "Don't show me again", callback:function(note){Preferences.showUriNotSupported = false;}}, 
+                            {label: 'Ok', callback: function(note){}}]);
             }
-        });
+        }
     },
 
     _updateToggleBroadcast: function() {
@@ -333,8 +350,7 @@ FloatNotesView.prototype = {
                 }
             }
 
-        });
-
+        }
     },
 
     _attachScrollHandlerTo: function(doc) {
@@ -464,7 +480,7 @@ FloatNotesView.prototype = {
     },
 
     openEditPopup: function(note, anchor, cb) {
-        this._generateLocationList();
+        this._generateLocationList(note);
         document.getElementById('floatnotes-edit-color').color = note.color;
         this.saveChanges = function() {
             if(this.popup.state == 'closed') {
@@ -475,7 +491,7 @@ FloatNotesView.prototype = {
         this.popup.openPopup(anchor, "end_before", 0, 0, false, false);
     },
 
-    _generateLocationList: function() {
+    _generateLocationList: function(note) {
         if(this._isLocationListGenerated) {
             locationBuilder.updateSelectedElement(note.url);
         }

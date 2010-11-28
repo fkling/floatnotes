@@ -39,7 +39,6 @@
                     </rows>
                 </grid>
             </groupbox>
-            <checkbox label="&preferences.note.deletion;" preference="pref-delete" />
     </prefpane>
     <prefpane id="location" label="&preferences.location.title;">
         <preferences>
@@ -80,7 +79,18 @@
 					<label value="&preferences.view.indicator_timeout_unit;" style="padding-top:3px;" />
 				</hbox>
 			</groupbox>
+    </prefpane>
+
+    <prefpane id="notifications" label="&preferences.notifications.title;">
+        <preferences>
+            <preference id="pref-note_delete" name="extensions.floatnotes.confirmDelete" type="bool" />
+			<preference id="pref-uri_not_supported" name="extensions.floatnotes.showUriNotSupported" type="bool" />
+		</preferences>
+        
+        <checkbox label="&preferences.notifications.note_deletion;" preference="pref-delete" />
+        <checkbox label="&preferences.notifications.uri_not_supported;" preference="pref-uri_not_supported" />
 	</prefpane>
+
     <prefpane id="sync" label="&preferences.sync.title;">
         <preferences>
             <preference id="pref-sync" name="services.sync.engine.floatnotes" type="bool" />

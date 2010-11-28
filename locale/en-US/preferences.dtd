@@ -3,7 +3,6 @@
 <!ENTITY preferences.note.width "Width:" >
 <!ENTITY preferences.note.height "Height:" >
 <!ENTITY preferences.note.color "Color:" >
-<!ENTITY preferences.note.deletion "Confirm deletion of notes" >
 
 <!ENTITY preferences.location.title "Location" >
 <!ENTITY preferences.location.default_loc "Default location" >
@@ -20,6 +19,11 @@
 <!ENTITY preferences.view.show_indicator "Show info if notes are outside the current view on the website" >
 <!ENTITY preferences.view.indicator_timeout "Time after the info fades out (0 = don't fade out):" >
 <!ENTITY preferences.view.indicator_timeout_unit "seconds" >
+
+<!ENTITY preferences.notifications.title "Notifications" >
+<!ENTITY preferences.notifications.note_deletion "Confirm deletion of notes" >
+<!ENTITY preferences.notifications.uri_not_supported "Show URI not supported information" >
+
 
 <!ENTITY preferences.sync.title "Sync" >
 <!ENTITY preferences.sync.enable "Enable synchronisation of notes" >

@@ -77,6 +77,10 @@ var URLHandler = {
         else {
             this._parsers[protoco] = parser;
         }
+    },
+
+    supports: function(location) {
+        return location.protocol in this._parsers;
     }
 };
 

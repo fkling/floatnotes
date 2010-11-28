@@ -75,6 +75,17 @@ var Preferences = {
         this._branch.setBoolPref('confirmDelete', !!value);
     },
 
+    get showUriNotSupported() {
+        if(!this._showUriNotSupported) {
+            this._showUriNotSupported = this._branch.getBoolPref('showUriNotSupported');
+        }
+        return this._showUriNotSupported;
+    },
+
+    set showUriNotSupported(value) {
+        this._branch.setBoolPref('showUriNotSupported', !!value);
+    },
+
     get updateOnHashChange() {
         if(!this._updateOnHashChange) {
             this._updateOnHashChange= this._branch.getBoolPref('updateOnHashChange');

@@ -61,21 +61,11 @@ DatabaseConnector.prototype = {
     getAllNotes: function(runWhenFinished) {
         var statement = this._db.createStatement("SELECT * FROM floatnotes ORDER BY content DESC");
         var notes = [];
+        var that = this;
         statement.executeAsync({
             handleResult: function(aResultSet) {
                 for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
-                    var data = {
-                        x: row.getResultByName("x"),
-                        y: row.getResultByName("y"),
-                        id: row.getResultByName("id"),
-                        url: row.getResultByName("url"),
-                        content: row.getResultByName("content"),
-                        w: row.getResultByName("w"),
-                        h: row.getResultByName("h"),
-                        status: row.getResultByName("status"),
-                        color: row.getResultByName("color")
-                    };
-                    notes.push(data);
+                    notes.push(that._createNoteFromRow(row));
                 }
             },
             handleCompletion: function() {
@@ -86,8 +76,7 @@ DatabaseConnector.prototype = {
     },
 
     getNotesContaining: function(wordList, runWhenFinished) {
-
-        //wordlist = wordlist.concat(wordlist);
+        var that = this;
         var ands = [];
         for(var i = wordList.length; i--; ) {
             ands.push('uc LIKE :w' + i + " ESCAPE '~'");
@@ -103,18 +92,7 @@ DatabaseConnector.prototype = {
         statement.executeAsync({
             handleResult: function(aResultSet) {
                 for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
-                    var data = {
-                        x: row.getResultByName("x"),
-                        y: row.getResultByName("y"),
-                        id: row.getResultByName("id"),
-                        url: row.getResultByName("url"),
-                        content: row.getResultByName("content"),
-                        w: row.getResultByName("w"),
-                        h: row.getResultByName("h"),
-                        status: row.getResultByName("status"),
-                        color: row.getResultByName("color")
-                    };
-                    notes.push(data);
+                    notes.push(that._createNoteFromRow(row));
                 }
             },
             handleCompletion: function() {

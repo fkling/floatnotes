@@ -2,320 +2,68 @@
 <?xml-stylesheet href="chrome://browser/skin/places/organizer.css" type="text/css"?>
 <window id="yourwindow" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:h="http://www.w3.org/1999/xhtml" style="width:600px;height:400px;"  orient="horizontal">
 
-<broadcasterset>
-    <broadcaster id="isEnabled" disabled="true" />
-</broadcasterset>
+    <broadcasterset>
+        <broadcaster id="isEnabled" disabled="true" />
+        <broadcaster id="searchListButtons" disabled="true" />
+    </broadcasterset>
 
-<vbox flex="1">
-<listbox id="searches" flex="1" onselect="search()" ondragstart="dragStart(event)"
-ondragover="dragOver(event)"
-ondragleave="dragLeave(event)"
-ondrop="onDrop(event);" 
-onkeypress="deleteSearch(event)"/>
-<hbox><button label="Edit" oncommand="openEditDiag()" /><button label="Delete" oncommand="deleteSearch()" /></hbox>
-</vbox>
-<splitter collapse="before">
-   <grippy />
-</splitter>
-<vbox flex="3">
-
-<hbox pack="end" align="center"><textbox flex="1" type="search" id="search" oncommand="search()" emptytext="Search Notes"/><button style="display:none;" class="small" id='saveSearch' label="Save" oncommand="saveSearch();"/></hbox>
-<vbox flex="1">
-<tree id="notes" flex="2" onselect="treeView.selectionChanged()" hidecolumnpicker="true">
-  <treecols>  
-      <treecol id="titlecol" label="Title" flex="1"/>
-      <splitter class="tree-splitter" />
-    <treecol id="urlcol" label="URL" flex="1"/>
-  </treecols>  
-  <treechildren ondblclick="loadPage()"/>
-</tree>
-<hbox pack="end">
-    <label id="counter" value="" pack="right" style="color:gray;font-style:italic;"/>
-</hbox>
-</vbox>
-<splitter />
-<grid>
-  <columns>
-    <column/>
-    <column flex="1"/>
-  </columns>
-  <rows>
-    <textbox flex="1" id="text" multiline="true"
-                              observes="isEnabled"
-                              onblur="saveNote(this.value, 'content')"
-               style="height:100px"/>
-    <row align="center">
-      <label control="color" value="Color:"/>
-      <hbox flex="1">
-      <colorpicker id="color" 
-                          type="button" 
-                          observes="isEnabled"
-                          onselect="saveNote(this.color, 'color')" />
-       <spacer flex="1" />
-       <button id="delete" label="Delete" observes="isEnabled" oncommand="deleteNote()" />
-      </hbox>   
-    </row>
-  </rows>
-</grid>
-<spacer style="height:5px"/>
-</vbox>
-<script type="text/javascript">
-<![CDATA[
-Components.utils.import("resource://floatnotes/database.jsm");
-Components.utils.import("resource://floatnotes/manager.jsm");
-Components.utils.import("resource://floatnotes/preferences.jsm");
-
-var textBox = document.getElementById('text');
-var colorPicker = document.getElementById('color');
-var inputBrdcast = document.getElementById('isEnabled');
-var deleteButton = document.getElementById('delete');
-var searchBox = document.getElementById('search');
-
-function openEditDiag() {
-  var item = searchList.getSelectedItem();
-  if(item && searchList.selectedIndex > 0) {
-       window.openDialog("chrome://floatnotes/content/editSearch.xul", "Edit Search", "modal", searchList.getSelectedItem(), searchManager);
-  }
-}
-
-function deleteSearch() {
-    var index = searchList.selectedIndex;
-    if(index !== null && index > 0) {
-        searchManager.delete(index);
-        searchList.removeItemAt(index);
-        searchList.selectItem(searchList.getItemAtIndex(index - 1));
-    }
-}
-
-function dragStart(event) {
-var index = searchList.getIndexOfItem(event.target);
-if(index > 0) { 
-    event.dataTransfer.setData('text/plain', index);
-}
-event.stopPropagation();
-}
-
-function dragOver(event) {
-    event.preventDefault();
-    event.target.style.borderBottom = "2px solid black";
-}
-
-function dragLeave(event) {
-    event.preventDefault();
-    event.target.style.borderBottom = "";
-}
-
-function onDrop(event) {
-    var sourceIndex = parseInt(event.dataTransfer.getData("text/plain"));
-    var targetIndex = searchList.getIndexOfItem(event.target);
-    var source = searchList.removeItemAt(sourceIndex);
-    var target = event.target.nextElementSibling;
-    if(target) {
-        searchList.insertBefore(source, target);
-    }
-    else {
-       searchList.appendChild(source);
-    }
-    searchManager.move(sourceIndex, targetIndex);
-    }
-
-function loadPage() {
-    if(treeView.selection.count == 1) {
-        var note = treeView.data[treeView.selection.currentIndex];
-        if(note) {
-            var url =  note.url;
-            if(url.lastIndexOf('*') === url.length - 1) {
-                url = url.substr(0, url.length-1);
-            }
-            url += '#floatnotes-note-' + note.id;
-            opener.gBrowser.selectedTab = opener.gBrowser.addTab(url); 
-        }
-    }
-
-}
-
-function saveSearch() {
-    var keywords = searchBox.value;
-    if(keywords) {
-        var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]  
-                        .getService(Components.interfaces.nsIPromptService);  
-  
-        var check = {value: false};                  // default the checkbox to false  
-  
-         var input = {value: ""};                  // default the edit field to Bob
-         var result = true;
-         while(!input.value && result) {
-             result = prompts.prompt(null, "Save search", "Name:", input, null, check);
-         } 
-         if(result) {
-              searchManager.addSearch(input.value, keywords);
-         }
-    }
-}
-
-function search() {
-    var words = document.getElementById('search').value;
-    var selectedSearch = searchList.selectedItem;
-    if(selectedSearch && selectedSearch.value) {
-        words = selectedSearch.value + ' ' + words;
-    }
-    clear();
-    if(words) {
-        db.getNotesContaining(words.split(' '),function(notes) {
-            treeView.data = notes;
-            tree.view = treeView;
-            updateCounter();
-            if(document.getElementById('search').value) {
-                document.getElementById('saveSearch').style.display = 'inline';
-            }
-            else {
-                 document.getElementById('saveSearch').style.display = 'none';
-            }
-        });
-    }
-    else {
-        db.getAllNotes(function(notes) {
-            treeView.data = notes;
-            tree.view = treeView;
-            updateCounter();
-            document.getElementById('saveSearch').style.display = 'none';
-        });
-   }
-}
-
-function getTitle(text) {
-    var index = text.indexOf("\n");
-    if (index >= 0) {
-        return text.substring(0, index);
-    }
-    else {
-        return text;
-    }
-}
-
-function updateCounter() {
-    document.getElementById('counter').value = treeView.rowCount + ' Notes';
-}
-
-function saveNote(value, attr) {
-    if(treeView.selection.count == 1) {
-        var note = treeView.data[treeView.selection.currentIndex];
-        if(value != note[attr]) {
-            note[attr] = value
-            manager.saveNote(note, function(){});
-        }
-    }
-}
-
-function deleteNote() {
-     var selection = treeView.selection;
-     if(selection && selection.count >=1) {
-         if(selection.count == 1) {
-             manager.deleteNote(treeView.data[selection.currentIndex], function() {});
-             search();
-         }
-         else {
-             var start = new Object();
-             var end = new Object();
-             var numRanges = tree.view.selection.getRangeCount();
-             var data = treeView.data;
-             for (var t = 0; t < numRanges; t++){
-                 tree.view.selection.getRangeAt(t,start,end);
-                 for (var v = start.value; v <= end.value; v++){
-                      manager.deleteNote(data[v], function() {});
-                 }
-             } 
-             search();
-         }
-     }
-}
-
-function clear() {
-    if(treeView.selection) {
-        treeView.selection.clearSelection();     
-    }
-     inputBrdcast.setAttribute('disabled', true);
-     textBox.value="";
-     colorPicker.color = "";
-}
-
-var tree = document.getElementById('notes');
-var db = getDatabase();
-var manager = getManager();
-var pref = Preferences;
-var searchList = document.getElementById('searches');
-
-var searchManager = {
-    searches: [{name: 'All notes', keywords: '', order:0}].concat(pref.savedSearches),
-    buildList: function() {
-        var selectedIndex = (searchList.selectedIndex > 0) ? searchList.selectedIndex : 0;
-        this.empty();
-        for(var i = 0, l = this.searches.length;i<l;i++) {
-            searchList.appendItem(this.searches[i].name, this.searches[i].keywords);
-        }
-setTimeout(function() {
-        searchList.selectItem(searchList.getItemAtIndex(selectedIndex));
-}, 25);
-    },
-    addSearch: function(name, keywords) {
-        this.searches.push({name: name, keywords: keywords});
-       this.save();
-        this.buildList();
-    },
-    empty: function() {
-        for(var i = searchList.itemCount -1;i >=0;i--) {
-            searchList.removeItemAt(i);
-        }
-    },
-    move: function(which, to) {
-        var removed = this.searches.splice(which, 1);
-        this.searches.splice(to + 1, 0, removed[0]);
-        this.save();
-    },
-    delete: function(index) {
-        this.searches.splice(index, 1);
-        this.save();
-    },
-    save: function() {
-        pref.savedSearches = this.searches.slice(1);
-    }
-};
-var treeView = {
-    data: [],
-    get rowCount() {
-        return this.data.length;
-    },  
-    getCellText : function(row,column){ 
-      if (column.id == "titlecol") return getTitle(this.data[row].content);  
-      else return this.data[row].url;  
-    },  
-    setTree: function(treebox){ this.treebox = treebox; },  
-    isContainer: function(row){ return false; },  
-    isSeparator: function(row){ return false; },  
-    isSorted: function(){ return false; },  
-    getLevel: function(row){ return 0; },  
-    getImageSrc: function(row,col){ return null; },  
-    getRowProperties: function(row,props){},  
-    getCellProperties: function(row,col,props){},  
-    getColumnProperties: function(colid,col,props){},
-    selectionChanged: function() {
-        if(this.selection.count == 1) {
-            inputBrdcast.setAttribute('disabled', false);
-            textBox.disabled = false;
-            textBox.value = this.data[this.selection.currentIndex].content;
-            colorPicker.color = this.data[this.selection.currentIndex].color;
-        }
-        else {
-             textBox.value = "";
-            colorPicker.color = "";
-            inputBrdcast.setAttribute('disabled', true);
-            deleteButton.disabled = false;
-        }
-    }  
-};
-
-searchManager.buildList();
-//search();
-]]>
-</script>
+    <vbox>
+        <listbox id="searches" flex="1" onselect="searchManager.updateButtons(); search();" ondragstart="dragHandler.dragStart(event)"
+            ondragover="dragHandler.dragOver(event)"
+            ondragleave="dragHandler.dragLeave(event)"
+            ondrop="dragHandler.onDrop(event);" 
+            onkeypress="deleteSearch(event)"/>
+        <hbox>
+            <button observes="searchListButtons" label="Edit" oncommand="openEditDiag()" />
+            <button observes="searchListButtons" label="Remove" oncommand="deleteSearch()" />
+        </hbox>
+    </vbox>
+    <splitter collapse="before">
+        <grippy />
+    </splitter>
+    <vbox flex="3">
+        <hbox pack="end" align="center">
+            <textbox flex="1" type="search" id="search" oncommand="search()" emptytext="Search Notes"/>
+            <button style="display:none;" class="small" id='saveSearch' label="Save" oncommand="saveSearch();"/>
+        </hbox>
+        <vbox flex="1">
+            <tree id="notes" flex="2" onselect="treeView.selectionChanged()" hidecolumnpicker="true" persist="sortDirection sortResource" sortDirection="ascending" sortResource="content">
+                <treecols>  
+                    <treecol id="content" label="Title" flex="1" onclick="sort(this)"/>
+                    <splitter class="tree-splitter" />
+                    <treecol id="url" label="URL" flex="1" onclick="sort(this)"/>
+                </treecols>  
+                <treechildren ondblclick="loadPage()"/>
+            </tree>
+            <hbox pack="end">
+                <label id="counter" value="" pack="right" style="color:gray;font-style:italic;"/>
+            </hbox>
+        </vbox>
+        <splitter />
+        <grid>
+            <columns>
+                <column/>
+                <column flex="1"/>
+            </columns>
+            <rows>
+                <textbox flex="1" id="text" multiline="true"
+                    observes="isEnabled"
+                    onblur="saveNote(this.value, 'content')"
+                    style="height:100px"/>
+                <row align="center">
+                    <label control="color" value="Color:"/>
+                    <hbox flex="1">
+                        <colorpicker id="color" 
+                            type="button" 
+                            observes="isEnabled"
+                            onselect="saveNote(this.color, 'color')" />
+                        <spacer flex="1" />
+                        <button id="delete" label="Remove" observes="isEnabled" oncommand="deleteNote()" />
+                    </hbox>   
+                </row>
+            </rows>
+        </grid>
+        <spacer style="height:5px"/>
+    </vbox>
+    <script type="text/javascript" src="chrome://floatnotes/content/notelist.js"> </script>
 </window>

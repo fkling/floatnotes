@@ -219,10 +219,10 @@ function search() {
 function getTitle(text) {
     var index = text.indexOf("\n");
     if (index >= 0) {
-        return text.substring(0, index);
+        return " " + text.substring(0, index);
     }
     else {
-        return text;
+        return " " + text;
     }
 }
 
@@ -370,6 +370,13 @@ var searchManager = {
         document.getElementById('searchListButtons').setAttribute('disabled', (searchList.selectedIndex === 0));
     }
 };
+
+
+var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
+                     .getService(Components.interfaces.nsIFaviconService);
+var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+                  .getService(Components.interfaces.nsIIOService);
+
 var treeView = {
     data: [],
     get rowCount() {
@@ -386,7 +393,20 @@ var treeView = {
     isSeparator: function(row){ return false; },  
     isSorted: function(){ return false; },  
     getLevel: function(row){ return 0; },  
-    getImageSrc: function(row,col){ return null; },  
+    getImageSrc: function(row,column){
+        if (column.id == "content") {
+            var note = this.data[row];
+            var url = note.url;
+            if(note.protocol) {
+                url = note.protocol + '//' + url;
+            }
+            if(url.lastIndexOf('*') === url.length - 1) {
+                url = url.substring(0, url.length);
+            }
+            return faviconService.getFaviconImageForPage(ioService.newURI(url, null, null)).spec;
+        }
+        return null; 
+    },  
     getRowProperties: function(row,props){},  
     getCellProperties: function(row,col,props){},  
     getColumnProperties: function(colid,col,props){},

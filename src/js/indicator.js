@@ -11,8 +11,8 @@ var IndicatorProxy = {
         this._timer = Components.classes["@mozilla.org/timer;1"]
             .createInstance(Components.interfaces.nsITimer);
         
-        this.above = new Indicator(Indicator.BELOW);
-        this.below = new Indicator(Indicator.ABOVE);
+        this.above = new Indicator(Indicator.BELOW, view);
+        this.below = new Indicator(Indicator.ABOVE, view);
     },
     updateAndShow: function(doc, notes) {
         this.above.updateAndShow(doc, notes);
@@ -47,8 +47,9 @@ var IndicatorProxy = {
 
 
 
-function Indicator(type) {
+function Indicator(type, view) {
     this.notes = null;
+    this.view = view;
 
     if(type == Indicator.BELOW) {
         this.label = util.getString('belowIndicatorString');
@@ -130,7 +131,7 @@ Indicator.prototype = {
             for(var i = 0, length = notes.length;i < length; i++) {
                 var div = this.current_doc.createElement('div');
                 div.className = "floatnotes-indicator-text";
-                div.setAttribute('rel', notes[i].dom.id);
+                div.setAttribute('rel', notes[i].guid);
                 div.textContent = notes[i].data.content.substring(0,30);
                 this.ele.container.appendChild(div);
             }
@@ -179,11 +180,9 @@ Indicator.prototype = {
         }, false);
 
         indicator.addEventListener('click', function(e) {
-            var doc = gBrowser.contentDocument;
             if(e.target.className == 'floatnotes-indicator-text') {
                 that._hide();
-                var t = doc.getElementById(e.target.getAttribute('rel'));
-                doc.defaultView.scrollTo(0, Math.max(parseInt(t.style.top, 10) - 20, 0));
+                that.view.scrollToNote(e.target.getAttribute('rel'));
             }
         }, true);
 

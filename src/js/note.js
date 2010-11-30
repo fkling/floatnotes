@@ -127,6 +127,10 @@ FloatNote.prototype = {
 
     /* getter and setter */
 
+    get guid() {
+        return this.data.guid;
+    },
+
     get url() {
         return this.data.url;
     },
@@ -182,7 +186,9 @@ FloatNote.prototype = {
         if(doc) {
             if(this.dom === null) {
                 this.dom = this.getDomElement(doc);
-                this.dom.id = 'floatnotes-note-' + this.data.id;
+                if(this.data.id) {
+                    this.dom.id = 'floatnotes-note-' + this.data.id;
+                }
             }
             this.dom = doc.adoptNode(this.dom);
             node = node || doc.body;

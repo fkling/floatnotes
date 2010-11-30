@@ -140,7 +140,7 @@ FloatNotesView.prototype = {
         window.addEventListener("contextmenu", function(e) {that.updateContext(e);}, true);
         window.addEventListener("contextmenu", function(e) {that.updateContextMenu(e);}, false);
         gBrowser.addEventListener("hashchange", function(e) {that.onHashChange(e);}, true);
-        //window.addEventListener("activate", function(e) {that.onWindowActivated(e);}, true);
+        window.addEventListener("activate", function(e) {that.onWindowActivated(e);}, true);
     },
 
     registerObserver: function() {
@@ -218,7 +218,7 @@ FloatNotesView.prototype = {
     },
 
     onWindowActivated: function(e) {
-
+        this.scrollToNote();
     },
 
     onHashChange: function(e) {
@@ -249,9 +249,7 @@ FloatNotesView.prototype = {
                 that._attachNotesToCurrentDocument();
                 that._attachAndShowIndicators();
                 that._updateToggleBroadcast();
-                if(domain.hash && domain.hash.indexOf('#floatnotes-note') === 0) {
-                    domain.hash = domain.hash;
-                }
+                that.scrollToNote();                
             });
         }
         else {
@@ -264,6 +262,17 @@ FloatNotesView.prototype = {
                 notifyBox.appendNotification('FloatNotes does not support URIs starting with "' + domain.protocol + '".', 'floatnotes', null, notifyBox.PRIORITY_INFO_MEDIUM, [{label: "Don't show me again", callback:function(note){Preferences.showUriNotSupported = false;}}, 
                             {label: 'Ok', callback: function(note){}}]);
             }
+        }
+    },
+
+    scrollToNote: function(guid) {
+        guid = guid || this.scroll_to_note;
+        if(guid) {
+            var note = this.notes[guid];
+            if(note) {
+                this.currentDocument.defaultView.scrollTo(note.data.x, Math.max(note.data.y - 20, 0));
+            }
+            this.scroll_to_note = null;
         }
     },
 

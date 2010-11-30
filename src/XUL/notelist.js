@@ -104,15 +104,67 @@ function loadPage() {
     if(treeView.selection.count == 1) {
         var note = treeView.data[treeView.selection.currentIndex];
         if(note) {
-            var url =  note.url;
+            var url =  (note.protocol) ? note.protocol + '//' + note.url : note.url;
             if(url.lastIndexOf('*') === url.length - 1) {
-                url = url.substr(0, url.length-1);
+                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                                    .getService(Components.interfaces.nsIPromptService);
+                promptService.alert(window, '', 'Note is visible on multiple pages, but I cannot know which ones.');
+                return;
             }
-            url += '#floatnotes-note-' + note.id;
-            opener.gBrowser.selectedTab = opener.gBrowser.addTab(url); 
+            openAndReuseOneTabPerURL(url, note.guid);
         }
     }
 }
+
+function openAndReuseOneTabPerURL(url, guid) {
+    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Components.interfaces.nsIWindowMediator);
+    var browserEnumerator = wm.getEnumerator("navigator:browser");
+
+    // Check each browser instance for our URL
+    var found = false;
+    while (!found && browserEnumerator.hasMoreElements()) {
+        var browserWin = browserEnumerator.getNext();
+        var tabbrowser = browserWin.gBrowser;
+
+        // Check each tab of this browser instance
+        var numTabs = tabbrowser.browsers.length;
+        for (var index = 0; index < numTabs; index++) {
+            var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+            var currentURL = currentBrowser.currentURI.spec;
+            if(currentURL.charAt(currentURL.length - 1) === '/') {
+                currentURL = currentURL.substring(0, currentURL.length -1);
+            }
+            if (url == currentURL) {
+
+                // The URL is already opened. Select this tab.
+                tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
+
+                browserWin.gFloatNotesView.scroll_to_note = guid;
+                // Focus *this* browser-window
+                browserWin.focus();
+
+                found = true;
+                break;
+            }
+        }
+    }
+
+    // Our URL isn't open. Open it now.
+    if (!found) {
+        var recentWindow = wm.getMostRecentWindow("navigator:browser");
+        if (recentWindow) {
+            // Use an existing browser window
+            recentWindow.gFloatNotesView.scroll_to_note = guid;
+            recentWindow.delayedOpenTab(url, null, null, null, null);
+        }
+        else {
+            // No browser windows are open, so open a new one.
+            var win = window.open(url);
+        }
+    }
+}
+
 
 function saveSearch() {
     var keywords = searchBox.value;

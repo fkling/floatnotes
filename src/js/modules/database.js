@@ -129,7 +129,7 @@ DatabaseConnector.prototype = {
     },
 
     createNoteAndGetId: function(note, runWhenFinished) {
-        var sql = "INSERT INTO floatnotes (url,content,h,w,x,y,status,color,guid, modification_date, creation_date) VALUES (:url,:content,:h,:w,:x,:y,:status,:color,:guid, :creation_date, :creation_date)";
+        var sql = "INSERT INTO floatnotes (url,protocol,content,h,w,x,y,status,color,guid, modification_date, creation_date) VALUES (:url,:protocol,:content,:h,:w,:x,:y,:status,:color,:guid, :creation_date, :creation_date)";
         LOG('Note as guid:' + note.guid);
         if(typeof note.guid == "undefined") {
             sql = sql.replace(':guid', 'hex(randomblob(16))');

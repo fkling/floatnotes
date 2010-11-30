@@ -39,7 +39,11 @@ var observer = {
 
     observe: function(subject, topic, data) {
         if(this.doObserve) {
+            var selection = treeView.selection;
             search();
+            if(selection && selection.count === 1) {
+                selection.select(selection.currentIndex);
+            }
         }
     }
 }
@@ -138,7 +142,7 @@ function search() {
     if(words) {
         db.getNotesContaining(words.split(' '),function(notes) {
             treeView.data = notes;
-            tree.view = treeView;
+            tree.boxObject.invalidate();
             updateCounter();
             if(document.getElementById('search').value) {
                 document.getElementById('saveSearch').style.display = 'inline';
@@ -176,11 +180,17 @@ function updateCounter() {
 
 function saveNote(value, attr) {
     if(treeView.selection.count == 1) {
-        var note = treeView.data[treeView.selection.currentIndex];
+        var selection = treeView.selection.currentIndex,
+            note = treeView.data[selection];
+
         if(value != note[attr]) {
             note[attr] = value
             observer.doObserve = false;
-            manager.saveNote(note, function(){observer.doObserve=true;});
+            manager.saveNote(note, function(id, guid){
+                observer.doObserve=true;
+                note.modification_date = manager.notes[guid].modification_date;
+                tree.boxObject.invalidateRow(selection);
+            });
         }
     }
 }
@@ -315,7 +325,9 @@ var treeView = {
     },  
     getCellText : function(row,column){ 
         if (column.id == "content") return getTitle(this.data[row].content);  
-        else return this.data[row].url;  
+        if (column.id == "url") return this.data[row].url;
+        if (column.id == "modification_date") return this.data[row].modification_date.toLocaleString();
+        if (column.id == "creation_date") return this.data[row].creation_date.toLocaleString();
     },  
     setTree: function(treebox){ this.treebox = treebox; },  
     isContainer: function(row){ return false; },  

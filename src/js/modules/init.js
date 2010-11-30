@@ -79,6 +79,10 @@ var Init = {
             db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)');
             db.executeSimpleSQL('UPDATE floatnotes SET guid=hex(randomblob(16))');
         }
+        if(versionChecker.compare(from, "0.6.5") < 0) {
+            db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN creation_date DATETIME');
+            db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN modification_date DATETIME');
+        }
     }
 }
 

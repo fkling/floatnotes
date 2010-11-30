@@ -126,6 +126,7 @@ FloatNotesManager.prototype = {
                 util.updateObject(note, data);
             }
         }
+        note.modification_date = new Date();
         this._db.updateNote(note, function() {
             if(data._prevURL) {
                 that.updateCacheForNewURL(note, data._prevURL, data.url);
@@ -156,7 +157,7 @@ FloatNotesManager.prototype = {
             url: domain,
             color: Preferences.color,
             status: 0};
-
+        data.creation_date = data.modification_date = new Date();
         return data;
     },
 

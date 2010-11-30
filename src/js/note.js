@@ -438,6 +438,7 @@ FloatNote.prototype = {
                 if(id > -1) {
                     that.dom.id =  'floatnotes-note-' + id;
                 }
+                that.ele.content.title = "Last modified: " + that.data.modification_date.toLocaleString();
             });
         }
     },
@@ -597,6 +598,7 @@ FloatNote.prototype = {
             'opacity:' + Preferences.transparency
         ].join(';');
         elements.content.innerHTML = this.markdownParser.makeHtml(this.data.content);
+        elements.content.title = "Last modified: " + this.data.modification_date.toLocaleString();
     },
 
     attachEventHandlers: function(elements) {

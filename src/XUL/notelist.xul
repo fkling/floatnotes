@@ -1,6 +1,12 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://browser/skin/places/organizer.css" type="text/css"?>
-<window id="yourwindow" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:h="http://www.w3.org/1999/xhtml" style="width:600px;height:400px;"  orient="horizontal">
+<window id="yourwindow" 
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml" 
+        xmlns:h="http://www.w3.org/1999/xhtml" 
+        style="width:600px;height:400px;"  
+        orient="horizontal"
+        persist="screenX screenY width height">
 
     <broadcasterset>
         <broadcaster id="isEnabled" disabled="true" />
@@ -27,11 +33,15 @@
             <button style="display:none;" class="small" id='saveSearch' label="Save" oncommand="saveSearch();"/>
         </hbox>
         <vbox flex="1">
-            <tree id="notes" flex="2" onselect="treeView.selectionChanged()" hidecolumnpicker="true" persist="sortDirection sortResource" sortDirection="ascending" sortResource="content">
+            <tree id="notes" flex="2" onselect="treeView.selectionChanged()" hidecolumnpicker="false" persist="sortDirection sortResource" sortDirection="ascending" sortResource="content">
                 <treecols>  
-                    <treecol id="content" label="Title" flex="1" onclick="sort(this)"/>
+                    <treecol id="content" label="Title" flex="1" onclick="sort(this)" persist="width hidden"/>
                     <splitter class="tree-splitter" />
-                    <treecol id="url" label="URL" flex="1" onclick="sort(this)"/>
+                    <treecol id="url" label="URL" flex="1" onclick="sort(this)" persist="width hidden"/>
+                    <splitter class="tree-splitter" />
+                    <treecol id="creation_date" label="Created" flex="1" onclick="sort(this)" persist="width hidden"/>
+                    <splitter class="tree-splitter" />
+                    <treecol id="modification_date" label="Modified" flex="1" onclick="sort(this)" persist="width hidden"/>
                 </treecols>  
                 <treechildren ondblclick="loadPage()"/>
             </tree>

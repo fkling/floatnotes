@@ -33,7 +33,7 @@ function DatabaseConnector(database_file) {
 DatabaseConnector.prototype = {
 
     createTables: function() {
-        this._db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT)');
+        this._db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, creation_date DATETME, modification_date DATETIME)');
         this._db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
         this._db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)');
     },
@@ -129,14 +129,13 @@ DatabaseConnector.prototype = {
     },
 
     createNoteAndGetId: function(note, runWhenFinished) {
-        var sql = "INSERT INTO floatnotes (url,content,h,w,x,y,status,color,guid) VALUES (:url,:content,:h,:w,:x,:y,:status,:color,:guid)";
+        var sql = "INSERT INTO floatnotes (url,content,h,w,x,y,status,color,guid, modification_date, creation_date) VALUES (:url,:content,:h,:w,:x,:y,:status,:color,:guid, :creation_date, :creation_date)";
         LOG('Note as guid:' + note.guid);
         if(typeof note.guid == "undefined") {
             sql = sql.replace(':guid', 'hex(randomblob(16))');
         }
         LOG('Generated statment: ' + sql);
         var statement = this._db.createStatement(sql);
-
         try {
             for (var param in statement.params) {
                 statement.params[param] = note[param];				
@@ -167,8 +166,7 @@ DatabaseConnector.prototype = {
     },
 
     updateNote: function(note, runWhenFinished) {
-        var statement = this._db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, status=:status, color=:color, url=:url WHERE guid = :guid");
-
+        var statement = this._db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, status=:status, color=:color, url=:url, modification_date=:modification_date WHERE guid = :guid");
         try {
             for (var param in statement.params) {
                 statement.params[param] = note[param];
@@ -246,7 +244,9 @@ DatabaseConnector.prototype = {
             h: row.getResultByName("h"),
             status: row.getResultByName("status"),
             color: row.getResultByName("color"),
-            guid: row.getResultByName('guid')
+            guid: row.getResultByName('guid'),
+            modification_date: new Date((+row.getResultByName('modification_date'))/1000),
+            creation_date: new Date((+row.getResultByName('creation_date'))/1000)
         };
 
         return data;

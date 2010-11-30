@@ -38,11 +38,6 @@ FloatNotesManager.prototype = {
 
     getNotesFor: function(location, cb) {
         LOG('Get notes for ' + location);
-        // don't load stuff for about pages
-        var ignoredURLs = {'about:': 1, 'chrome:': 1, 'resource:': 1};
-        if(ignoredURLs[location.protocol]) {
-            cb([]);
-        }
 
         var that = this;
         var domains = URLHandler.getSearchUrls(location);
@@ -155,6 +150,7 @@ FloatNotesManager.prototype = {
             h: Preferences.height,
             content: "",
             url: domain,
+            protocol: URLHandler.getProtocol(document.location),
             color: Preferences.color,
             status: 0};
         data.creation_date = data.modification_date = new Date();

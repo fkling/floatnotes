@@ -3,6 +3,9 @@ EXPORTED_SYMBOLS = ['URLParser', 'URLHandler'];
 Components.utils.import("resource://floatnotes/preferences.jsm");
 
 var URLParser = {
+    getProtocol: function(location) {
+        return location.protocol ? location.protocol : '';
+    },
     getAllSitesUrl: function(location) {
         return '*';
     },

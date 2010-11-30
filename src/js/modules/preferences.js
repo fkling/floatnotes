@@ -100,6 +100,13 @@ var Preferences = {
         return this._includePageForHashURLs;
     },
 
+    get ignoreProtocol() {
+        if(!this._ignoreProtocol) {
+            this._ignoreProtocol = this._branch.getBoolPref('ignoreProtocol');
+        }
+        return this._ignoreProtocol;
+    },
+
     get savedSearches() {
         if(!this._savedSearches) {
             this._savedSearches = this._branch.getComplexValue('savedSearches', Components.interfaces.nsISupportsString).data;

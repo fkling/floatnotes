@@ -17,6 +17,7 @@ pref("extensions.floatnotes.transparency", "0.9");
 pref("extensions.floatnotes.location", -2);
 pref("extensions.floatnotes.updateOnHashChange", false);
 pref("extensions.floatnotes.includePageForHashURLs", true);
+pref("extensions.floatnotes.ignoreProtocol", true);
 
 /* interface */
 pref("extensions.floatnotes.showIndicator", true);

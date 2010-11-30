@@ -83,6 +83,9 @@ var Init = {
             db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN creation_date DATETIME');
             db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN modification_date DATETIME');
         }
+        if(versionChecker.compare(from, "0.6.6") < 0) {
+            db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN protocol TEXT');
+        }
     }
 }
 

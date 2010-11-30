@@ -389,6 +389,7 @@ FloatNotesView.prototype = {
     saveNote: function(note, cb) {
         this.doObserve = false;
         var that = this;
+        note.data.protocol = URLHandler.getProtocol(this.currentDocument.location);
         this.notesManager.saveNote(note.data, function(id, guid) {
             if(id > -1) {
                 that.notes[guid] = note;

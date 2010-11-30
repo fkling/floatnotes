@@ -153,8 +153,10 @@ FloatNote.prototype = {
     },
 
     set text(value) {
-        this.setStatus(note_status.NEEDS_SAVE);
-        this.data.content = value;
+        if(this.data.content != value) {
+            this.setStatus(note_status.NEEDS_SAVE);
+            this.data.content = value;
+        }
         if(this.ele && this.ele.content) {
             this.ele.content.innerHTML = this.markdownParser.makeHtml(value);
         }
@@ -306,7 +308,6 @@ FloatNote.prototype = {
 
             note.text = note.ele.text.value;
             note.unsetStatus(note_status.EDITING);
-            note.setStatus(note_status.NEEDS_SAVE);
             note.save();
             finish = true;
         }

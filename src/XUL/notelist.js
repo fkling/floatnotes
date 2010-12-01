@@ -2,6 +2,7 @@ Components.utils.import("resource://floatnotes/database.js");
 Components.utils.import("resource://floatnotes/manager.js");
 Components.utils.import("resource://floatnotes/preferences.js");
 Components.utils.import("resource://floatnotes/util-Locale.js");
+Components.utils.import("resource://floatnotes/URLHandler.js");
 
 var textBox = document.getElementById('text');
 var colorPicker = document.getElementById('color');
@@ -108,7 +109,7 @@ function loadPage() {
     if(treeView.selection.count == 1) {
         var note = treeView.data[treeView.selection.currentIndex];
         if(note) {
-            var url =  (note.protocol) ? note.protocol + '//' + note.url : note.url;
+            var url =  URLHandler.getNoteUrl(note);
             if(url.lastIndexOf('*') === url.length - 1) {
                 var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                                     .getService(Components.interfaces.nsIPromptService);
@@ -405,11 +406,8 @@ var treeView = {
     getImageSrc: function(row,column){
         if (column.id == "content") {
             var note = this.data[row];
-            var url = note.url;
-            if(note.protocol) {
-                url = note.protocol + '//' + url;
-            }
-            if(url.lastIndexOf('*') === url.length - 1) {
+            var url =  URLHandler.getNoteUrl(note);
+            if(url.charAt(url.length - 1) === '*') {
                 url = url.substring(0, url.length);
             }
             return faviconService.getFaviconImageForPage(ioService.newURI(url, null, null)).spec;

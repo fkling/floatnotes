@@ -79,13 +79,24 @@ var URLHandler = {
             }
         }
         else {
-            this._parsers[protoco] = parser;
+            this._parsers[protocol] = parser;
         }
     },
 
     supports: function(location) {
         return location.protocol in this._parsers;
-    }
+    },
+
+    getNoteUrl: function(note) {
+        var url = note.url,
+            i = url.indexOf(':');
+        if(i >= 0 && url.substring(0, i+1) in this._parsers) {
+            return url;
+        }
+        else {
+            return note.protocol + '//' + url;
+        }
+    },
 };
 
 for(var method in URLParser) {
@@ -158,4 +169,23 @@ var HTTPURLParser = {
     }
 };
 
+var FileURLParser = {
+    __proto__: URLParser,
+    getPageUrl: function(location) {
+        return location.toString();
+    },
+    getStartsWithUrls: function(location) {
+        var url = location.toString();
+        url = url.substring(0, url.lastIndexOf('/')) + '*';
+        return [url];
+    },
+    getAllSitesUrl: function(location) {
+        return '';
+    },
+    getSearchUrls: function(location) {
+        return this.getStartsWithUrls(location).concat([this.getPageUrl(location)]);
+    }
+};
+
 URLHandler.register(['http:', 'https:'], HTTPURLParser);
+URLHandler.register('file:', FileURLParser);

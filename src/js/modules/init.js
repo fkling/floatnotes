@@ -105,6 +105,7 @@ var Init = {
         }
         if(versionChecker.compare(from, "0.6.6") < 0) {
             db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN protocol TEXT');
+            db.executeSimpleSQL('UPDATE floatnotes SET protocol="http:"');
         }
     }
 }

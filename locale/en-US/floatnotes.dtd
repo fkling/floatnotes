@@ -2,3 +2,8 @@
 <!ENTITY floatnotes.edit "Edit note" >
 <!ENTITY floatnotes.delete "Delete note" >
 <!ENTITY floatnotes.hide "Hide notes" >
+<!ENTITY floatnotes "FloatNotes" >
+<!ENTITY floatnotes.notelist "Notes Manager" >
+
+<!ENTITY edit_popup.color "Color:" >
+<!ENTITY edit_popup.location "Location" >

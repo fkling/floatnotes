@@ -1,6 +1,7 @@
 Components.utils.import("resource://floatnotes/database.js");
 Components.utils.import("resource://floatnotes/manager.js");
 Components.utils.import("resource://floatnotes/preferences.js");
+Components.utils.import("resource://floatnotes/util-Locale.js");
 
 var textBox = document.getElementById('text');
 var colorPicker = document.getElementById('color');
@@ -108,7 +109,7 @@ function loadPage() {
             if(url.lastIndexOf('*') === url.length - 1) {
                 var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                                     .getService(Components.interfaces.nsIPromptService);
-                promptService.alert(window, '', 'Note is visible on multiple pages, but I cannot know which ones.');
+                promptService.alert(window, '',Locale.get('notelist.notify_multiple_pages'));
                 return;
             }
             openAndReuseOneTabPerURL(url, note.guid);
@@ -176,7 +177,7 @@ function saveSearch() {
         var input = {value: ""};
         var result = true;
         while(!input.value && result) {
-            result = prompts.prompt(null, "Save search", "Name:", input, null, check);
+            result = prompts.prompt(null, Locale.get('notelist.save_search.title'), Locale.get('notelist.save_search.name'),input, null, check);
         } 
         if(result) {
             searchManager.addSearch(input.value, keywords);
@@ -227,7 +228,14 @@ function getTitle(text) {
 }
 
 function updateCounter() {
-    document.getElementById('counter').value = treeView.rowCount + ' Notes';
+    var str = treeView.rowCount;
+    if(str === 1) {
+        str += ' ' + Locale.get('singularNote');
+    }
+    else {
+        str += ' ' + Locale.get('pluralNote');
+    }
+    document.getElementById('counter').value = str;
 }
 
 function saveNote(value, attr) {

@@ -89,7 +89,7 @@ Indicator.prototype = {
     },
 
     _updateLabel: function(nn_notes) {
-        this.ele.label.innerHTML = nn_notes + ' ' + (nn_notes > 1 ? Util.Locale.get('pluralIndicatorString'): Util.Locale.get('singularIndicatorString')) +  " " + this.label;
+        this.ele.label.innerHTML = nn_notes + ' ' + (nn_notes > 1 ? Util.Locale.get('pluralNote'): Util.Locale.get('singularNote')) +  " " + this.label;
     },
 
     _show: function() {

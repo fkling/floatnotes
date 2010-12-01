@@ -1,0 +1,15 @@
+<!ENTITY button.edit "Edit" >
+<!ENTITY button.remove "Remove" >
+<!ENTITY button.save "Save" >
+
+<!ENTITY searchtext "Search Notes" >
+
+<!ENTITY list.title "Title" >
+<!ENTITY list.url "URL" >
+<!ENTITY list.created "Created" >
+<!ENTITY list.modified "Modified" >
+
+<!ENTITY color "Color:" >
+
+<!ENTITY editsearch.name "Name:" >
+<!ENTITY editsearch.keywords "Keywords:" >

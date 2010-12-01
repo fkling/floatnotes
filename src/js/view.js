@@ -26,29 +26,31 @@ var locationBuilder = {
     },
 
     buildLocationList: function(location, noteUrl) {
-        var item;
-        var group = this.locationListElement;
+        var item,
+            group = this.locationListElement,
+            loc = Util.Locale;
+
         Util.Dom.removeChildren(group);
-        
-        this._addItem(group, 'This page',  URLHandler.getPageUrl(location), noteUrl);
+
+        this._addItem(group, loc.get('location.page_url_label'),  URLHandler.getPageUrl(location), noteUrl);
         var queryUrl = URLHandler.getPageQueryUrl(location);
         if(queryUrl) {
             var query = location.search;
-            item = this._addItem(group, '...including query (?)',  queryUrl, noteUrl);
+            item = this._addItem(group, loc.get('location.query_url_label'),  queryUrl, noteUrl);
             item.style.marginLeft="20px";
             item.setAttribute('tooltiptext', query);
         }
         var hashUrl =  URLHandler.getPageAnchorUrl(location);
         if(hashUrl) {
             var hash = location.hash;
-            item = this._addItem(group, '...including anchor (#)', hashUrl, noteUrl);
+            item = this._addItem(group, loc.get('location.query_url_label'), hashUrl, noteUrl);
             item.style.marginLeft="20px";
             item.setAttribute('tooltiptext', hash);
         }
-        this._addItem(group, 'This website',  URLHandler.getSiteUrl(location), noteUrl);
-        this._addItem(group, 'All websites (global)',  URLHandler.getAllSitesUrl(location), noteUrl);
+        this._addItem(group, loc.get('location.site_url_label'),  URLHandler.getSiteUrl(location), noteUrl);
+        this._addItem(group, loc.get('location.all_sites_label'),  URLHandler.getAllSitesUrl(location), noteUrl);
         var moreOptions = document.createElement('label');
-        moreOptions.setAttribute('value', 'On sites starting with...');
+        moreOptions.setAttribute('value', loc.get('location.sites_starting_label'));
         moreOptions.style.cssText = 'color:blue;font-style:underline;';
         group.appendChild(moreOptions);
 
@@ -253,13 +255,15 @@ FloatNotesView.prototype = {
         }
         else {
             if(Preferences.showUriNotSupported) {
-                var notifyBox = gBrowser.getNotificationBox();
-                var note = notifyBox.getNotificationWithValue('floatnotes');
+                var notifyBox = gBrowser.getNotificationBox(),
+                    note = notifyBox.getNotificationWithValue('floatnotes'),
+                    loc = Util.Locale;
                 if(note) {
                     notifyBox.removeNotification(note);
                 }
-                notifyBox.appendNotification('FloatNotes does not support URIs starting with "' + domain.protocol + '".', 'floatnotes', null, notifyBox.PRIORITY_INFO_MEDIUM, [{label: "Don't show me again", callback:function(note){Preferences.showUriNotSupported = false;}}, 
-                            {label: 'Ok', callback: function(note){}}]);
+
+                notifyBox.appendNotification(loc.get('location.protocol_not_supported', [domain.protocol]), 'floatnotes', null, notifyBox.PRIORITY_INFO_MEDIUM, [{label: loc.get('button.not_again'), callback:function(note){Preferences.showUriNotSupported = false;}}, 
+                            {label: loc.get('button.ok'), callback: function(note){}}]);
             }
         }
     },
@@ -277,7 +281,7 @@ FloatNotesView.prototype = {
 
     _updateToggleBroadcast: function() {
        if(this._notesHiddenFor(this.currentDocument.location)) {
-            var text = Util.Locale.get('showNotesString', this.currentNotes.length);
+            var text = Util.Locale.get('showNotesString', [this.currentNotes.length]);
             this._toggleNotesBrdc.setAttribute('label', text);
             this._toggleNotesBrdc.setAttribute('tooltiptext', text);
             this._toggleNotesBrdc.setAttribute('disabled', true);
@@ -415,8 +419,9 @@ FloatNotesView.prototype = {
             if(Preferences.confirmDelete) {
                 var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                                 .getService(Components.interfaces.nsIPromptService);
+                var loc = Util.Locale;
                 var checkState = {value: !Preferences.confirmDelete};
-                del = promptService.confirmCheck(null, 'Delete note', 'Are you sure you want to delete this note?', "Don't ask me again.", checkState);
+                del = promptService.confirmCheck(null, loc.get('note.delete.title'), loc.get('note.delete.popup.msg'), loc.get('button.not_ask_again'), checkState);
                 Preferences.confirmDelete = !checkState.value;
             }
 

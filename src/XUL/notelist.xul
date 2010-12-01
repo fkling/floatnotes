@@ -1,3 +1,4 @@
+<!DOCTYPE window SYSTEM "chrome://floatnotes/locale/notelist.dtd">
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://browser/skin/places/organizer.css" type="text/css"?>
 <window id="yourwindow" 
@@ -20,8 +21,8 @@
             ondrop="dragHandler.onDrop(event);" 
             onkeypress="deleteSearch(event)"/>
         <hbox>
-            <button observes="searchListButtons" label="Edit" oncommand="openEditDiag()" />
-            <button observes="searchListButtons" label="Remove" oncommand="deleteSearch()" />
+            <button observes="searchListButtons" label="&button.edit;" oncommand="openEditDiag()" />
+            <button observes="searchListButtons" label="&button.remove;" oncommand="deleteSearch()" />
         </hbox>
     </vbox>
     <splitter collapse="before">
@@ -29,19 +30,19 @@
     </splitter>
     <vbox flex="3">
         <hbox pack="end" align="center">
-            <textbox flex="1" type="search" id="search" oncommand="search()" emptytext="Search Notes"/>
-            <button style="display:none;" class="small" id='saveSearch' label="Save" oncommand="saveSearch();"/>
+            <textbox flex="1" type="search" id="search" oncommand="search()" emptytext="&searchtext;"/>
+            <button style="display:none;" class="small" id='saveSearch' label="&button.save;" oncommand="saveSearch();"/>
         </hbox>
         <vbox flex="1">
             <tree id="notes" flex="2" onselect="treeView.selectionChanged()" hidecolumnpicker="false" persist="sortDirection sortResource" sortDirection="ascending" sortResource="content">
                 <treecols>  
-                    <treecol id="content" label="Title" flex="1" onclick="sort(this)" persist="width hidden"/>
+                    <treecol id="content" label="&list.title;" flex="1" onclick="sort(this)" persist="width hidden"/>
                     <splitter class="tree-splitter" />
-                    <treecol id="url" label="URL" flex="1" onclick="sort(this)" persist="width hidden"/>
+                    <treecol id="url" label="&list.url;" flex="1" onclick="sort(this)" persist="width hidden"/>
                     <splitter class="tree-splitter" />
-                    <treecol id="creation_date" label="Created" flex="1" onclick="sort(this)" persist="width hidden"/>
+                    <treecol id="creation_date" label="&list.created;" flex="1" onclick="sort(this)" persist="width hidden"/>
                     <splitter class="tree-splitter" />
-                    <treecol id="modification_date" label="Modified" flex="1" onclick="sort(this)" persist="width hidden"/>
+                    <treecol id="modification_date" label="&list.modified;" flex="1" onclick="sort(this)" persist="width hidden"/>
                 </treecols>  
                 <treechildren ondblclick="loadPage()"/>
             </tree>
@@ -61,7 +62,7 @@
                     onblur="saveNote(this.value, 'content')"
                     style="height:100px"/>
                 <row align="center">
-                    <label control="color" value="Color:"/>
+                    <label control="color" value="&color;"/>
                     <hbox flex="1">
                         <colorpicker id="color" 
                             type="button" 

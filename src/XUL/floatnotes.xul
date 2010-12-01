@@ -18,12 +18,12 @@
         <panel id="floatnotes-edit-popup" style="padding:5px;" onpopuphidden="gFloatNotesView.saveChanges()">
             <vbox>
                 <hbox align="center">
-                    <label value="Color:" />
+                    <label value="&edit_popup.color;" />
                     <colorpicker id="floatnotes-edit-color" type="button" />
                 </hbox>
                 <vbox>
                     <groupbox>
-                        <caption label="Location" />
+                        <caption label="&edit_popup.location;" />
                         <radiogroup id="floatnotes-edit-location-list"> </radiogroup>
                     </groupbox>
                 </vbox>
@@ -32,7 +32,7 @@
     </popupset>
 
     <menupopup id="menu_ToolsPopup">
-        <menu id="xulschoolhello-hello-menu" label="FloatNotes"
+        <menu id="xulschoolhello-hello-menu" label="&floatnotes;"
             accesskey=""
             insertafter="javascriptConsole,devToolsSeparator">
             <menupopup>

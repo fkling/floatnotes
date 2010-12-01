@@ -1,9 +1,6 @@
-//!#ifndef __INCLUDE_UPDATE__
-//!#define __INCLUDE_UPDATE__
+//!#include "../header.js"
 
-//!#include "../util.js"
-
-Components.utils.import("resource://floatnotes/preferences.jsm");
+Cu.import("resource://floatnotes/preferences.js");
 
 var EXPORTED_SYMBOLS = ['Init'];
 
@@ -11,7 +8,7 @@ var Init = {
     init: function(cb) {
         this.loadCSS();
         var that = this;
-        util.getCurrentVersion(function(newVersion) {
+        this.getCurrentVersion(function(newVersion) {
             that.init = function(cb) {cb();};
             var lastVersion = Preferences.version;
             var firstrun = Preferences.firstrun;
@@ -27,10 +24,8 @@ var Init = {
     },
 
     loadCSS: function() {
-        var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
-        .getService(Components.interfaces.nsIStyleSheetService);
-        var ios = Components.classes["@mozilla.org/network/io-service;1"]
-        .getService(Components.interfaces.nsIIOService);
+        var sss = Cc["@mozilla.org/content/style-sheet-service;1"] .getService(Ci.nsIStyleSheetService);
+        var ios = Cc["@mozilla.org/network/io-service;1"] .getService(Ci.nsIIOService);
         var uri = ios.newURI("chrome://floatnotes/skin/notes.css", null, null);
 
         if(!sss.sheetRegistered(uri, sss.AGENT_SHEET)) {
@@ -39,18 +34,43 @@ var Init = {
         LOG('CSS loaded');
     },
 
-    runOnFirstRun: function() {
-        var preferences = util.getPreferencesService(); 
+     getCurrentVersion: function(cb) {
+        if(!this._currentVersion) {
+            var appInfo = Cc["@mozilla.org/xre/app-info;1"] .getService(Ci.nsIXULAppInfo),
+                versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+            LOG('Application version: ' + appInfo.version + '. Compared to 4.0alpha: ' + versionChecker.compare(appInfo.version, "4.0alpha"));
+            if(versionChecker.compare(appInfo.version, "4.0alpha") < 0) {
+                var extensionManager = Cc["@mozilla.org/extensions/manager;1"].getService(Ci.nsIExtensionManager);
+                this._currentVersion = extensionManager.getItemForID("floatnotes@felix-kling.de").version;
+                LOG('Extension version: ' + this._currentVersion);
+                cb(this._currentVersion);
+            }
+            else {
+                var scope = {}, that = this;
+                Cu.import("resource://gre/modules/AddonManager.js", scope);
+                    scope.AddonManager.getAddonByID('floatnotes@felix-kling.de', function(addon) {
+                    that._currentVersion = addon.version;
+                    LOG('Extension version: ' + that._currentVersion);
+                    cb(that._currentVersion);
+                });
 
+            }
+        }
+        else {
+            cb(this._currentVersion);
+        }
+    },
+
+    runOnFirstRun: function() {
         this.getDatabase().createTables();
         Preferences.firstrun = false;
-        util.getCurrentVersion(function(version) {
+        this.getCurrentVersion(function(version) {
             Preferences.version = version;
         });
     },
     getDatabase: function() {
         if(!this._db) {
-            Components.utils.import("resource://floatnotes/database.jsm");
+            Cu.import("resource://floatnotes/database.js");
             this._db = getDatabase(this.DB_FILE);
         }
         return this._db;
@@ -61,8 +81,8 @@ var Init = {
         Preferences.version = to;
         var db = this.getDatabase();
 
-        var versionChecker = CC["@mozilla.org/xpcom/version-comparator;1"]
-        .getService(CI.nsIVersionComparator);
+        var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
+        .getService(Ci.nsIVersionComparator);
 
         if(versionChecker.compare(from, "0.6") < 0) {
             // Insert code if version is different here => upgrade
@@ -88,5 +108,3 @@ var Init = {
         }
     }
 }
-
-//!#endif

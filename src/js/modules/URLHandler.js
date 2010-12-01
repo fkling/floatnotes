@@ -1,6 +1,7 @@
+//!#include "../header.js"
 EXPORTED_SYMBOLS = ['URLParser', 'URLHandler'];
 
-Components.utils.import("resource://floatnotes/preferences.jsm");
+Cu.import("resource://floatnotes/preferences.js");
 
 var URLParser = {
     getProtocol: function(location) {

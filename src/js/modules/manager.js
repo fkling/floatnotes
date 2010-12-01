@@ -1,10 +1,7 @@
-//!#ifndef __INCLUDE_MANAGER_
-//!#define __INCLUDE_MANAGER_
+//!#include "../header.js"
 
-//!#include "../util.js"
-
-Components.utils.import("resource://floatnotes/URLHandler.jsm");
-Components.utils.import("resource://floatnotes/preferences.jsm");
+Cu.import("resource://floatnotes/URLHandler.js");
+Cu.import("resource://floatnotes/preferences.js");
 
 var EXPORTED_SYMBOLS = ['getManager'];
 
@@ -22,7 +19,7 @@ function FloatNotesManager(database) {
     this._db = database;
     this.notesByUrl = {};
     this.notes = {};
-    this._observer_service = CC["@mozilla.org/observer-service;1"].getService(CI.nsIObserverService);
+    this._observer_service = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 }
 
 /**
@@ -94,6 +91,7 @@ FloatNotesManager.prototype = {
     },
 
     addNote: function(data, cb) {
+        LOG('Save note for the first time.')
         var that = this;
         this._db.createNoteAndGetId(data, function(id, guid) {
             var domain = data.url;
@@ -118,7 +116,7 @@ FloatNotesManager.prototype = {
         if(this.notes[ID]) {
             note = this.notes[ID];
             if(note != data) {
-                util.updateObject(note, data);
+                Util.Js.updateObject(note, data);
             }
         }
         note.modification_date = new Date();
@@ -140,7 +138,7 @@ FloatNotesManager.prototype = {
             this.notesByUrl[newURL] = [];
         }
         this.notesByUrl[newURL].push(note);
-        util.removeObjectFromArray(note, this.notesByUrl[oldURL]);
+        Util.Js.removeObjectFromArray(note, this.notesByUrl[oldURL]);
     },
 
     createNote: function(document) {
@@ -176,7 +174,7 @@ FloatNotesManager.prototype = {
         this._db.deleteNote(ID, function() {
             that._observer_service.notifyObservers(null, 'floatnotes-note-delete', note.guid);
             if(cached) {
-                util.removeObjectFromArray(note, that.notesByUrl[note.url]);
+                Util.Js.removeObjectFromArray(note, that.notesByUrl[note.url]);
                 delete that.notes[note.url];
             }
             cb();
@@ -194,4 +192,3 @@ FloatNotesManager.prototype = {
         return false;
     }
 };
-//!#endif

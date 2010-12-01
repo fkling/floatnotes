@@ -1,12 +1,11 @@
 //!#ifndef __INCLUDE_MANAGER_
 //!#define __INCLUDE_MANAGER_
-
-//!#include "util.js"
+//!#include "header.js"
 //!#include "indicator.js"
 //!#include "note.js"
 
-Components.utils.import("resource://floatnotes/URLHandler.jsm");
-Components.utils.import("resource://floatnotes/preferences.jsm");
+Cu.import("resource://floatnotes/URLHandler.js");
+Cu.import("resource://floatnotes/preferences.js");
 
 
 var locationBuilder = {
@@ -29,7 +28,7 @@ var locationBuilder = {
     buildLocationList: function(location, noteUrl) {
         var item;
         var group = this.locationListElement;
-        util.removeChildren(group);
+        Util.Dom.removeChildren(group);
         
         this._addItem(group, 'This page',  URLHandler.getPageUrl(location), noteUrl);
         var queryUrl = URLHandler.getPageQueryUrl(location);
@@ -179,7 +178,7 @@ FloatNotesView.prototype = {
                     note = this.notes[data];
                     if(note) {
                         note.detach();
-                        util.removeObjectFromArray(note, this.currentNotes);
+                        Util.Js.removeObjectFromArray(note, this.currentNotes);
                         delete this.notes[data];
                     }
                 break;
@@ -188,7 +187,7 @@ FloatNotesView.prototype = {
                     LOG('URL changed for: ' + data);
                     if(note) {
                         note.detach();
-                        util.removeObjectFromArray(note, this.currentNotes);
+                        Util.Js.removeObjectFromArray(note, this.currentNotes);
                     }
                 case 'floatnotes-note-add':
                     var locations =  URLHandler.getSearchUrls(this.currentDocument.location);
@@ -278,14 +277,14 @@ FloatNotesView.prototype = {
 
     _updateToggleBroadcast: function() {
        if(this._notesHiddenFor(this.currentDocument.location)) {
-            var text = util.getString('showNotesString', [this.currentNotes.length]);
+            var text = Util.Locale.get('showNotesString', this.currentNotes.length);
             this._toggleNotesBrdc.setAttribute('label', text);
             this._toggleNotesBrdc.setAttribute('tooltiptext', text);
             this._toggleNotesBrdc.setAttribute('disabled', true);
             this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
        }
         else {
-            var text = util.getString('hideNotesString');
+            var text = Util.Locale.get('hideNotesString');
             this._toggleNotesBrdc.setAttribute('label', text);
             this._toggleNotesBrdc.setAttribute('tooltiptext', text);
             this._toggleNotesBrdc.setAttribute('disabled', false);
@@ -320,7 +319,7 @@ FloatNotesView.prototype = {
         if(Preferences.showIndicator) {
             IndicatorProxy.attachTo(this.currentDocument, this._container);
             this._attachScrollHandlerTo(this.currentDocument);
-            util.fireEvent(this.currentDocument, 'scroll');
+            Util.Dom.fireEvent(this.currentDocument, this.currentDocument, 'scroll');
         }
     },
 
@@ -426,7 +425,7 @@ FloatNotesView.prototype = {
                 this.doObserve = false;
                 this.notesManager.deleteNote(note.data, function() {
                     note.detach();
-                    util.removeObjectFromArray(note, that.currentNotes);
+                    Util.Js.removeObjectFromArray(note, that.currentNotes);
                     delete that.notes[note.data.guid];
                     that.contextNote = null;
                     that.doObserve = true;
@@ -453,7 +452,7 @@ FloatNotesView.prototype = {
     showNotes: function() {
         var location = this.currentDocument.location;
         this._setNotesVisibilityForTo(location, true);
-        util.show(this._container);
+        Util.Css.show(this._container);
         this._attachAndShowIndicators();
         this._updateToggleBroadcast();
     },
@@ -461,7 +460,7 @@ FloatNotesView.prototype = {
     hideNotes: function() {
         var location = this.currentDocument.location;
         this._setNotesVisibilityForTo(location, false);
-        util.hide(this._container);
+        Util.Css.hide(this._container);
         this._detachIndicators();
         this._updateToggleBroadcast();
     },

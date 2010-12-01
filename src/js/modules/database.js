@@ -1,6 +1,4 @@
-//!#ifndef __INCLUDE_DB__
-//!#define __INCLUDE_DB__
-//!#include "../util.js"
+//!#include "../header.js"
 
 var EXPORTED_SYMBOLS = ['getDatabase'];
 
@@ -253,4 +251,3 @@ DatabaseConnector.prototype = {
         return data;
     }
 };
-//!#endif

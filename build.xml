@@ -124,7 +124,7 @@
             <arg line="-P -C -DDEBUG=${cpp.debug} -DTESTRUN=${cpp.testrun}" />
             <srcfile />
 			<targetfile />
-			<globmapper from="*.js" to="*.jsm" />
+			<globmapper from="*.js" to="*.js" />
 		</apply>
 
 		<exec executable="git" outputproperty="date">

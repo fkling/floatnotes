@@ -1,6 +1,5 @@
+//!#include "header.js"
 //!#include "view.js"
-
-
 var Loader = {  
 
     listenToApplicationLoad: function() {
@@ -11,11 +10,11 @@ var Loader = {
             LOG("Window loaded");
             var runAfter = function() {
                 try {
-                    //Components.utils.import("resource://floatnotes/sync.jsm");
+                    //Cu.import("resource://floatnotes/sync.js");
                     //initSync();
                 }
                 catch(e){};
-                Components.utils.import("resource://floatnotes/init.jsm");
+                Cu.import("resource://floatnotes/init.js");
                 Init.init(function() {
                     that.createFloatNotesView();
                 });
@@ -28,14 +27,14 @@ var Loader = {
     },
 
     createFloatNotesView: function() {
-        Components.utils.import("resource://floatnotes/manager.jsm");
+        Cu.import("resource://floatnotes/manager.js");
         window[FloatNotesView.GLOBAL_NAME] = new FloatNotesView(getManager(this.getDatabase()));
         LOG("View created");
     },
 
     getDatabase: function() {
         if(!this._db) {
-            Components.utils.import("resource://floatnotes/database.jsm");
+            Cu.import("resource://floatnotes/database.js");
                 this._db = getDatabase(this.DB_FILE);
         }
         return this._db;

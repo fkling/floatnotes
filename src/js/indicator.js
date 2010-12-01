@@ -1,9 +1,6 @@
 //!#ifndef __INCLUDE_INDICATOR_
 //!#define __INCLUDE_INDICATOR_
-
-//!#include "util.js"
-
-
+//!#include "header.js"
 var IndicatorProxy = {
     init: function(view, preferences) {
         this.view = view;
@@ -52,10 +49,10 @@ function Indicator(type, view) {
     this.view = view;
 
     if(type == Indicator.BELOW) {
-        this.label = util.getString('belowIndicatorString');
+        this.label = Util.Locale.get('belowIndicatorString');
     }
     else if(type == Indicator.ABOVE) {
-        this.label = util.getString('aboveIndicatorString');
+        this.label = Util.Locale.get('aboveIndicatorString');
     }
     this.type = type;
     this.lastCount = 0;
@@ -67,7 +64,6 @@ Indicator.BELOW = -1;
 Indicator.prototype = {
     updateAndShow: function(doc, notes) {
         if(this.ele) {
-            var u = util;
             var count = 0;
             this.lastNotes = this._getCurrentNotesFrom(notes);
             count = this.lastNotes.length; LOG(count + ' notes ' + this.type);
@@ -93,11 +89,11 @@ Indicator.prototype = {
     },
 
     _updateLabel: function(nn_notes) {
-        this.ele.label.innerHTML = nn_notes + ' ' + (nn_notes > 1 ? util.getString('pluralIndicatorString'): util.getString('singularIndicatorString')) +  " " + this.label;
+        this.ele.label.innerHTML = nn_notes + ' ' + (nn_notes > 1 ? Util.Locale.get('pluralIndicatorString'): Util.Locale.get('singularIndicatorString')) +  " " + this.label;
     },
 
     _show: function() {
-        util.show(this.ele.indicator);
+        Util.Css.show(this.ele.indicator);
     },
 
     attachTo: function(doc, node) {
@@ -124,7 +120,7 @@ Indicator.prototype = {
     },
 
     _createAndShowNoteList: function() {
-        util.show(this.ele.container);
+        Util.Css.show(this.ele.container);
         if(this.updateList) {
             this.ele.container.textContent = '';	
             var notes = this.lastNotes;
@@ -139,11 +135,11 @@ Indicator.prototype = {
         }			
     },	
     _hide: function() {
-        util.hide(this.ele.container);
+        Util.Css.hide(this.ele.container);
     },
 
     hideAll: function() {
-        util.hide(this.ele.indicator);
+        Util.Css.hide(this.ele.indicator);
         this._hide();
     },
 
@@ -167,7 +163,7 @@ Indicator.prototype = {
         container.className = "floatnotes-indicator-container";
         container.textContent = "Loading...";
 
-        util.hide(container);
+        Util.Css.hide(container);
 
         indicator.addEventListener('mouseover', function(e) {
             IndicatorProxy.stopTimeout();

@@ -1,9 +1,9 @@
-//!#include "../util.js"
+//!#include "../header.js"
 
-Components.utils.import("resource://services-sync/engines.js");
-Components.utils.import("resource://services-sync/base_records/crypto.js");
-Components.utils.import("resource://services-sync/stores.js");
-Components.utils.import("resource://services-sync/trackers.js");
+Cu.import("resource://services-sync/engines.js");
+Cu.import("resource://services-sync/base_records/crypto.js");
+Cu.import("resource://services-sync/stores.js");
+Cu.import("resource://services-sync/trackers.js");
 
 var EXPORTED_SYMBOLS = ['initSync'];
 var registered = false;
@@ -96,8 +96,8 @@ NoteRecord.prototype = {
 
 function FloatNotesStore(name) {
     Store.call(this, name);
-    Components.utils.import("resource://floatnotes/database.jsm");
-    Components.utils.import("resource://floatnotes/manager.jsm");
+    Cu.import("resource://floatnotes/database.js");
+    Cu.import("resource://floatnotes/manager.js");
     this._db = getDatabase();
     this._manager = getManager(this._db);
 }

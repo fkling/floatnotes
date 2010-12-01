@@ -1,10 +1,8 @@
 //!#ifndef __INCLUDE_NOTE__
 //!#define __INCLUDE_NOTE__
-
-//!#include "util.js"
-
-Components.utils.import("resource://floatnotes/showdown/showdown.js");
-Components.utils.import("resource://floatnotes/preferences.jsm");
+//!#include "header.js"
+Cu.import("resource://floatnotes/showdown/showdown.js");
+Cu.import("resource://floatnotes/preferences.js");
 
 var note_status = {
     SAVED: 1,
@@ -22,17 +20,17 @@ var _in = function(note) {
         if(note.hasStatus(note_status.MINIMIZED)) {
             note.unminimize();
         }
-        util.show(note.ele.drag);
-        util.show(note.ele.resize);
-        util.show(note.ele.menu);
+        Util.Css.show(note.ele.drag);
+        Util.Css.show(note.ele.resize);
+        Util.Css.show(note.ele.menu);
     };
 };
 
 var _out = function(note) {
     return function(e) {
-        util.hide(note.ele.drag);
-        util.hide(note.ele.resize);
-        util.hide(note.ele.menu);
+        Util.Css.hide(note.ele.drag);
+        Util.Css.hide(note.ele.resize);
+        Util.Css.hide(note.ele.menu);
         if(note.hasStatus(note_status.MINIMIZED)) {
             note.minimize();
         }
@@ -234,7 +232,7 @@ FloatNote.prototype = {
     },
 
     minimize: function() {
-        util.addClass(this.dom, 'small');
+        Util.Css.addClass(this.dom, 'small');
     },
 
     minimizeAndSave: function() {
@@ -245,7 +243,7 @@ FloatNote.prototype = {
     },
 
     unminimize: function() {
-        util.removeClass(this.dom, 'small');
+        Util.Css.removeClass(this.dom, 'small');
     },
 
     unminimizeAndSave: function() {
@@ -281,13 +279,13 @@ FloatNote.prototype = {
 
     edit: function() {
         var textarea = this.ele.text;
-        util.hide(this.ele.content);
+        Util.Css.hide(this.ele.content);
 
         textarea.value = this.data.content;
-        util.show(this.ele.text);
+        Util.Css.show(this.ele.text);
         textarea.focus();
 
-        util.addClass(this.dom, 'note-edit');
+        Util.Css.addClass(this.dom, 'note-edit');
         this.setStatus(note_status.EDITING);
 
         FloatNote.editedNote = this;
@@ -322,10 +320,10 @@ FloatNote.prototype = {
             window.removeEventListener('click', note.endEdit, false);
             window.removeEventListener('keydown', note.endEdit, true);
 
-            util.show(note.ele.content);
-            util.hide(note.ele.text);
+            Util.Css.show(note.ele.content);
+            Util.Css.hide(note.ele.text);
 
-            util.removeClass(note.dom, 'note-edit');
+            Util.Css.removeClass(note.dom, 'note-edit');
             if(note.hasStatus(note_status.EDITING)) {
                 note.unsetStatus(note_status.EDITING);
             }
@@ -452,13 +450,13 @@ FloatNote.prototype = {
 
     setFix: function() {
         this.setStatus(note_status.FIXED);
-        util.addClass(this.dom, "fixed");
+        Util.Css.addClass(this.dom, "fixed");
         this.toggleFix = this.unfix;
     },
 
     unsetFix: function() {
         this.unsetStatus(note_status.FIXED);
-        util.removeClass(this.dom, "fixed");
+        Util.Css.removeClass(this.dom, "fixed");
         this.toggleFix = this.fix;
     },
 
@@ -478,7 +476,7 @@ FloatNote.prototype = {
         var newTop = (this.data.y + this.view.currentDocument.defaultView.pageYOffset);
         style.top = newTop + "px";
         this.data.y = newTop;
-        util.removeClass(this.dom, "fixed");
+        Util.Css.removeClass(this.dom, "fixed");
         this.toggleFix = this.fix;
         this.setStatus(note_status.NEEDS_SAVE);
         this.save();

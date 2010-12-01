@@ -1,6 +1,6 @@
-Components.utils.import("resource://floatnotes/database.jsm");
-Components.utils.import("resource://floatnotes/manager.jsm");
-Components.utils.import("resource://floatnotes/preferences.jsm");
+Components.utils.import("resource://floatnotes/database.js");
+Components.utils.import("resource://floatnotes/manager.js");
+Components.utils.import("resource://floatnotes/preferences.js");
 
 var textBox = document.getElementById('text');
 var colorPicker = document.getElementById('color');

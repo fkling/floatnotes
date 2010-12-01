@@ -94,8 +94,8 @@ function FloatNotesView(manager) {
     this.status = {};
     this.notes = {};
 
-    this._scrollTimer = Components.classes["@mozilla.org/timer;1"]
-                        .createInstance(Components.interfaces.nsITimer);
+    this._scrollTimer = Cc["@mozilla.org/timer;1"]
+                        .createInstance(Ci.nsITimer);
 
     // get references to menu items
     this._toggleNotesBrdc = document.getElementById('floatnotes-toggle-brdc');
@@ -144,9 +144,8 @@ FloatNotesView.prototype = {
         window.addEventListener("activate", function(e) {that.onWindowActivated(e);}, true);
     },
 
-    registerObserver: function() {
-        var obsService = Components.classes["@mozilla.org/observer-service;1"]
-        .getService(Components.interfaces.nsIObserverService);
+    registerObserver: function() { 
+        var obsService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
         obsService.addObserver(this, 'floatnotes-note-update', false);
         obsService.addObserver(this, 'floatnotes-note-delete', false);
         obsService.addObserver(this, 'floatnotes-note-urlchange', false);
@@ -161,8 +160,7 @@ FloatNotesView.prototype = {
 
     removeObserver: function() {
         //this._removeUnloadListener();
-        var obsService = Components.classes["@mozilla.org/observer-service;1"]
-        .getService(Components.interfaces.nsIObserverService);
+        var obsService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
         obsService.removeObserver(this, 'floatnotes-note-update');
         obsService.removeObserver(this, 'floatnotes-note-delete');
     },
@@ -417,9 +415,8 @@ FloatNotesView.prototype = {
         if(note) {
             var del = true;
             if(Preferences.confirmDelete) {
-                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-                                .getService(Components.interfaces.nsIPromptService);
                 var loc = Util.Locale;
+                var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"] .getService(Ci.nsIPromptService);
                 var checkState = {value: !Preferences.confirmDelete};
                 del = promptService.confirmCheck(null, loc.get('note.delete.title'), loc.get('note.delete.popup.msg'), loc.get('button.not_ask_again'), checkState);
                 Preferences.confirmDelete = !checkState.value;

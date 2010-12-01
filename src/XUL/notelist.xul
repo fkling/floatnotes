@@ -18,8 +18,7 @@
         <listbox id="searches" flex="1" onselect="searchManager.updateButtons(); search();" ondragstart="dragHandler.dragStart(event)"
             ondragover="dragHandler.dragOver(event)"
             ondragleave="dragHandler.dragLeave(event)"
-            ondrop="dragHandler.onDrop(event);" 
-            onkeypress="deleteSearch(event)"/>
+            ondrop="dragHandler.onDrop(event);"/>
         <hbox>
             <button observes="searchListButtons" label="&button.edit;" oncommand="openEditDiag()" />
             <button observes="searchListButtons" label="&button.remove;" oncommand="deleteSearch()" />

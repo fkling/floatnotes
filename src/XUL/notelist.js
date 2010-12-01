@@ -7,6 +7,7 @@ var textBox = document.getElementById('text');
 var colorPicker = document.getElementById('color');
 var inputBrdcast = document.getElementById('isEnabled');
 var deleteButton = document.getElementById('delete');
+var saveSearchButton = document.getElementById('saveSearch');
 var searchBox = document.getElementById('search');
 var searchList = document.getElementById('searches');
 var tree = document.getElementById('notes');
@@ -71,17 +72,19 @@ var dragHandler = {
     },
 
     onDrop: function onDrop(event) {
-        var sourceIndex = parseInt(event.dataTransfer.getData("text/plain"));
+        var sourceIndex = +event.dataTransfer.getData("text/plain");
         var targetIndex = searchList.getIndexOfItem(event.target);
-        var source = searchList.removeItemAt(sourceIndex);
-        var target = event.target.nextElementSibling;
-        if(target) {
-            searchList.insertBefore(source, target);
+        if(targetIndex >= 0 && sourceIndex !== targetIndex) {
+            var source = searchList.removeItemAt(sourceIndex);
+            var target = event.target.nextElementSibling;
+            if(target) {
+                searchList.insertBefore(source, target);
+            }
+            else {
+                searchList.appendChild(source);
+            } 
+            searchManager.move(sourceIndex, targetIndex);
         }
-        else {
-            searchList.appendChild(source);
-        }
-        searchManager.move(sourceIndex, targetIndex);
     }
 };
 
@@ -186,7 +189,7 @@ function saveSearch() {
 }
 
 function search() {
-    var words = document.getElementById('search').value;
+    var words = searchBox.value;
     var selectedSearch = searchList.selectedItem;
     if(selectedSearch && selectedSearch.value) {
         words = selectedSearch.value + ' ' + words;
@@ -197,11 +200,11 @@ function search() {
             treeView.data = notes;
             tree.boxObject.invalidate();
             updateCounter();
-            if(document.getElementById('search').value) {
-                document.getElementById('saveSearch').style.display = 'inline';
+            if(searchBox.value) {
+                saveSearchButton.style.display = 'inline';
             }
             else {
-                document.getElementById('saveSearch').style.display = 'none';
+                saveSearchButton.style.display = 'none';
             }
             sort();
         });
@@ -344,7 +347,6 @@ var searchManager = {
         for(var i = 0, l = this.searches.length;i<l;i++) {
             searchList.appendItem(this.searches[i][0], this.searches[i][1]);
         }
-        //searchList.selectItem(searchList.getItemAtIndex(selectedIndex));
         searchList.selectedIndex = selectedIndex;
     },
     addSearch: function(name, keywords) {
@@ -372,7 +374,6 @@ var searchManager = {
     update: function(index, name, keywords) {
         this.searches[index] = [name, keywords];
         this.save();
-        this.buildList();
     },
     updateButtons: function() {
         document.getElementById('searchListButtons').setAttribute('disabled', (searchList.selectedIndex === 0));

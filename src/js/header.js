@@ -35,4 +35,5 @@ var Util = (function() {
     }
     return t;
 }());
+Cu.import("resource://floatnotes/Shared.js");
 //!#endif

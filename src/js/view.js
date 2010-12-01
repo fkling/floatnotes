@@ -64,7 +64,7 @@ var locationBuilder = {
 
     _addItem: function(group, text, url, noteUrl) {
         var item = group.appendItem(text, url);
-        item.disabled = !url;
+        item.hidden = !url;
         if(noteUrl == url) {  
             group.selectedItem = item;
         }
@@ -512,6 +512,14 @@ FloatNotesView.prototype = {
         else {
             locationBuilder.buildLocationList(this.currentDocument.location, note.url);
             this._isLocationListGenerated = true;
+        }
+    },
+    openNotesManager: function() {
+        if(!("notemanager" in Shared) || Shared.notemanager.closed) {
+            Shared.notemanager = window.openDialog('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome, resizeable, centerscreen');
+        }
+        else {
+            Shared.notemanager.focus();
         }
     }
 };

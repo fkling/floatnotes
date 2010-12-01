@@ -36,8 +36,8 @@
             accesskey=""
             insertafter="javascriptConsole,devToolsSeparator">
             <menupopup>
-                <menuitem label="NoteManager"
-                    oncommand="window.openDialog('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome, resizeable, centerscreen')" />
+                <menuitem label="&floatnotes.notelist;"
+                    oncommand="gFloatNotesView.openNotesManager();" />
             </menupopup>
         </menu>
     </menupopup>     

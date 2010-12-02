@@ -150,19 +150,23 @@ FloatNotesView.prototype = {
         obsService.addObserver(this, 'floatnotes-note-delete', false);
         obsService.addObserver(this, 'floatnotes-note-urlchange', false);
         obsService.addObserver(this, 'floatnotes-note-add', false);
-        //var that = this;
-        //function remove() {
-        //that.removeObserver();
-        //}
-        //window.addEventListener('unload',remove , true);
-        //this._removeUnloadListener = function() { window.removeEventListener('unload', remove, true);};
+        var that = this;
+        function remove(e) {
+            if(e.target instanceof XULDocument) {
+                LOG('Observer removed.')
+                window.removeEventListener('unload', remove, true);
+                that.removeObserver();
+            }
+        }
+        window.addEventListener('unload',remove , true);
     },
 
     removeObserver: function() {
-        //this._removeUnloadListener();
         var obsService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
         obsService.removeObserver(this, 'floatnotes-note-update');
         obsService.removeObserver(this, 'floatnotes-note-delete');
+        obsService.removeObserver(this, 'floatnotes-note-urlchange');
+        obsService.removeObserver(this, 'floatnotes-note-add');
     },
 
     observe: function(subject, topic, data) {

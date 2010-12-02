@@ -2,7 +2,7 @@
 <!ENTITY button.remove "Remove" >
 <!ENTITY button.save "Save" >
 
-<!ENTITY searchtext "Search Notes" >
+<!ENTITY searchtext "Type to search for notes and/or select a saved search from the left..." >
 
 <!ENTITY list.title "Title" >
 <!ENTITY list.url "URL" >

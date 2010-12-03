@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 	<Description about="urn:mozilla:install-manifest">
 		<em:id>floatnotes@felix-kling.de</em:id>
-		<em:iconURL>chrome://floatnotes/skin/icon.png</em:iconURL>
+		<em:iconURL>chrome://floatnotes/skin/note_128.png</em:iconURL>
 		<em:type>2</em:type>
 		<em:name>FloatNotes</em:name>
 		<em:version>@VERSION@</em:version>
@@ -16,7 +16,7 @@
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
 				<em:minVersion>3.6</em:minVersion>
-				<em:maxVersion>4.0b6</em:maxVersion>
+				<em:maxVersion>4.0b7</em:maxVersion>
 			</Description>
 		</em:targetApplication>
 		<em:localized>

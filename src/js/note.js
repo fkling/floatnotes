@@ -317,6 +317,8 @@ FloatNote.prototype = {
         }
 
         if(finish) {
+            e.stopPropagation();
+            e.preventDefault();
             window.removeEventListener('click', note.endEdit, false);
             window.removeEventListener('keydown', note.endEdit, true);
 

@@ -441,13 +441,15 @@ FloatNotesView.prototype = {
     },
 
     /* show or hide the notes for the current location */
-    toggleNotes: function() {
+    toggleNotes: function(element) {
         var domain = this.currentDocument.location;
         if(this._notesHiddenFor(domain)) {
             this.showNotes(); LOG('Nodes shown.');
+            Util.Css.removeClass(element, 'hidden');
         }
         else {
             this.hideNotes(); LOG('Nodes hidden.');
+            Util.Css.addClass(element, 'hidden');
         }
     },
 
@@ -515,12 +517,26 @@ FloatNotesView.prototype = {
             this._isLocationListGenerated = true;
         }
     },
-    openNotesManager: function() {
+    openNotesManager: function(event) {
+        if(event) {
+            event.stopPropagation();
+        }
         if(!("notemanager" in Shared) || Shared.notemanager.closed) {
             Shared.notemanager = window.openDialog('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome, resizeable, centerscreen');
         }
         else {
             Shared.notemanager.focus();
+        }
+    },
+    openPreferences: function(event) {
+        if(event) {
+            event.stopPropagation();
+        }
+        if(!("preferences" in Shared) || Shared.preferences.closed) {
+            Shared.preferences = window.openDialog('chrome://floatnotes/content/preferences.xul', 'FloatNotes Preferences');
+        }
+        else {
+            Shared.preferences.focus();
         }
     }
 };

@@ -1,0 +1,11 @@
+#floatnotes-toolbar-hide {
+    list-style-image: url("chrome://floatnotes/skin/note_24.png");
+}
+
+#floatnotes-toolbar-hide.hidden {
+    list-style-image: url("chrome://floatnotes/skin/note_dis_24.png");
+}
+
+toolbar[iconsize="small"] #floatnotes-toolbar-hide {
+    list-style-image: url("chrome://floatnotes/skin/note_16.png");
+}

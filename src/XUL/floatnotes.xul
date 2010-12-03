@@ -1,16 +1,24 @@
 <?xml version="1.0"?>
 <!DOCTYPE window SYSTEM "chrome://floatnotes/locale/floatnotes.dtd">
+<?xml-stylesheet href="chrome://floatnotes/skin/floatnotes.css" type="text/css"?>
 <overlay id="floatnotesOverlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <broadcasterset id="mainBroadcasterSet">
-        <broadcaster id="floatnotes-toggle-brdc" oncommand="gFloatNotesView.toggleNotes()"/>
+        <broadcaster id="floatnotes-toggle-brdc" oncommand="gFloatNotesView.toggleNotes(this)"/>
     </broadcasterset>
 
     <toolbarpalette id="BrowserToolbarPalette">
-        <toolbarbutton id="floatnotes-toolbar-hide" class="" label="FloatNotes">
+        <toolbarbutton id="floatnotes-toolbar-hide" class="" label="FloatNotes" type="menu-button">
             <observes element="floatnotes-toggle-brdc" attribute="tooltiptext" />
             <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
+            <menupopup id="floatnotes-main-menu">
+                <menuitem label="&floatnotes.notelist;"
+                            oncommand="gFloatNotesView.openNotesManager(event);" />
+                <menuseparator />
+                <menuitem label="&floatnotes.preferences;"
+                        oncommand="gFloatNotesView.openPreferences(event);" />
+            </menupopup>
         </toolbarbutton>
     </toolbarpalette>
 
@@ -29,15 +37,19 @@
                 </vbox>
             </vbox>
         </panel>
+
     </popupset>
 
     <menupopup id="menu_ToolsPopup">
-        <menu id="xulschoolhello-hello-menu" label="&floatnotes;"
+        <menu id="floatnotes-menu" label="&floatnotes;"
             accesskey=""
             insertafter="javascriptConsole,devToolsSeparator">
             <menupopup>
                 <menuitem label="&floatnotes.notelist;"
-                    oncommand="gFloatNotesView.openNotesManager();" />
+                        oncommand="gFloatNotesView.openNotesManager();" />
+                <menuseparator />
+                <menuitem label="&floatnotes.preferences;"
+                        oncommand="window.openDialog('chrome://floatnotes/content/preferences.xul', 'FloatNotes Preferences');" />
             </menupopup>
         </menu>
     </menupopup>     

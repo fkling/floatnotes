@@ -22,7 +22,7 @@ var _in = function(note) {
         }
         Util.Css.show(note.ele.drag);
         Util.Css.show(note.ele.resize);
-        Util.Css.show(note.ele.menu);
+        Util.Css.show(note.ele.menuspacer);
     };
 };
 
@@ -30,7 +30,7 @@ var _out = function(note) {
     return function(e) {
         Util.Css.hide(note.ele.drag);
         Util.Css.hide(note.ele.resize);
-        Util.Css.hide(note.ele.menu);
+        Util.Css.hide(note.ele.menuspacer);
         if(note.hasStatus(note_status.MINIMIZED)) {
             note.minimize();
         }
@@ -38,10 +38,10 @@ var _out = function(note) {
 };
 
 var _updateFix = function(newValues, defaultX, defaultY, window, noteStyle) {
-    if(parseInt(newValues.Y, 10) + parseInt(noteStyle.height, 10) >= window.innerHeight) {
+    if(newValues.Y + parseInt(noteStyle.height, 10) >= window.innerHeight) {
         newValues.Y = defaultY;
     }
-    if(parseInt(newValues.X, 10) + parseInt(noteStyle.width, 10) >= window.innerWidth) {
+    if(newValues.X + parseInt(noteStyle.width, 10) >= window.innerWidth) {
         newValues.X = defaultX;
     }
 };
@@ -57,13 +57,13 @@ var resize = function(e) {
 
     var content = window.content;
     var newValues = {
-        X: Math.max(movedNote.X + e.pageX,0) + 'px',
-        Y: Math.max(movedNote.Y + e.pageY,0) + 'px'
+        X: Math.max(movedNote.X + e.pageX,0),
+        Y: Math.max(movedNote.Y + e.pageY,0)
     };
 
     updateFix(newValues, style.width, style.height, content, style);
-    style.width = newValues.X;
-    style.height =  newValues.Y;
+    style.width = newValues.X + "px";
+    style.height =  newValues.Y + "px";
 
     scrollWindow(e, content);
 };
@@ -415,12 +415,17 @@ FloatNote.prototype = {
         e.preventDefault();
         e.stopPropagation();
 
-        var note = FloatNote.movedNote.note;
+        var note = FloatNote.movedNote.note,
+            style = note.dom.style,
+            data = note.data;
+
         note.setStatus(note_status.NEEDS_SAVE);
         note.unsetStatus(note_status.RESIZING);
-        note.dom.style.opacity = FloatNote.movedNote.opacity;
-        note.data.w = parseInt(note.dom.style.width, 10);
-        note.data.h = parseInt(note.dom.style.height, 10);
+        style.opacity = FloatNote.movedNote.opacity;
+        var newWidth = parseInt(style.width, 10); 
+        var newHeight = parseInt(style.height, 10);
+        data.w = style.width =  Math.max(newWidth,60); 
+        data.h = style.height = Math.max(newHeight, 80);
         note.save();
 
         if(note.hasStatus(note_status.FIXED)) {
@@ -507,7 +512,7 @@ FloatNote.prototype = {
     },
 
     createDOMElements: function(doc) {
-        var container, drag, resize, content, text, fixer, edit, del, menu;
+        var container, drag, resize, content, text, fixer, edit, del, menuspacer, menu;
 
         container = doc.createElement('div');
         container.className = 'floatnotes-note';
@@ -516,25 +521,23 @@ FloatNote.prototype = {
         drag.className = 'floatnotes-drag';
         drag.innerHTML = '<div class="floatnotes-drag-handler"></div>';
         
+        menuspacer = doc.createElement('div');
+        menuspacer.className = 'floatnotes-menuspacer';
+
         menu = doc.createElement('div');
         menu.className = 'floatnotes-menu';
 
         fixer = doc.createElement('span');
-        fixer.className = 'floatnotes-togglefix floatnotes-menu-entry';	
-        fixer.appendChild(doc.createTextNode('\u25CF'));
+        fixer.className = 'floatnotes-togglefix floatnotes-menu-entry';
+        fixer.title = Util.Locale.get('note.menu.pin');
 
         edit = doc.createElement('span');
         edit.className= 'floatnotes-edit floatnotes-menu-entry';	
-        edit.appendChild(doc.createTextNode('E'));
+        edit.title = Util.Locale.get('note.menu.edit');
 
         del = doc.createElement('span');
         del.className= 'floatnotes-delete floatnotes-menu-entry';	
-        del.appendChild(doc.createTextNode('D'));
-
-        menu.appendChild(fixer);
-        menu.appendChild(edit);
-        menu.appendChild(del);
-        
+        del.title = Util.Locale.get('note.menu.delete');
 
         content = doc.createElement('div');
         content.className = 'floatnotes-content';
@@ -557,10 +560,11 @@ FloatNote.prototype = {
             fixer: fixer,
             edit: edit,
             del: del,
-            menu: menu
+            menu: menu,
+            menuspacer: menuspacer
         };
 
-        drag = content = resize = text = fixer = edit = del = menu = null;
+        drag = content = resize = text = fixer = edit = del = menu = menuspacer = null;
 
         FloatNote.prototype.createDOMElements = function(doc) {
             var elements = FloatNote.prototype.dom;
@@ -570,18 +574,21 @@ FloatNote.prototype = {
                 resize: elements.resize.cloneNode(false), 
                 content: elements.content.cloneNode(false), 
                 text: elements.text.cloneNode(false),
-                fixer: elements.fixer.cloneNode(true),
-                edit: elements.edit.cloneNode(true),
-                del: elements.del.cloneNode(true),
-                menu: elements.menu.cloneNode(false)
+                fixer: elements.fixer.cloneNode(false),
+                edit: elements.edit.cloneNode(false),
+                del: elements.del.cloneNode(false),
+                menu: elements.menu.cloneNode(false),
+                menuspacer: elements.menuspacer.cloneNode(false)
             };
 
             var container = new_elements.container;
-            new_elements.menu.appendChild(new_elements.fixer);
-            new_elements.menu.appendChild(new_elements.edit);
-            new_elements.menu.appendChild(new_elements.del);
+            var menu = new_elements.menu;
+            menu.appendChild(new_elements.fixer);
+            menu.appendChild(new_elements.edit);
+            menu.appendChild(new_elements.del);
+            new_elements.menuspacer.appendChild(menu);
             container.appendChild(new_elements.drag);
-            container.appendChild(new_elements.menu);
+            container.appendChild(new_elements.menuspacer);
             container.appendChild(new_elements.content);
             container.appendChild(new_elements.text);
             container.appendChild(new_elements.resize);
@@ -604,6 +611,7 @@ FloatNote.prototype = {
         ].join(';');
         elements.content.innerHTML = this.markdownParser.makeHtml(this.data.content);
         elements.content.title = Util.Locale.get('note.last_modified',  [this.data.modification_date.toLocaleString()]);
+        elements.menu.style.backgroundColor = this.data.color;
     },
 
     attachEventHandlers: function(elements) {

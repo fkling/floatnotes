@@ -9,15 +9,14 @@
 
 
 .floatnotes-note {
-    border: 1px solid black !important;
+    border: 1px solid #555 !important;
     font-family: Arial, sans-serif !important;
     text-align:left !important;
-    min-height: 42px !important;
-    min-width: 40px !important;
+    min-height: 80px !important;
+    min-width: 60px !important;
     -moz-box-shadow: 0px 0px 5px #888 !important;
     -moz-border-radius: 5px !important;
     position: absolute !important;
-    padding-bottom:16px !important;
 }
 
 .floatnotes-note * {
@@ -57,9 +56,9 @@
 .floatnotes-note .floatnotes-drag{
     height: 20px !important;
     cursor: move !important;
-    margin-top:-15px !important;
+    margin-top:-18px !important;
     margin-left: -1px !important;
-    border: 1px solid black !important;
+    border: 1px solid #555 !important;
     border-bottom: none !important;
     width: 100% !important;
     display: none;
@@ -84,7 +83,7 @@
 
 
 .floatnotes-note .floatnotes-drag-handler {
-    background-color: #333 !important;
+    background-color: #222 !important;
     opacity: 0.3 !important;
     height: 15px !important;
     cursor: move !important;
@@ -96,30 +95,59 @@
 }
 
 
-.floatnotes-note .floatnotes-menu {
+
+.floatnotes-note .floatnotes-menuspacer {
     position: absolute !important;
-    top:-12px !important;
+    top:-10px !important;
     left:-40px !important;
-    height: 80px !important;
+    height: 100px !important;
     display: none;
     width:40px !important;
+    margin-right: -1px !important;
 }
 
-.floatnotes-note.note-edit .floatnotes-menu {
+.floatnotes-note.fixed .floatnotes-menuspacer {
+    /*margin-right:-2px;*/
+}
+
+.floatnotes-note .floatnotes-menu {
+    width: 20px !important;
+    float:right !important;
+    border: 1px solid #555 !important;
+    border-right: none !important;
+    -moz-border-radius: 5px 0px 0px 5px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+}
+
+.floatnotes-note.fixed .floatnotes-menu {
+    border-width: 2px !important;
+}
+
+.floatnotes-note.note-edit .floatnotes-menuspacer {
    display: none !important; 
 }
 
 
 .floatnotes-note .floatnotes-menu-entry {
-    clear: both;
-    float: right;
+    background-repeat: no-repeat;
 	display: block !important;
     cursor: pointer !important;
-    width: 20px;
-    height: 20px;
-    border: 1px solid black;
-    margin: 0px 5px 0px 5px;
-    background-color: inherit !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 5px 0px !important;
+}
+
+.floatnotes-note .floatnotes-togglefix {
+    background-image: url('chrome://floatnotes/skin/pin_off.png');
+}
+
+.floatnotes-note .floatnotes-edit {
+    background-image: url('chrome://floatnotes/skin/settings1_small.png');
+}
+
+.floatnotes-note .floatnotes-delete {
+    background-image: url('chrome://floatnotes/skin/delete_small.png');
 }
 
 .floatnotes-note .floatnotes-resize{
@@ -135,7 +163,6 @@
 
 .floatnotes-note .floatnotes-content{
 	padding: 5px !important;
-    padding-top: 3px !important;
     overflow:auto !important;
     position:absolute !important;
     top: 0 !important;

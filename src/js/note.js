@@ -492,9 +492,17 @@ FloatNote.prototype = {
     },
 
     raiseToTop: function(e) {
-        var maxz = parseInt(this.style.zIndex, 10);
+        var element;
+        if(this.style) {
+            element = this;
+        }
+        else {
+            element = this.dom;
+        }
 
-        var siblings = this.parentNode.childNodes;
+        var maxz = parseInt(element.style.zIndex, 10);
+
+        var siblings = element.parentNode.childNodes;
 
         for (var i = siblings.length -1;i > -1; --i) {
             var v = 0;
@@ -503,7 +511,7 @@ FloatNote.prototype = {
             }
             maxz =  v > maxz ? v : maxz;
         }
-        this.style.zIndex = maxz+1;  
+        element.style.zIndex = maxz+1;  
     },
 
     getDomElement: function(doc) {	

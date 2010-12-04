@@ -399,6 +399,7 @@ FloatNotesView.prototype = {
         data.y = this.Y;
         var note = new FloatNote(data, this);
         note.attachToDocument(this.currentDocument, this._container);
+        note.raiseToTop();
         this._attachAndShowIndicators();
         note.edit();
     },

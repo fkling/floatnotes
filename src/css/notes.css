@@ -185,7 +185,7 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	padding: 15px 0px 5px 5px !important;
+	padding: 5px 0px 5px 5px !important;
 	z-index:-1;
 	-moz-border-radius: 5px !important;
 	border: none !important;
@@ -200,8 +200,6 @@
 	font-size: 1.4em !important;
 }
 
-
-
 .floatnotes-note h2 {
     font-size: 1.1em !important;
 }
@@ -211,6 +209,7 @@
     margin: 7px 0 7px 0;
     color: black !important;
     font-weight: bold !important;
+    padding: 0 !important;
 }
 
 .floatnotes-note p {   
@@ -241,7 +240,10 @@
 }
 
 .floatnotes-note ul li{   
-    list-style: square !important;
+    list-style-type: square  !important;
+    list-style-position: outside  !important;
+    list-style-image: none  !important;
+    background: none  !important;
 }
 
 

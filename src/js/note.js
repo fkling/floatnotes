@@ -291,6 +291,7 @@ FloatNote.prototype = {
         FloatNote.editedNote = this;
         window.addEventListener('keydown', this.endEdit, true);
         window.addEventListener('click', this.endEdit, false);
+        this.view.noteIsEditing(true);
     },
 
     endEdit: function(e) {
@@ -330,6 +331,7 @@ FloatNote.prototype = {
                 note.unsetStatus(note_status.EDITING);
             }
             FloatNote.editedNote = null;
+            note.view.noteIsEditing(false);
 
             if(abort && !note.data.id && note.ele.text.value == '') {
                 note.detach();

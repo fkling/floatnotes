@@ -6,6 +6,19 @@
     list-style-image: url("chrome://floatnotes/skin/note_dis_24.png");
 }
 
+#floatnotes-toolbar-hide[disabled="true"] {
+    list-style-image: url("chrome://floatnotes/skin/note_24_dis.png");
+}
+
+
 toolbar[iconsize="small"] #floatnotes-toolbar-hide {
     list-style-image: url("chrome://floatnotes/skin/note_16.png");
+}
+
+toolbar[iconsize="small"] #floatnotes-toolbar-hide.hidden {
+    list-style-image: url("chrome://floatnotes/skin/note_dis_16.png");
+}
+
+toolbar[iconsize="small"] #floatnotes-toolbar-hide[disabled="true"] {
+    list-style-image: url("chrome://floatnotes/skin/note_16_dis.png");
 }

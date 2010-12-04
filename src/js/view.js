@@ -99,6 +99,7 @@ function FloatNotesView(manager) {
 
     // get references to menu items
     this._toggleNotesBrdc = document.getElementById('floatnotes-toggle-brdc');
+    this._editNoteBrdc = document.getElementById('floatnotes-edit-brdc');
     this._newMenuEntry = document.getElementById('floatnotes-new-note');
     this._hideMenuEntry = document.getElementById('floatnotes-hide-note');
     this.popup = document.getElementById('floatnotes-edit-popup');
@@ -287,14 +288,16 @@ FloatNotesView.prototype = {
             this._toggleNotesBrdc.setAttribute('label', text);
             this._toggleNotesBrdc.setAttribute('tooltiptext', text);
             this._toggleNotesBrdc.setAttribute('disabled', true);
-            this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/hide_note_small.png');
+            this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/note_dis_16.png');
+            this._toggleNotesBrdc.setAttribute('class', 'hidden');
        }
         else {
             var text = Util.Locale.get('hideNotesString');
             this._toggleNotesBrdc.setAttribute('label', text);
             this._toggleNotesBrdc.setAttribute('tooltiptext', text);
             this._toggleNotesBrdc.setAttribute('disabled', false);
-            this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/unhide_note_small.png');
+            this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/note_16.png');
+            this._toggleNotesBrdc.setAttribute('class', '');
         }
 
     },
@@ -445,11 +448,9 @@ FloatNotesView.prototype = {
         var domain = this.currentDocument.location;
         if(this._notesHiddenFor(domain)) {
             this.showNotes(); LOG('Nodes shown.');
-            Util.Css.removeClass(element, 'hidden');
         }
         else {
             this.hideNotes(); LOG('Nodes hidden.');
-            Util.Css.addClass(element, 'hidden');
         }
     },
 
@@ -493,7 +494,7 @@ FloatNotesView.prototype = {
 
     updateContextMenu: function(event) {
         this._newMenuEntry.hidden = !!this.contextNote;
-        this._hideMenuEntry.hidden = this.notesManager.siteHasNotes(this.currentDocument.location) && !this.contextNote;
+        this._hideMenuEntry.hidden = !this.notesManager.siteHasNotes(this.currentDocument.location) && !this.contextNote;
     },
 
     openEditPopup: function(note, anchor, cb) {
@@ -538,6 +539,9 @@ FloatNotesView.prototype = {
         else {
             Shared.preferences.focus();
         }
+    },
+    noteIsEditing: function(value) {
+        this._editNoteBrdc.setAttribute('disabled', value);
     }
 };
 

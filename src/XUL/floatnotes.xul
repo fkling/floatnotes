@@ -6,12 +6,15 @@
 
     <broadcasterset id="mainBroadcasterSet">
         <broadcaster id="floatnotes-toggle-brdc" oncommand="gFloatNotesView.toggleNotes(this)"/>
+        <broadcaster id="floatnotes-edit-brdc" disabled="false"/>
     </broadcasterset>
 
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="floatnotes-toolbar-hide" class="" label="FloatNotes" type="menu-button">
             <observes element="floatnotes-toggle-brdc" attribute="tooltiptext" />
             <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
+            <observes element="floatnotes-toggle-brdc" attribute="class" />
+            <observes element="floatnotes-edit-brdc" attribute="disabled" />
             <menupopup id="floatnotes-main-menu">
                 <menuitem label="&floatnotes.notelist;"
                             oncommand="gFloatNotesView.openNotesManager(event);" />
@@ -56,15 +59,17 @@
 
     <popup id="contentAreaContextMenu">
         <menuseparator />
-            <menuitem id="floatnotes-hide-note"  class="menuitem-iconic">
+            <menuitem id="floatnotes-hide-note" class="menuitem-iconic">
                 <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
                 <observes element="floatnotes-toggle-brdc" attribute="image" />
                 <observes element="floatnotes-toggle-brdc" attribute="label" />
+                <observes element="floatnotes-edit-brdc" attribute="disabled" />
             </menuitem>
             <menuitem id="floatnotes-new-note" label='&floatnotes.new;'
                 oncommand='gFloatNotesView.addNote();' class="menuitem-iconic"
-                image='chrome://floatnotes/skin/new_note16.png'>
+                image='chrome://floatnotes/skin/note_new.png'>
                 <observes element="floatnotes-toggle-brdc" attribute="disabled" />
+                <observes element="floatnotes-edit-brdc" attribute="disabled" />
             </menuitem>
     </popup>
 	

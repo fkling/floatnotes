@@ -185,7 +185,7 @@ FloatNotesManager.prototype = {
         var domains = URLHandler.getSearchUrls(location);
         for(var i = domains.length -1; i > -1; --i) {
             var domain = domains[i];
-            if( this.notesByUrl[domain] && this.notesByUrl[domain].length) {
+            if( domain in this.notesByUrl && this.notesByUrl[domain].length > 0) {
                 return true;
             }  
         }

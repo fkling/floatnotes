@@ -35,6 +35,13 @@ var Preferences = {
         return this._transparency;
     },
 
+    get draggingTransparency() {
+        if(!this._draggingTransparency) {
+            this._draggingTransparency = this._branch.getCharPref('draggingTransparency');
+        }
+        return this._draggingTransparency;
+    },
+
     get location() {
         if(!this._location) {
             this._location = this._branch.getIntPref('location');

@@ -349,7 +349,7 @@ FloatNote.prototype = {
             Y: parseInt(this.dom.style.top, 10) - e.pageY,
             opacity: this.dom.style.opacity || 1
         };
-        this.dom.style.opacity = 0.7;
+        this.dom.style.opacity = Preferences.draggingTransparency;
 
         this.setStatus(note_status.DRAGGING);
         this.dom.removeEventListener('mouseout', this.outHandler, false);
@@ -399,7 +399,7 @@ FloatNote.prototype = {
             Y: parseInt(this.dom.style.height, 10) - e.pageY,
             opacity: this.dom.style.opacity || 1
         };
-        this.dom.style.opacity = 0.7;
+        this.dom.style.opacity = Preferences.draggingTransparency;
 
         if(this.hasStatus(note_status.FIXED)) {
             updateFix = _updateFix;

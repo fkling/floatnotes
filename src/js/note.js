@@ -359,7 +359,7 @@ FloatNote.prototype = {
             updateFix = _updateFix;
             scrollWindow = function(){};
         }
-
+        Util.Css.addClass(this.view._container, 'overlay');
         gBrowser.contentDocument.addEventListener("mouseup", this.endMove, true);
         gBrowser.contentDocument.addEventListener("mousemove", move, true);
 
@@ -385,6 +385,7 @@ FloatNote.prototype = {
         note.dom.addEventListener('mouseout', note.outHandler, false);
         note.dom.addEventListener('mouseover', note.inHandler, false);
 
+        Util.Css.removeClass(note.view._container, 'overlay');
         gBrowser.contentDocument.removeEventListener('mousemove', move, true);
         gBrowser.contentDocument.removeEventListener('mouseup', note.endMove, true);
     },
@@ -410,6 +411,7 @@ FloatNote.prototype = {
         this.dom.removeEventListener('mouseout', this.outHandler, false);
         this.dom.removeEventListener('mouseover', this.inHandler, false);
 
+        Util.Css.addClass(this.view._container, 'overlay');
         gBrowser.contentDocument.addEventListener("mouseup", this.endResize, true);
         gBrowser.contentDocument.addEventListener("mousemove", resize, true);	
 
@@ -440,6 +442,7 @@ FloatNote.prototype = {
         note.dom.addEventListener('mouseout', note.outHandler, false);
         note.dom.addEventListener('mouseover', note.inHandler, false);
 
+        Util.Css.removeClass(note.view._container, 'overlay');
         gBrowser.contentDocument.removeEventListener('mousemove', resize, true);
         gBrowser.contentDocument.removeEventListener('mouseup', note.endResize, true);
     },

@@ -50,20 +50,33 @@ var locationBuilder = {
         this._addItem(group, loc.get('location.site_url_label'),  URLHandler.getSiteUrl(location), noteUrl);
         this._addItem(group, loc.get('location.all_sites_label'),  URLHandler.getAllSitesUrl(location), noteUrl);
         var moreOptions = document.createElement('label');
+        var moreOptionsContainer = document.createElement('vbox');
+        moreOptionsContainer.style.paddingLeft = "20px";
+
         moreOptions.setAttribute('value', loc.get('location.sites_starting_label'));
-        moreOptions.style.cssText = 'color:blue;font-style:underline;';
+        moreOptions.setAttribute('class',"floatnotes-location-label");
         group.appendChild(moreOptions);
+        group.appendChild(moreOptionsContainer);
 
 
         var urls = URLHandler.getStartsWithUrls(location);
         for(var i = 0; i < urls.length; i++) {
             var url = urls[i];
-            this._addItem(group, this._shortenUrl(url), url, noteUrl);
+            this._addItem(group, this._shortenUrl(url), url, noteUrl, moreOptionsContainer);
         }
     },
 
-    _addItem: function(group, text, url, noteUrl) {
-        var item = group.appendItem(text, url);
+    _addItem: function(group, text, url, noteUrl, parent) {
+        var item;
+        if(parent) {
+            item = document.createElement('radio');
+            item.setAttribute('label',text);
+            item.setAttribute('value',url);
+            parent.appendChild(item);
+        }
+        else {
+            item = group.appendItem(text, url);
+        }
         item.hidden = !url;
         if(noteUrl == url) {  
             group.selectedItem = item;

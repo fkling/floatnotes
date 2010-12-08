@@ -47,7 +47,7 @@ var Init = {
             }
             else {
                 var scope = {}, that = this;
-                Cu.import("resource://gre/modules/AddonManager.js", scope);
+                Cu.import("resource://gre/modules/AddonManager.jsm", scope);
                     scope.AddonManager.getAddonByID('floatnotes@felix-kling.de', function(addon) {
                     that._currentVersion = addon.version;
                     LOG('Extension version: ' + that._currentVersion);

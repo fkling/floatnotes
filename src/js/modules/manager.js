@@ -110,21 +110,28 @@ FloatNotesManager.prototype = {
     },
 
     updateNote: function(data, cb) {
-        var that = this;
-        var note = data;
-        var ID = data.guid;
+        var that = this,
+            note = data,
+            ID = data.guid;
+
         if(this.notes[ID]) {
             note = this.notes[ID];
+            LOG('Note url: ' + note.url + '| data url: ' + data.url)
+            if(data.url !== note.url) {
+                note._prevURL = note.url;
+            }
+
             if(note != data) {
                 Util.Js.updateObject(note, data);
             }
         }
+ 
         note.modification_date = new Date();
         this._db.updateNote(note, function() {
-            if(data._prevURL) {
-                that.updateCacheForNewURL(note, data._prevURL, data.url);
+            if(note._prevURL) {
+                that.updateCacheForNewURL(note, note._prevURL, note.url);
                 that._observer_service.notifyObservers(null, 'floatnotes-note-urlchange', note.guid);
-                data._prevURL = null;
+                note._prevURL = null;
             }
             that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.guid);
             if(typeof cb == 'function') {

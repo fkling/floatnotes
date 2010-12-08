@@ -6,14 +6,8 @@ var Loader = {
         var that = this;
         var runWhenLoaded = function(event){
             window.removeEventListener('load', runWhenLoaded, false);           
-
             LOG("Window loaded");
             var runAfter = function() {
-                try {
-                    //Cu.import("resource://floatnotes/sync.js");
-                    //initSync();
-                }
-                catch(e){};
                 Cu.import("resource://floatnotes/init.js");
                 Init.init(function() {
                     that.createFloatNotesView();
@@ -22,6 +16,12 @@ var Loader = {
             var timer = Components.classes["@mozilla.org/timer;1"]
                         .createInstance(Components.interfaces.nsITimer);
             timer.initWithCallback({notify: runAfter}, 500, timer.ONE_SHOT);
+        }
+        try {
+            Cu.import("resource://floatnotes/sync.js");
+        }
+        catch(e) {
+            LOG(e)
         }
         window.addEventListener('load', runWhenLoaded, false);           
     },

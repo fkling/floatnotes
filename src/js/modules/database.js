@@ -127,8 +127,8 @@ DatabaseConnector.prototype = {
     },
 
     createNoteAndGetId: function(note, runWhenFinished) {
-        var sql = "INSERT INTO floatnotes (url,protocol,content,h,w,x,y,status,color,guid, modification_date, creation_date) VALUES (:url,:protocol,:content,:h,:w,:x,:y,:status,:color,:guid, :creation_date, :creation_date)";
-        LOG('Note as guid:' + note.guid);
+        var sql = "INSERT INTO floatnotes (url,protocol,content,h,w,x,y,status,color,guid, modification_date, creation_date) VALUES (:url,:protocol,:content,:h,:w,:x,:y,:status,:color,:guid, :modification_date, :creation_date)";
+        LOG('Note has guid:' + note.guid);
         if(typeof note.guid == "undefined") {
             sql = sql.replace(':guid', 'hex(randomblob(16))');
         }
@@ -208,27 +208,56 @@ DatabaseConnector.prototype = {
         return this._db.executeSimpleSQL(statement);
     },
 
-    noteExistsWithId: function(guid) {
-        var statement = this._db.createStatement("SELECT COUNT(*) FROM floatnotes WHERE guid = :guid");
-        statement.params.guid = guid;
-        statement.executeStep();
-        return !!parseInt(statement.row);
+    noteExistsWithId: function(runOnFinished, note_guid) {
+        var statement = this._db.createStatement("SELECT COUNT(*) as counter FROM floatnotes WHERE guid = :guid");
+            count = 0,
+            that = this;
+        statement.params.guid = note_guid;
+        statement.executeAsync({
+            handleResult: function(aResultSet) {
+                for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+                    count = row.getResultByName('counter');
+                }
+            },
+            handleCompletion: function() {
+                runOnFinished(count > 0);
+            }
+        });     
     },
 
-    getNoteSync: function(guid) {
-        var statement = this._db.createStatement("SELECT * FROM floatnotes WHERE guid = :guid");
-        statement.params.guid = guid;
-        statement.executeStep();
-        return this._createNoteFromRow(statement.row); 
+    getNote: function(runOnFinished, note_guid) {
+        LOG('Get note with GUID ' + note_guid)
+        var statement = this._db.createStatement("SELECT * FROM floatnotes WHERE guid = :guid"),
+            note,
+            that = this;
+        statement.params.guid = note_guid;
+        statement.executeAsync({
+            handleResult: function(aResultSet) {
+                for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+                    note = that._createNoteFromRow(row);
+                }
+            },
+            handleCompletion: function() {
+                runOnFinished(note);
+            }
+        }); 
     },
 
-    getAllIdsSync: function() {
-        var statement = this._db.createStatement("SELECT guid FROM floatnotes");
-        var ids = [];
-        while(statement.executeStep()) {
-            ids.push(statement.row.guid);
-        }
-        return ids;
+    getAllIds: function(runOnFinished) {
+        var statement = this._db.createStatement("SELECT guid FROM floatnotes"),
+            ids = [],
+            that = this;
+        LOG('Get all IDs')
+        statement.executeAsync({
+            handleResult: function(aResultSet) {
+                for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+                    ids.push(row.getResultByName('guid')); 
+                }
+            },
+            handleCompletion: function() {
+                runOnFinished(ids);
+            }
+        }); 
     },
 
     _createNoteFromRow: function(row) {

@@ -147,15 +147,27 @@
 }
 
 .floatnotes-note .floatnotes-togglefix {
-    background-image: url('chrome://floatnotes/skin/pin_off.png');
+    background-image: url('chrome://floatnotes/skin/pin_off.png') !important;
+}
+
+.floatnotes-note .floatnotes-togglefix:hover {
+    background-image: url('chrome://floatnotes/skin/pin_off_hover.png') !important;
 }
 
 .floatnotes-note .floatnotes-edit {
-    background-image: url('chrome://floatnotes/skin/settings1_small.png');
+    background-image: url('chrome://floatnotes/skin/settings1_small.png') !important;
+}
+
+.floatnotes-note .floatnotes-edit:hover {
+    background-image: url('chrome://floatnotes/skin/settings1_small_hover.png') !important;
 }
 
 .floatnotes-note .floatnotes-delete {
-    background-image: url('chrome://floatnotes/skin/delete_small.png');
+    background-image: url('chrome://floatnotes/skin/delete_small.png') !important;
+}
+
+.floatnotes-note .floatnotes-delete:hover {
+    background-image: url('chrome://floatnotes/skin/delete_small_hover.png') !important;
 }
 
 .floatnotes-note .floatnotes-resize{
@@ -291,6 +303,4 @@
 
 .floatnotes-indicator .floatnotes-indicator-text:hover {
     background-color: #FCFACF !important;
-}
-
 }

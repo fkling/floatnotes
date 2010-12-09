@@ -640,12 +640,7 @@ FloatNote.prototype = {
             e.stopPropagation();
             e.preventDefault();
             note.toggleFix(e);
-        }, true);
-
-        elements.fixer.addEventListener('dblclick', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }, true);
+        }, false);
 
         elements.edit.addEventListener('click', function(e) {
             note.view.openEditPopup(note, elements.edit, function(color, url) {
@@ -671,8 +666,6 @@ FloatNote.prototype = {
                 note.minimizeAndSave();
             }
         }, false);
-
-
 
         elements.container.addEventListener('mouseout', this.outHandler, false);
         elements.container.addEventListener('mouseover', this.inHandler, false);

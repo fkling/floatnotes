@@ -43,7 +43,7 @@ var locationBuilder = {
         var hashUrl =  URLHandler.getPageAnchorUrl(location);
         if(hashUrl) {
             var hash = location.hash;
-            item = this._addItem(group, loc.get('location.query_url_label'), hashUrl, noteUrl);
+            item = this._addItem(group, loc.get('location.hash_url_label'), hashUrl, noteUrl);
             item.style.marginLeft="20px";
             item.setAttribute('tooltiptext', hash);
         }
@@ -158,13 +158,12 @@ FloatNotesView.prototype = {
     registerEventHandlers: function() {
         // attach load handler
         var that = this;
+        window.addEventListener("activate", function(e) {that.onWindowActivated(e);}, true);
         gBrowser.addEventListener("pageshow", function(e){that.onPageLoad(e);}, true);
-        var container = gBrowser.tabContainer;
-        container.addEventListener("TabSelect", function(e){that.onTabSelect(e);}, false);
+        gBrowser.tabContainer.addEventListener("TabSelect", function(e){that.onTabSelect(e);}, false);
+        gBrowser.addEventListener("hashchange", function(e) {that.onHashChange(e);}, true);
         window.addEventListener("contextmenu", function(e) {that.updateContext(e);}, true);
         window.addEventListener("contextmenu", function(e) {that.updateContextMenu(e);}, false);
-        gBrowser.addEventListener("hashchange", function(e) {that.onHashChange(e);}, true);
-        window.addEventListener("activate", function(e) {that.onWindowActivated(e);}, true);
     },
 
     registerObserver: function() { 
@@ -388,11 +387,9 @@ FloatNotesView.prototype = {
 
 
     _attachAndShowIndicators: function() {
-        if(Preferences.showIndicator) {
-            IndicatorProxy.attachTo(this.currentDocument, this._container);
-            this._attachScrollHandlerTo(this.currentDocument);
-            Util.Dom.fireEvent(this.currentDocument, this.currentDocument, 'scroll');
-        }
+        IndicatorProxy.attachTo(this.currentDocument, this._container);
+        this._attachScrollHandlerTo(this.currentDocument);
+        Util.Dom.fireEvent(this.currentDocument, this.currentDocument, 'scroll');
     },
 
     _startScrollTimeout: function() {

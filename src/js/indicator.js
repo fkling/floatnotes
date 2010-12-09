@@ -12,8 +12,10 @@ var IndicatorProxy = {
         this.below = new Indicator(Indicator.ABOVE, view);
     },
     updateAndShow: function(doc, notes) {
-        this.above.updateAndShow(doc, notes);
-        this.below.updateAndShow(doc, notes);
+        if(this.preferences.showIndicator) {
+            this.above.updateAndShow(doc, notes);
+            this.below.updateAndShow(doc, notes);
+        }
     },
     attachTo: function(doc, node) {
         this.above.attachTo(doc, node);

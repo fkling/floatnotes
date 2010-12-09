@@ -9,7 +9,7 @@
 <!ENTITY preferences.location.query "... including query, EXAMPLE: www.example.com/page?s=floatnotes" >
 <!ENTITY preferences.location.hash "... including anchor, EXAMPLE: www.example.com/page?s=floatnotes#note" >
 <!ENTITY preferences.location.page "Current page, EXAMPLE: www.example.com/page" >
-<!ENTITY preferences.location.wild_page "Current page and subpages, EXAMPLE: Pages staring with www.example.com/page" >
+<!ENTITY preferences.location.wild_page "Current page and subpages, EXAMPLE: Pages starting with www.example.com/page" >
 <!ENTITY preferences.location.website "Whole website, EXAMPLE: Pages starting with www.example.com" >
 <!ENTITY preferences.location.updateHash "Update notes when anchor changes" >
 <!ENTITY preferences.location.includePageHash "Show notes from page (including query string)" >

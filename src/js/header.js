@@ -7,7 +7,7 @@ var Cu = Components.utils;
 //!#if DEBUG
 var logger = {
     log: function(msg) {
-        this._consoleService = Cc["@mozilla.org/consoleservice;1"] .getService(Ci.nsIConsoleService);
+        this._consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
         this.log = function(msg) {
             this._consoleService.logStringMessage("FloatNotes: " + msg);
         }

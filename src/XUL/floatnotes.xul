@@ -66,19 +66,18 @@
                 <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
                 <observes element="floatnotes-toggle-brdc" attribute="image" />
                 <observes element="floatnotes-toggle-brdc" attribute="label" />
-                <observes element="floatnotes-edit-brdc" attribute="disabled" />
+                <observes element="floatnotes-edit-brdc" attribute="hidden" />
             </menuitem>
             <menuitem id="floatnotes-delete-note" label='&floatnotes.delete;'
                 oncommand='gFloatNotesView.deleteNote();' class="menuitem-iconic"
                 image='chrome://floatnotes/skin/note_delete.png'>
-                <observes element="floatnotes-toggle-brdc" attribute="disabled" />
-                <observes element="floatnotes-edit-brdc" attribute="disabled" />
+                <observes element="floatnotes-edit-brdc" attribute="hidden" />
             </menuitem>
             <menuitem id="floatnotes-new-note" label='&floatnotes.new;'
                 oncommand='gFloatNotesView.addNote();' class="menuitem-iconic"
                 image='chrome://floatnotes/skin/note_new.png'>
-                <observes element="floatnotes-toggle-brdc" attribute="disabled" />
-                <observes element="floatnotes-edit-brdc" attribute="disabled" />
+                <observes element="floatnotes-toggle-brdc" attribute="hidden" />
+                <observes element="floatnotes-edit-brdc" attribute="hidden" />
             </menuitem>
     </popup>
 	

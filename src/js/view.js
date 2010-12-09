@@ -350,6 +350,7 @@ FloatNotesView.prototype = {
             this._toggleNotesBrdc.setAttribute('label', text);
             this._toggleNotesBrdc.setAttribute('tooltiptext', text);
             this._toggleNotesBrdc.setAttribute('disabled', true);
+            this._toggleNotesBrdc.setAttribute('hidden', true);
             this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/note_dis_16.png');
             this._toggleNotesBrdc.setAttribute('class', 'hidden');
        }
@@ -358,6 +359,7 @@ FloatNotesView.prototype = {
             this._toggleNotesBrdc.setAttribute('label', text);
             this._toggleNotesBrdc.setAttribute('tooltiptext', text);
             this._toggleNotesBrdc.setAttribute('disabled', false);
+            this._toggleNotesBrdc.setAttribute('hidden', false);
             this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/note_16.png');
             this._toggleNotesBrdc.setAttribute('class', '');
         }
@@ -554,9 +556,9 @@ FloatNotesView.prototype = {
     },
 
     updateContextMenu: function(event) {
-        this._deleteMenuEntry.hidden = !this.contextNote || !Preferences.showContextDelete;
-        this._newMenuEntry.hidden = !!this.contextNote;
-        this._hideMenuEntry.hidden = !this.notesManager.siteHasNotes(this.currentDocument.location) && !this.contextNote || !Preferences.showContextHide;
+        this._deleteMenuEntry.hidden = !this.contextNote || this._editNoteBrdc.hidden || !Preferences.showContextDelete;
+        this._newMenuEntry.hidden = !!this.contextNote || this._editNoteBrdc.hidden || this._toggleNotesBrdc.hidden;
+        this._hideMenuEntry.hidden = this._editNoteBrdc.hidden || !(this.currentNotes.length > 0)  || !Preferences.showContextHide;
     },
 
     openEditPopup: function(note, anchor, cb) {
@@ -604,6 +606,7 @@ FloatNotesView.prototype = {
     },
     noteIsEditing: function(value) {
         this._editNoteBrdc.setAttribute('disabled', value);
+        this._editNoteBrdc.setAttribute('hidden', value);
     }
 };
 

@@ -31,9 +31,11 @@ var IndicatorProxy = {
 
     startTimeout: function() {
         var that = this;
-        this._timer.initWithCallback({notify: function(){ 
-            that.hideAll();
-        }}, this.preferences.fadeOutTime*1000, this._timer.TYPE_ONE_SHOT);
+        if(this.preferences.fadeOutAfter > 0) {
+            this._timer.initWithCallback({notify: function(){ 
+                that.hideAll();
+            }}, this.preferences.fadeOutAfter*1000, this._timer.TYPE_ONE_SHOT);
+        }
     },
 
     stopTimeout: function() {

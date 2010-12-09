@@ -19,6 +19,11 @@
 <!ENTITY preferences.view.show_indicator "Show info if notes are outside the current view on the website" >
 <!ENTITY preferences.view.indicator_timeout "Time after the info fades out (0 = don't fade out):" >
 <!ENTITY preferences.view.indicator_timeout_unit "seconds" >
+<!ENTITY preferences.view.show_toolbar_button "Show in toolbar" >
+<!ENTITY preferences.view.show_menu "Show in 'Tools' menu" >
+<!ENTITY preferences.view.show_context_delete "Show 'Delete note' in context menu" >
+<!ENTITY preferences.view.show_context_locations "Show 'Edit location' in context menu" >
+<!ENTITY preferences.view.show_context_hide "Show 'Hide notes' in context menu" >
 
 <!ENTITY preferences.notifications.title "Notifications" >
 <!ENTITY preferences.notifications.note_deletion "Confirm deletion of notes" >

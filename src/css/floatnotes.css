@@ -1,24 +1,24 @@
-#floatnotes-toolbar-hide {
+#floatnotes-toolbar-button {
     list-style-image: url("chrome://floatnotes/skin/note_24.png");
 }
 
-#floatnotes-toolbar-hide.hidden {
+#floatnotes-toolbar-button.hidden {
     list-style-image: url("chrome://floatnotes/skin/note_dis_24.png");
 }
 
-#floatnotes-toolbar-hide[disabled="true"] {
+#floatnotes-toolbar-button[disabled="true"] {
     list-style-image: url("chrome://floatnotes/skin/note_24_dis.png");
 }
 
 
-toolbar[iconsize="small"] #floatnotes-toolbar-hide {
+toolbar[iconsize="small"] #floatnotes-toolbar-button {
     list-style-image: url("chrome://floatnotes/skin/note_16.png");
 }
 
-toolbar[iconsize="small"] #floatnotes-toolbar-hide.hidden {
+toolbar[iconsize="small"] #floatnotes-toolbar-button.hidden {
     list-style-image: url("chrome://floatnotes/skin/note_dis_16.png");
 }
 
-toolbar[iconsize="small"] #floatnotes-toolbar-hide[disabled="true"] {
+toolbar[iconsize="small"] #floatnotes-toolbar-button[disabled="true"] {
     list-style-image: url("chrome://floatnotes/skin/note_16_dis.png");
 }

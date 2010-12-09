@@ -24,6 +24,10 @@ pref("extensions.floatnotes.ignoreProtocol", true);
 pref("extensions.floatnotes.showIndicator", true);
 pref("extensions.floatnotes.fadeOutAfter", 3);
 pref("extensions.floatnotes.scrolltimer", 100);
+pref("extensions.floatnotes.showToolbarButton", true);
+pref("extensions.floatnotes.showMenu", true);
+pref("extensions.floatnotes.showContextHide", false);
+pref("extensions.floatnotes.showContextDelete", false);
 
 /* notes manager */
 pref("extensions.floatnotes.savedSearches", '[]');

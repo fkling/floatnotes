@@ -1,117 +1,35 @@
 //!#include "../header.js"
 
-var EXPORTED_SYMBOLS = ['Preferences'];
+var EXPORTED_SYMBOLS = ['Preferences'],
+    PREFS = {'width': 0, 
+            'height': 0, 
+            'location': 0, 
+            'fadeOutAfter': 0, 
+            'scrolltimer': 0,
+            'color': 1, 
+            'transparency': 1, 
+            'draggingTransparency': 1, 
+            'version': 1,
+            'showIndicator': 2, 
+            'confirmDelete': 2, 
+            'showUriNotSupported': 2, 
+            'updateOnHashChange': 2, 
+            'includePageForHashURLs': 2, 
+            'ignoreProtocol': 2, 
+            'firstrun': 2,
+            'showToolbarButton': 2,
+            'showMenu': 2,
+            'showContextHide': 2,
+            'showContextDelete': 2,
+            'showContextLocations': 2 },
+    MAP = ['IntPref', 'CharPref', 'BoolPref'];
 
-var init = false;
 
 var Preferences = {
+    _observers: {},
+    _do_observe: true,
 
     /* -- preferences -- */
-    get width() {
-        if(!this._width) {
-            this._width = this._branch.getIntPref('width');
-        }
-        return this._width;
-    },
-
-    get height() {
-        if(!this._height) {
-            this._width = this._branch.getIntPref('height');
-        }
-        return this._width;
-    },
-
-    get color() {
-        if(!this._color) {
-            this._color = this._branch.getCharPref('color');
-        }
-        return this._color;
-    },
-
-    get transparency() {
-        if(!this._transparency) {
-            this._transparency = this._branch.getCharPref('transparency');
-        }
-        return this._transparency;
-    },
-
-    get draggingTransparency() {
-        if(!this._draggingTransparency) {
-            this._draggingTransparency = this._branch.getCharPref('draggingTransparency');
-        }
-        return this._draggingTransparency;
-    },
-
-    get location() {
-        if(!this._location) {
-            this._location = this._branch.getIntPref('location');
-        }
-        return this._location;
-    },
-
-    get showIndicator() {
-        if(!this._showIndicator) {
-            this._showIndicator = this._branch.getBoolPref('showIndicator');
-        }
-        return this._showIndicator;
-    },
-
-    get fadeOutTime() {
-        if(!this._fadeOutAfter) {
-            this._fadeOutAfter = this._branch.getIntPref('fadeOutAfter');
-        }
-        return this._fadeOutAfter;
-    },
-
-    get scrollTimer() {
-        if(!this._scrolltimer) {
-            this._scrolltimer = this._branch.getIntPref('scrolltimer');
-        }
-        return this._scrolltimer;
-    },
-
-    get confirmDelete() {
-        if(!this._confirmDelete) {
-            this._confirmDelete = this._branch.getBoolPref('confirmDelete');
-        }
-        return this._confirmDelete ;
-    },
-
-    set confirmDelete(value) {
-        this._branch.setBoolPref('confirmDelete', !!value);
-    },
-
-    get showUriNotSupported() {
-        if(!this._showUriNotSupported) {
-            this._showUriNotSupported = this._branch.getBoolPref('showUriNotSupported');
-        }
-        return this._showUriNotSupported;
-    },
-
-    set showUriNotSupported(value) {
-        this._branch.setBoolPref('showUriNotSupported', !!value);
-    },
-
-    get updateOnHashChange() {
-        if(!this._updateOnHashChange) {
-            this._updateOnHashChange= this._branch.getBoolPref('updateOnHashChange');
-        }
-        return this._updateOnHashChange;
-    },
-
-    get includePageForHashURLs() {
-        if(!this._includePageForHashURLs) {
-            this._includePageForHashURLs = this._branch.getBoolPref('includePageForHashURLs');
-        }
-        return this._includePageForHashURLs;
-    },
-
-    get ignoreProtocol() {
-        if(!this._ignoreProtocol) {
-            this._ignoreProtocol = this._branch.getBoolPref('ignoreProtocol');
-        }
-        return this._ignoreProtocol;
-    },
 
     get savedSearches() {
         if(!this._savedSearches) {
@@ -130,30 +48,6 @@ var Preferences = {
         Components.interfaces.nsISupportsString, str);
     },
 
-    get version() {
-        if(!this._version) {
-            this._version = this._branch.getCharPref('version');
-        }
-        return this._version;
-    },
-
-    set version(value) {
-        this._branch.setCharPref('version', value);
-    },
-
-    get firstrun() {
-        if(!this._firstrun) {
-            this._firstrun = this._branch.getBoolPref('firstrun');
-        }
-        return this._firstrun;
-    },
-
-    set firstrun(value) {
-        this._branch.setBoolPref('firstrun', !!value);
-    },
-
-
-
     register: function() {  
         var prefService = Components.classes["@mozilla.org/preferences-service;1"]  
         .getService(Components.interfaces.nsIPrefService);  
@@ -164,17 +58,83 @@ var Preferences = {
     },  
 
     unregister: function() {  
-        if (!this._branch) return;  
+        if (!this._branch) {
+            return; 
+        }
         this._branch.removeObserver("", this);  
     },  
 
-    observe: function(aSubject, aTopic, aData) {  
-        if(aTopic != "nsPref:changed") return;  
-        if(('_' + aData) in this) {
-            LOG('Preference changed: ' + aData);
-            this['_' + aData] = null;
+    observe: function(aSubject, aTopic, aData) {
+        if(this._do_observe) {
+            if(aTopic != "nsPref:changed") {
+                return;
+            }
+            if(aData in this) {
+                LOG('Preference changed: ' + aData);
+                this['_' + aData] = null;
+                this._notifyObservers(aData);
+            }
+        }
+    },
+
+    addObserver: function(preference, observer) {
+        if(!(preference in this._observers)) {
+            this._observers[preference] = [];
+        }
+        this._observers[preference].push(observer); LOG('Add observer for ' + preference)
+    },
+
+    removeObserver: function(observer, preference) {
+        if(preference in this._observers) {
+            var obs = this._observers[preference];
+            Util.Js.removeObjectFromArray(observer, obs);
+            if(obs.length === 0) {
+                delete this._observers[preference];
+            }
+        }
+    },
+
+    _notifyObservers: function(preference) { LOG('Registerd observers for ' + preference + ': ' + (preference in this._observers))
+        if(preference in this._observers) { LOG('Preference: Call observers');
+            var obs = this._observers[preference];
+            for(var i = 0, l = obs.length; i < l; i += 1) {
+                var ob = obs[i];
+                if(typeof ob === 'function') {
+                    ob(preference, this[preference]);
+                }
+                else {
+                    ob.onPreferenceChange(preference, this[preference]);
+                }
+            }
         }
     }
+};
+
+function getGetter(pref) {
+    var ipref = '_' + pref;
+    var ifunc = 'get' + MAP[PREFS[pref]];
+    return function() {
+        if(!this[ipref]) {
+            this[ipref] = this._branch[ifunc](pref);
+        }
+        return this[ipref];
+    };
+}
+
+function getSetter(pref) {
+    var ipref = '_' + pref;
+    var ifunc = 'set' + MAP[PREFS[pref]];
+    return function(value) {
+        this._do_observe = false;
+        this[ipref] = value;
+        this._branch[ifunc](pref, value);
+        this._do_observe = true;
+    };
+}
+
+for(var pref in PREFS) {
+    Preferences.__defineGetter__(pref, getGetter(pref));
+    Preferences.__defineSetter__(pref, getSetter(pref));
 }
 
 Preferences.register();

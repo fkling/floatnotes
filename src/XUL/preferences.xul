@@ -63,22 +63,28 @@
     <prefpane id="view" label="&preferences.view.title;">
         <preferences>
             <preference id="pref-indicator" name="extensions.floatnotes.showIndicator" type="bool" />
-			<preference id="pref-fadeout" name="extensions.floatnotes.fadeOutAfter" type="int" />
+            <preference id="pref-fadeout" name="extensions.floatnotes.fadeOutAfter" type="int" />
+            <preference id="pref-toolbarbutton" name="extensions.floatnotes.showToolbarButton" type="bool" />
+            <preference id="pref-menu" name="extensions.floatnotes.showMenu" type="bool" />
+            <preference id="pref-contexthide" name="extensions.floatnotes.showContextHide" type="bool" />
+            <preference id="pref-contextdelete" name="extensions.floatnotes.showContextDelete" type="bool" />
 		</preferences>
 
-        <groupbox>
-				<caption label="&preferences.view.title;" />
 				<checkbox id="floatnotes-indicator"
 					label="&preferences.view.show_indicator;"
 					preference="pref-indicator" />
-				<hbox>
+				<hbox style="margin-left:20px">
 					<label value="&preferences.view.indicator_timeout;"
 						style="padding-top:3px;" />
 					<textbox id="floatnotes-fadeout" size="2" maxlength="2"
 						preference="pref-fadeout" />
 					<label value="&preferences.view.indicator_timeout_unit;" style="padding-top:3px;" />
-				</hbox>
-			</groupbox>
+                </hbox>
+                <checkbox label="&preferences.view.show_toolbar_button;" preference="pref-toolbarbutton" />
+                <checkbox label="&preferences.view.show_menu;" preference="pref-menu" />
+                <checkbox label="&preferences.view.show_context_hide;" preference="pref-contexthide" />
+                <checkbox label="&preferences.view.show_context_delete;" preference="pref-contextdelete" />
+
     </prefpane>
 
     <prefpane id="notifications" label="&preferences.notifications.title;">

@@ -10,7 +10,7 @@
     </broadcasterset>
 
     <toolbarpalette id="BrowserToolbarPalette">
-        <toolbarbutton id="floatnotes-toolbar-hide" class="" label="FloatNotes" type="menu-button">
+        <toolbarbutton id="floatnotes-toolbar-button" class="" label="FloatNotes" type="menu-button">
             <observes element="floatnotes-toggle-brdc" attribute="tooltiptext" />
             <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
             <observes element="floatnotes-toggle-brdc" attribute="class" />
@@ -45,8 +45,11 @@
 
     <menupopup id="menu_ToolsPopup">
         <menu id="floatnotes-menu" label="&floatnotes;"
+            hidden="true"
+            class="menu-iconic"
+            image="chrome://floatnotes/skin/note_16.png"
             accesskey=""
-            insertafter="javascriptConsole,devToolsSeparator">
+            insertbefore="devToolsSeparator">
             <menupopup>
                 <menuitem label="&floatnotes.notelist;"
                         oncommand="gFloatNotesView.openNotesManager();" />
@@ -63,6 +66,12 @@
                 <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
                 <observes element="floatnotes-toggle-brdc" attribute="image" />
                 <observes element="floatnotes-toggle-brdc" attribute="label" />
+                <observes element="floatnotes-edit-brdc" attribute="disabled" />
+            </menuitem>
+            <menuitem id="floatnotes-delete-note" label='&floatnotes.delete;'
+                oncommand='gFloatNotesView.deleteNote();' class="menuitem-iconic"
+                image='chrome://floatnotes/skin/note_delete.png'>
+                <observes element="floatnotes-toggle-brdc" attribute="disabled" />
                 <observes element="floatnotes-edit-brdc" attribute="disabled" />
             </menuitem>
             <menuitem id="floatnotes-new-note" label='&floatnotes.new;'

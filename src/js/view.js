@@ -110,12 +110,21 @@ function FloatNotesView(manager) {
     this._scrollTimer = Cc["@mozilla.org/timer;1"]
                         .createInstance(Ci.nsITimer);
 
-    // get references to menu items
+    // get references to UI items
     this._toggleNotesBrdc = document.getElementById('floatnotes-toggle-brdc');
     this._editNoteBrdc = document.getElementById('floatnotes-edit-brdc');
+
+    this._deleteMenuEntry = document.getElementById('floatnotes-delete-note');
     this._newMenuEntry = document.getElementById('floatnotes-new-note');
     this._hideMenuEntry = document.getElementById('floatnotes-hide-note');
+    
+    this._menuEntry = document.getElementById('floatnotes-menu');
+    this.onPreferenceChange('showMenu', Preferences.showMenu);
+    this._toolbarButton = document.getElementById('floatnotes-toolbar-button');
+    this.onPreferenceChange('showToolbarButton', Preferences.showToolbarButton);
+
     this.popup = document.getElementById('floatnotes-edit-popup');
+
     // create indicators
     IndicatorProxy.init(this, Preferences);
 
@@ -173,6 +182,9 @@ FloatNotesView.prototype = {
             }
         }
         window.addEventListener('unload',remove , true);
+
+        Preferences.addObserver('showMenu', this);
+        Preferences.addObserver('showToolbarButton', this);
     },
 
     removeObserver: function() {
@@ -215,6 +227,44 @@ FloatNotesView.prototype = {
                         this._attachNotesToCurrentDocument([note]);
                     }
             }
+        }
+    },
+
+    onPreferenceChange: function(pref, value) { LOG('View: Preference ' + pref + ' changed: ' + value)
+        switch(pref) {
+            case 'showMenu':
+                this._menuEntry.hidden = !value;
+            break;
+            case 'showToolbarButton':
+                try {
+                  var myId    = "floatnotes-toolbar-button";
+                  var afterId = "search-container";
+                  var navBar  = document.getElementById("nav-bar");
+                  var curSet  = navBar.currentSet.split(",");
+                  if(value && curSet.indexOf(myId) == -1 ) {
+                    var pos = curSet.indexOf(afterId) + 1 || curSet.length;
+                    var set = curSet.slice(0, pos).concat(myId).concat(curSet.slice(pos));
+
+                    navBar.setAttribute("currentset", set.join(","));
+                    navBar.currentSet = set.join(",");
+                    document.persist(navBar.id, "currentset");
+                  }
+                  else if(!value && curSet.indexOf(myId) > -1) {
+                    var pos = curSet.indexOf(myId)
+                    curSet.splice(pos, 1);
+
+                    navBar.setAttribute('curentset', curSet.join(','));
+                    navBar.currentSet = curSet.join(',');
+                    document.persist(navBar.id, "currentset");
+                  }
+                    try {
+                      BrowserToolboxCustomizeDone(true);
+                    }
+                    catch (e) {}
+                }
+                catch(e) {}
+                
+                break;
         }
     },
 
@@ -349,7 +399,7 @@ FloatNotesView.prototype = {
         var that = this;
         this._scrollTimer.initWithCallback({notify: function(){
             that._updateAndShowIndicators();
-        }}, Preferences.scrollTimer, this._scrollTimer.TYPE_ONE_SHOT);
+        }}, Preferences.scrolltimer, this._scrollTimer.TYPE_ONE_SHOT);
     },
 
     _updateAndShowIndicators: function() {
@@ -507,8 +557,9 @@ FloatNotesView.prototype = {
     },
 
     updateContextMenu: function(event) {
+        this._deleteMenuEntry.hidden = !this.contextNote || !Preferences.showContextDelete;
         this._newMenuEntry.hidden = !!this.contextNote;
-        this._hideMenuEntry.hidden = !this.notesManager.siteHasNotes(this.currentDocument.location) && !this.contextNote;
+        this._hideMenuEntry.hidden = !this.notesManager.siteHasNotes(this.currentDocument.location) && !this.contextNote || !Preferences.showContextHide;
     },
 
     openEditPopup: function(note, anchor, cb) {

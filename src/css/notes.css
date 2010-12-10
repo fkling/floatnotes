@@ -13,7 +13,7 @@
     left: 0px;
     width: 100%;
     height: 100%;
-    z-index: 999;
+    z-index: auto;
 }
 
 .floatnotes-note {
@@ -92,7 +92,7 @@
 
 .floatnotes-note .floatnotes-drag-handler {
     background-color: #222 !important;
-    opacity: 0.3 !important;
+    opacity: 0.5 !important;
     height: 15px !important;
     cursor: move !important;
     margin-top: 3px !important;
@@ -251,7 +251,7 @@
     line-height: 1.2em !important;
 }
 
-.floatnotes-note em,  .floatnotes-not strong{   
+.floatnotes-note em,  .floatnotes-note strong{   
     font-size: inherit !important;
 }
 
@@ -265,8 +265,6 @@
     list-style-image: none  !important;
     background: none  !important;
 }
-
-
 
 
 /*  ----- Indicator styles ----- */

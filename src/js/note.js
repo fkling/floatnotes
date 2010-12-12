@@ -473,9 +473,9 @@ FloatNote.prototype = {
     },
 
     fix : function(e) {
-        this.setFix();
         var style = this.dom.style;
         var newTop = (this.data.y - this.view.currentDocument.defaultView.pageYOffset);
+        this.setFix();
         style.top =  newTop + "px";
         this.data.y = newTop;
         this.setStatus(note_status.NEEDS_SAVE);
@@ -483,13 +483,11 @@ FloatNote.prototype = {
     },
 
     unfix: function(e) {
-        this.unsetStatus(note_status.FIXED);
         var style = this.dom.style;
         var newTop = (this.data.y + this.view.currentDocument.defaultView.pageYOffset);
+        this.unsetFix();
         style.top = newTop + "px";
         this.data.y = newTop;
-        Util.Css.removeClass(this.dom, "fixed");
-        this.toggleFix = this.fix;
         this.setStatus(note_status.NEEDS_SAVE);
         this.save();
     },
@@ -636,11 +634,11 @@ FloatNote.prototype = {
         this.outHandler = _out(this);
         this.inHandler = _in(this);
 
-        elements.fixer.addEventListener('mousedown', function(e) {
+        elements.fixer.addEventListener('click', function(e) {
             e.stopPropagation();
             e.preventDefault();
             note.toggleFix(e);
-        }, false);
+        }, true);
 
         elements.edit.addEventListener('click', function(e) {
             note.view.openEditPopup(note, elements.edit, function(color, url) {
@@ -670,8 +668,8 @@ FloatNote.prototype = {
         elements.container.addEventListener('mouseout', this.outHandler, false);
         elements.container.addEventListener('mouseover', this.inHandler, false);
 
-        elements.container.addEventListener('dblclick', function(e) {
-            if(e.target.className != 'floatnotes-drag') {
+        elements.content.addEventListener('dblclick', function(e) {
+            if(e.target.nodeName != 'A') {
                 note.edit();
             }
         }, false);

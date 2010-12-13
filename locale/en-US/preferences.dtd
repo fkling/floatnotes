@@ -27,7 +27,7 @@
 
 <!ENTITY preferences.notifications.title "Notifications" >
 <!ENTITY preferences.notifications.note_deletion "Confirm deletion of notes" >
-<!ENTITY preferences.notifications.uri_not_supported "Show URI not supported information" >
+<!ENTITY preferences.notifications.site_not_supported "Show information if a website is not supported" >
 
 
 <!ENTITY preferences.sync.title "Sync" >

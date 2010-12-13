@@ -34,7 +34,7 @@ pref("extensions.floatnotes.savedSearches", '[]');
 
 /* notifications */
 pref("extensions.floatnotes.confirmDelete", true);
-pref("extensions.floatnotes.showUriNotSupported", true);
+pref("extensions.floatnotes.showSiteNotSupported", true);
 
 /* meta data */
 pref("extensions.floatnotes.firstrun", true);

@@ -305,6 +305,14 @@ FloatNotesView.prototype = {
         doc = doc || this.currentDocument;
         var domain = doc.location;
         if(domain.protocol === 'about:') {
+            this._editNoteBrdc.setAttribute('hidden', true);
+            return false;
+        }
+            
+        // FloatNotes does not support pages with frames yet
+        if(this.currentDocument.querySelector('frameset')) {
+            this._editNoteBrdc.setAttribute('hidden', true);
+            this.showNotification(Util.Locale.get('location.frames_not_supported'));
             return false;
         }
 
@@ -314,22 +322,26 @@ FloatNotesView.prototype = {
                 that.currentNotes = that._createNotesWith(data);
                 that._attachNotesToCurrentDocument();
                 that._attachAndShowIndicators();
-                that._updateToggleBroadcast();
+                that._updateBroadcaster();
                 that.scrollToNote();                
             });
         }
         else {
-            if(Preferences.showUriNotSupported) {
-                var notifyBox = gBrowser.getNotificationBox(),
-                    note = notifyBox.getNotificationWithValue('floatnotes'),
-                    loc = Util.Locale;
-                if(note) {
-                    notifyBox.removeNotification(note);
-                }
+            this._editNoteBrdc.setAttribute('hidden', true);
+            this.showNotification(Util.Locale.get('location.protocol_not_supported', [domain.protocol]));
+                
+        }
+    },
 
-                notifyBox.appendNotification(loc.get('location.protocol_not_supported', [domain.protocol]), 'floatnotes', null, notifyBox.PRIORITY_INFO_MEDIUM, [{label: loc.get('button.not_again'), callback:function(note){Preferences.showUriNotSupported = false;}}, 
-                            {label: loc.get('button.ok'), callback: function(note){}}]);
-            }
+    showNotification: function(msg) {
+        if(Preferences.showSiteNotSupported === true) {
+            var notifyBox = gBrowser.getNotificationBox(),
+                note = notifyBox.getNotificationWithValue('floatnotes'),
+                loc = Util.Locale;
+            if(note) {
+                notifyBox.removeNotification(note);
+            } 
+            notifyBox.appendNotification(msg, 'floatnotes', 'chrome://floatnotes/skin/note_16.png', notifyBox.PRIORITY_INFO_HIGH, [{label: loc.get('button.not_show_again'), callback:function(note){ Preferences.showSiteNotSupported = false; }}, {label: loc.get('button.ok'), callback: function(note){}} ]);
         }
     },
 
@@ -344,7 +356,8 @@ FloatNotesView.prototype = {
         }
     },
 
-    _updateToggleBroadcast: function() {
+    _updateBroadcaster: function() {
+       this._editNoteBrdc.setAttribute('hidden', false);
        if(this._notesHiddenFor(this.currentDocument.location)) {
             var text = Util.Locale.get('showNotesString', [this.currentNotes.length]);
             this._toggleNotesBrdc.setAttribute('label', text);
@@ -526,7 +539,7 @@ FloatNotesView.prototype = {
         this._setNotesVisibilityForTo(location, true);
         Util.Css.show(this._container);
         this._attachAndShowIndicators();
-        this._updateToggleBroadcast();
+        this._updateBroadcaster();
     },
 
     hideNotes: function() {
@@ -534,7 +547,7 @@ FloatNotesView.prototype = {
         this._setNotesVisibilityForTo(location, false);
         Util.Css.hide(this._container);
         this._detachIndicators();
-        this._updateToggleBroadcast();
+        this._updateBroadcaster();
     },
 
     _setNotesVisibilityForTo: function(location, visible) {

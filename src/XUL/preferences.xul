@@ -90,11 +90,11 @@
     <prefpane id="notifications" label="&preferences.notifications.title;">
         <preferences>
             <preference id="pref-note_delete" name="extensions.floatnotes.confirmDelete" type="bool" />
-			<preference id="pref-uri_not_supported" name="extensions.floatnotes.showUriNotSupported" type="bool" />
+			<preference id="pref-site_not_supported" name="extensions.floatnotes.showSiteNotSupported" type="bool" />
 		</preferences>
         
         <checkbox label="&preferences.notifications.note_deletion;" preference="pref-delete" />
-        <checkbox label="&preferences.notifications.uri_not_supported;" preference="pref-uri_not_supported" />
+        <checkbox label="&preferences.notifications.site_not_supported;" preference="pref-site_not_supported" />
 	</prefpane>
 
     <prefpane id="sync" label="&preferences.sync.title;">

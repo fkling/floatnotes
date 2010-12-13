@@ -1,29 +1,6 @@
 //!#include "../header.js"
 
-var EXPORTED_SYMBOLS = ['Preferences'],
-    PREFS = {'width': 0, 
-            'height': 0, 
-            'location': 0, 
-            'fadeOutAfter': 0, 
-            'scrolltimer': 0,
-            'color': 1, 
-            'transparency': 1, 
-            'draggingTransparency': 1, 
-            'version': 1,
-            'showIndicator': 2, 
-            'confirmDelete': 2, 
-            'showUriNotSupported': 2, 
-            'updateOnHashChange': 2, 
-            'includePageForHashURLs': 2, 
-            'ignoreProtocol': 2, 
-            'firstrun': 2,
-            'showToolbarButton': 2,
-            'showMenu': 2,
-            'showContextHide': 2,
-            'showContextDelete': 2,
-            'showContextLocations': 2 },
-    MAP = ['IntPref', 'CharPref', 'BoolPref'];
-
+var EXPORTED_SYMBOLS = ['Preferences'];
 
 var Preferences = {
     _observers: {},
@@ -48,10 +25,35 @@ var Preferences = {
         Components.interfaces.nsISupportsString, str);
     },
 
+    _init: function() {
+        var b = this._branch,
+            map = {},
+            prefs = b.getChildList("",{});
+
+        map[b.PREF_STRING] = 'CharPref';
+        map[b.PREF_BOOL] = 'BoolPref';
+        map[b.PREF_INT] = 'IntPref';
+
+        for(var i = prefs.length; i--; ) {
+            var pref = prefs[i],
+                type = map[b.getPrefType(pref)];
+
+            // don't override manually defined getter, setter
+            if(!this.hasOwnProperty(pref)) {
+                this.__defineGetter__(pref, getGetter(pref, type));
+                this.__defineSetter__(pref, getSetter(pref, type));
+            }
+        }
+
+
+    },
+
     register: function() {  
         var prefService = Components.classes["@mozilla.org/preferences-service;1"]  
         .getService(Components.interfaces.nsIPrefService);  
         this._branch = prefService.getBranch("extensions.floatnotes.");  
+        
+        this._init();
 
         this._branch.QueryInterface(Components.interfaces.nsIPrefBranch2);  
         this._branch.addObserver("", this, false);  
@@ -110,31 +112,26 @@ var Preferences = {
     }
 };
 
-function getGetter(pref) {
-    var ipref = '_' + pref;
-    var ifunc = 'get' + MAP[PREFS[pref]];
+function getGetter(pref, type) {
+    var ipref = '_' + pref,
+        type = 'get' + type;
     return function() {
         if(!this[ipref]) {
-            this[ipref] = this._branch[ifunc](pref);
+            this[ipref] = this._branch[type](pref);
         }
         return this[ipref];
     };
 }
 
-function getSetter(pref) {
+function getSetter(pref, type) {
     var ipref = '_' + pref;
-    var ifunc = 'set' + MAP[PREFS[pref]];
+        type = 'set' + type;
     return function(value) {
         this._do_observe = false;
         this[ipref] = value;
-        this._branch[ifunc](pref, value);
+        this._branch[type](pref, value);
         this._do_observe = true;
     };
-}
-
-for(var pref in PREFS) {
-    Preferences.__defineGetter__(pref, getGetter(pref));
-    Preferences.__defineSetter__(pref, getSetter(pref));
 }
 
 Preferences.register();

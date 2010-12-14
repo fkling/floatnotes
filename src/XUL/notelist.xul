@@ -32,6 +32,7 @@
             <textbox flex="1" type="search" id="search" oncommand="search()" emptytext="&searchtext;"/>
             <button style="display:none;" class="small" id='saveSearch' label="&button.save;" oncommand="saveSearch();"/>
         </hbox>
+        <description id="searchMsg" style="font-size:0.9em;color:gray;font-style:italic;display:none;" />
         <vbox flex="1">
             <tree id="notes" flex="2" onselect="treeView.selectionChanged()" hidecolumnpicker="false" persist="sortDirection sortResource" sortDirection="ascending" sortResource="content">
                 <treecols>  

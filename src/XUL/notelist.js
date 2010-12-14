@@ -43,6 +43,7 @@ var observer = {
     observe: function(subject, topic, data) {
         if(this.doObserve) {
             var selection = treeView.selection;
+            search.dirty = true;
             search();
             if(selection && selection.count === 1) {
                 selection.select(selection.currentIndex);
@@ -100,8 +101,8 @@ function deleteSearch() {
     var index = searchList.selectedIndex;
     if(index !== null && index > 0) {
         searchManager.delete(index);
-        searchList.removeItemAt(index);
         searchList.selectItem(searchList.getItemAtIndex(index - 1));
+        searchList.removeItemAt(index);
     }
 }
 
@@ -172,7 +173,7 @@ function openAndReuseOneTabPerURL(url, guid) {
 
 
 function saveSearch() {
-    var keywords = searchBox.value;
+    var keywords = search.LastSearch;
     if(keywords) {
         var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]  
         .getService(Components.interfaces.nsIPromptService);  
@@ -184,42 +185,57 @@ function saveSearch() {
             result = prompts.prompt(null, Locale.get('notelist.save_search.title'), Locale.get('notelist.save_search.name'),input, null, check);
         } 
         if(result) {
-            searchManager.addSearch(input.value, keywords);
+            searchManager.addSearch(input.value, keywords.join(' '));
         }
     }
 }
 
 function search() {
-    var words = searchBox.value;
+    var words = searchBox.value ? searchBox.value.split(' ') : [];
     var selectedSearch = searchList.selectedItem;
+    var searchMsg = document.getElementById('searchMsg');
     if(selectedSearch && selectedSearch.value) {
-        words = selectedSearch.value + ' ' + words;
-    }
-    clear();
-    if(words) {
-        db.getNotesContaining(words.split(' '),function(notes) {
-            treeView.data = notes;
-            tree.boxObject.invalidate();
-            updateCounter();
-            if(searchBox.value) {
-                saveSearchButton.style.display = 'inline';
-            }
-            else {
-                saveSearchButton.style.display = 'none';
-            }
-            sort();
-        });
+        words = selectedSearch.value.split(' ').concat(words);
+        searchMsg.value = Locale.get('notelist.search_msg', [words.join(' ')]);
+        searchMsg.style.display = 'block';
     }
     else {
-        db.getAllNotes(function(notes) {
-            treeView.data = notes;
-            tree.view = treeView;
-            updateCounter();
-            document.getElementById('saveSearch').style.display = 'none';
-            sort();
-        });
+        searchMsg.style.display = 'none';
+    }
+    clear();
+    if(search.dirty || (words.toString() !== search.LastSearch.toString())) {
+        if(words.length > 0) {
+            treeView.clearPreviousSelection();
+            search.dirty = false;
+            db.getNotesContaining(words,function(notes) {
+                treeView.data = notes;
+                if(typeof tree.boxObject.invalidate === 'function') {
+                    tree.boxObject.invalidate();
+                };
+                updateCounter();
+                if(searchBox.value) {
+                    saveSearchButton.style.display = 'inline';
+                }
+                else {
+                    saveSearchButton.style.display = 'none';
+                }
+                sort();
+            });
+        }
+        else {
+            db.getAllNotes(function(notes) {
+                treeView.data = notes;
+                tree.view = treeView;
+                updateCounter();
+                document.getElementById('saveSearch').style.display = 'none';
+                sort();
+            });
+        }
+        search.LastSearch = words;
     }
 }
+search.LastSearch = [];
+search.dirty = true;
 
 function getTitle(text) {
     var index = text.indexOf("\n");
@@ -242,12 +258,12 @@ function updateCounter() {
     document.getElementById('counter').value = str;
 }
 
-function saveNote(value, attr) {
-    if(treeView.selection.count == 1) {
-        var selection = treeView.selection.currentIndex,
-            note = treeView.data[selection];
+function saveNote(value, attr, selection) {
+    if(typeof selection === 'number' || treeView.selection.count == 1) {
+        selection = (typeof selection === 'number' ) ? selection : treeView.selection.currentIndex;
+        var note = treeView.data[selection];
 
-        if(value != note[attr]) {
+        if(typeof note !== 'undefined' && value != note[attr]) {
             note[attr] = value
             observer.doObserve = false;
             manager.saveNote(note, function(id, guid){
@@ -267,8 +283,8 @@ function deleteNote() {
             search();
         }
         else {
-            var start = new Object();
-            var end = new Object();
+            var start = {};
+            var end =  {};
             var numRanges = tree.view.selection.getRangeCount();
             var data = treeView.data;
             for (var t = 0; t < numRanges; t++){
@@ -279,6 +295,7 @@ function deleteNote() {
             } 
             search();
         }
+        treeView.clearPreviousSelection();
     }
 }
 
@@ -349,11 +366,14 @@ var searchManager = {
             searchList.appendItem(this.searches[i][0], this.searches[i][1]);
         }
         searchList.selectedIndex = selectedIndex;
+        this.selectedIndex = null;
     },
     addSearch: function(name, keywords) {
         this.searches.push([name,keywords]);
+        searchBox.value = '';
         this.save();
-        this.buildList();
+        var item = searchList.appendItem(name, keywords);
+        searchList.selectedItem = item;
     },
     empty: function() {
         for(var i = searchList.itemCount -1;i >=0;i--) {
@@ -375,6 +395,12 @@ var searchManager = {
     update: function(index, name, keywords) {
         this.searches[index] = [name, keywords];
         this.save();
+        var item = searchList.getItemAtIndex(index);
+        item.label = name;
+        item.value = keywords;
+        if(item == searchList.selectedItem) {
+            search();
+        }
     },
     updateButtons: function() {
         document.getElementById('searchListButtons').setAttribute('disabled', (searchList.selectedIndex === 0));
@@ -419,27 +445,42 @@ var treeView = {
     getColumnProperties: function(colid,col,props){},
     selectionChanged: function() {
         var count = this.selection.count;
+        var note;
         if(count === 0) {
             inputBrdcast.setAttribute('disabled', true);
             textBox.value = "";
             colorPicker.value = "";
         }
         else if(count == 1) {
+            this._savePreviousSelection();
+            note = this.data[this.selection.currentIndex];
             inputBrdcast.setAttribute('disabled', false);
             textBox.disabled = false;
-            textBox.value = this.data[this.selection.currentIndex].content;
-            colorPicker.color = this.data[this.selection.currentIndex].color;
+            textBox.value = note.content;
+            colorPicker.color = note.color;
+            this._prevSelection = index;
         }
         else {
+            this._savePreviousSelection();
             textBox.value = "";
             colorPicker.color = "";
             inputBrdcast.setAttribute('disabled', true);
             deleteButton.disabled = false;
         }
     },
-
     cycleHeader: function(col) {
 
+    },
+    _savePreviousSelection: function() {
+        var index = this.selection.currentIndex;
+        if(typeof this._prevSelection === 'number' && index != this._prevSelection) {
+            saveNote(textBox.value, 'content', this._prevSelection);
+            saveNote(colorPicker.color, 'color',  this._prevSelection);
+        }
+        this.clearPreviousSelection();
+    },
+    clearPreviousSelection: function() {
+        this._prevSelection = null;
     }
 };
 

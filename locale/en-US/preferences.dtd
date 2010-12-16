@@ -6,30 +6,30 @@
 
 <!ENTITY preferences.location.title "Location" >
 <!ENTITY preferences.location.default_loc "Default location" >
-<!ENTITY preferences.location.query "... including query, EXAMPLE: www.example.com/page?s=floatnotes" >
-<!ENTITY preferences.location.hash "... including anchor, EXAMPLE: www.example.com/page?s=floatnotes#note" >
-<!ENTITY preferences.location.page "Current page, EXAMPLE: www.example.com/page" >
-<!ENTITY preferences.location.wild_page "Current page and subpages, EXAMPLE: Pages starting with www.example.com/page" >
-<!ENTITY preferences.location.website "Whole website, EXAMPLE: Pages starting with www.example.com" >
+<!ENTITY preferences.location.query "... with query, e.g.: www.example.com/page?s=query" >
+<!ENTITY preferences.location.hash "... with anchor, e.g.: www.example.com/page#anchor" >
+<!ENTITY preferences.location.query_hash "... with query and anchor, e.g.: www.example.com/page?s=query#anchor" >
+<!ENTITY preferences.location.page "Current page, e.g.: www.example.com/page" >
+<!ENTITY preferences.location.wild_page "Current page and subpages, e.g.: Pages starting with www.example.com/page" >
+<!ENTITY preferences.location.website "Whole website, e.g.: Pages starting with www.example.com" >
 <!ENTITY preferences.location.updateHash "Update notes when anchor changes" >
 <!ENTITY preferences.location.includePageHash "Show notes from page (including query string)" >
-<!ENTITY preferences.location.ajaxDescription "This option makes it possible to create notes on websites that use Ajax and the anchor to load subpages. Otherwise, anchors are ignored as they normally reference the same page." >
 
 <!ENTITY preferences.view.title "View" >
-<!ENTITY preferences.view.show_indicator "Show info if notes are outside the current view on the website" >
-<!ENTITY preferences.view.indicator_timeout "Time after the info fades out (0 = don't fade out):" >
+<!ENTITY preferences.view.show_indicator "Show indicators for notes that are outside the current view" >
+<!ENTITY preferences.view.indicator_timeout "Fade out after:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = don't fade out)" >
 <!ENTITY preferences.view.indicator_timeout_unit "seconds" >
-<!ENTITY preferences.view.show_toolbar_button "Show in toolbar" >
-<!ENTITY preferences.view.show_menu "Show in 'Tools' menu" >
+<!ENTITY preferences.view.show_toolbar_button "Show button in toolbar" >
+<!ENTITY preferences.view.show_menu "Show entry in 'Tools' menu" >
 <!ENTITY preferences.view.show_context_delete "Show 'Delete note' in context menu" >
 <!ENTITY preferences.view.show_context_locations "Show 'Edit location' in context menu" >
 <!ENTITY preferences.view.show_context_hide "Show 'Hide notes' in context menu" >
 
 <!ENTITY preferences.notifications.title "Notifications" >
 <!ENTITY preferences.notifications.note_deletion "Confirm deletion of notes" >
-<!ENTITY preferences.notifications.site_not_supported "Show information if a website is not supported" >
+<!ENTITY preferences.notifications.site_not_supported "Show warning if website is not supported" >
 
 
 <!ENTITY preferences.sync.title "Sync" >
-<!ENTITY preferences.sync.enable "Enable synchronisation of notes" >
-<!ENTITY preferences.sync.description "Your notes will be synchronized using Firefox Sync (must be installed for Firefox 3.6)" >
+<!ENTITY preferences.sync.enable "Enable synchronisation (requires Firefox Sync)" >

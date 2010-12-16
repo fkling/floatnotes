@@ -19,6 +19,9 @@ var URLParser = {
     getPageAnchorUrl: function(location) {
         return '';
     },
+    getPageQueryAnchorUrl: function(location) {
+        return '';
+    },
     getSiteUrl: function(location) {
         return '';
     },
@@ -29,6 +32,11 @@ var URLParser = {
         var def = Preferences.location;
         var url = '';
         switch(def) {
+           case  URLHandler.PAGE_QUERY_ANCHOR_URL:
+               url = this.getPageQueryAnchorUrl(location);
+                if(url) {
+                    break;
+                }
            case  URLHandler.PAGE_ANCHOR_URL:
                url = this.getPageAnchorUrl(location);
                 if(url) {
@@ -65,7 +73,8 @@ var URLParser = {
 var URLHandler = {
     PAGE_URL: -2,
     PAGE_QUERY_URL: -1,
-    PAGE_ANCHOR_URL: -4,
+    PAGE_ANCHOR_URL: -5,
+    PAGE_QUERY_ANCHOR_URL: -4,
     PAGE_WILDCARD_URL: -3,
     SITE_URL: 0,
     _parsers: {},
@@ -130,6 +139,12 @@ var HTTPURLParser = {
     },
     getPageAnchorUrl: function(location) {
         if(location.hash && Preferences.updateOnHashChange) {
+            return location.hostname + location.pathname + location.hash;
+        }
+        return '';
+    },
+    getPageQueryAnchorUrl: function(location) {
+        if(location.hash && location.search && Preferences.updateOnHashChange) {
             return location.hostname + location.pathname + location.search + location.hash;
         }
         return '';
@@ -164,6 +179,7 @@ var HTTPURLParser = {
         }
         if(location.hash && Preferences.updateOnHashChange) {
             urls.push(this.getPageAnchorUrl(location));
+            urls.push(this.getPageQueryAnchorUrl(location));
         }
         return urls;
     }

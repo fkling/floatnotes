@@ -31,24 +31,37 @@ var locationBuilder = {
             loc = Util.Locale;
 
         Util.Dom.removeChildren(group);
-
-        this._addItem(group, loc.get('location.page_url_label'),  URLHandler.getPageUrl(location), noteUrl);
+        
+        var pageUrl =  URLHandler.getPageUrl(location);
+        item = this._addItem(group, loc.get('location.page_url_label'), pageUrl, noteUrl);
+        item.setAttribute('tooltiptext', pageUrl);
         var queryUrl = URLHandler.getPageQueryUrl(location);
         if(queryUrl) {
             var query = location.search;
             item = this._addItem(group, loc.get('location.query_url_label'),  queryUrl, noteUrl);
             item.style.marginLeft="20px";
-            item.setAttribute('tooltiptext', query);
+            item.setAttribute('tooltiptext', queryUrl);
         }
         var hashUrl =  URLHandler.getPageAnchorUrl(location);
         if(hashUrl) {
             var hash = location.hash;
             item = this._addItem(group, loc.get('location.hash_url_label'), hashUrl, noteUrl);
             item.style.marginLeft="20px";
-            item.setAttribute('tooltiptext', hash);
+            item.setAttribute('tooltiptext', hashUrl);
         }
-        this._addItem(group, loc.get('location.site_url_label'),  URLHandler.getSiteUrl(location), noteUrl);
+        var queryHashUrl =  URLHandler.getPageQueryAnchorUrl(location);
+        if(queryHashUrl) {
+            var tooltip = location.search + location.hash;
+            item = this._addItem(group, loc.get('location.query_hash_url_label'), queryHashUrl, noteUrl);
+            item.style.marginLeft="20px";
+            item.setAttribute('tooltiptext', queryHashUrl);
+        }
+        var siteUrl =  URLHandler.getSiteUrl(location);
+        item = this._addItem(group, loc.get('location.site_url_label'), siteUrl, noteUrl);
+        item.setAttribute('tooltiptext', siteUrl);
+
         this._addItem(group, loc.get('location.all_sites_label'),  URLHandler.getAllSitesUrl(location), noteUrl);
+
         var moreOptions = document.createElement('label');
         var moreOptionsContainer = document.createElement('vbox');
         moreOptionsContainer.style.paddingLeft = "20px";
@@ -62,7 +75,8 @@ var locationBuilder = {
         var urls = URLHandler.getStartsWithUrls(location);
         for(var i = 0; i < urls.length; i++) {
             var url = urls[i];
-            this._addItem(group, this._shortenUrl(url), url, noteUrl, moreOptionsContainer);
+            item = this._addItem(group, this._shortenUrl(url), url, noteUrl, moreOptionsContainer);
+            item.setAttribute('tooltiptext', url);
         }
     },
 

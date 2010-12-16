@@ -51,14 +51,14 @@
             <radiogroup id="floatnotes-location" preference="pref-location">
                 <radio label="&preferences.location.page;" value="-2" />
                 <radio label="&preferences.location.query;" value="-1" style="margin-left: 15px;"/>
-                <radio id="location-hash-url" label="&preferences.location.hash;" value="-4" style="margin-left: 15px;"/>
+                <radio class="hash_url" label="&preferences.location.hash;" value="-5" style="margin-left: 15px;"/>
+                <radio class="hash_url" label="&preferences.location.query_hash;" value="-4" style="margin-left: 15px;"/>
                 <radio label="&preferences.location.wild_page;" value="-3" />
                 <radio label="&preferences.location.website;" value="0" />
             </radiogroup>
         </groupbox>
         <checkbox id="location-enableHash" preference="pref-updateHash" label="&preferences.location.updateHash;" oncommand="enableHashUrls()"/>
         <checkbox id="location-includePageHash" preference="pref-includePageHash" style="margin-left:15px" label="&preferences.location.includePageHash;" />
-        <description style="width:300px;height:30px;">&preferences.location.ajaxDescription;</description>
     </prefpane>
     <prefpane id="view" label="&preferences.view.title;">
         <preferences>
@@ -79,6 +79,7 @@
 					<textbox id="floatnotes-fadeout" size="2" maxlength="2"
 						preference="pref-fadeout" />
 					<label value="&preferences.view.indicator_timeout_unit;" style="padding-top:3px;" />
+					<label value="&preferences.view.indicator_timeout_0;" style="padding-top:3px;" />
                 </hbox>
                 <checkbox label="&preferences.view.show_toolbar_button;" preference="pref-toolbarbutton" />
                 <checkbox label="&preferences.view.show_menu;" preference="pref-menu" />
@@ -102,13 +103,16 @@
             <preference id="pref-sync" name="services.sync.engine.floatnotes" type="bool" />
 		</preferences>
         <checkbox  label="&preferences.sync.enable;" preference="pref-sync" />
-        <description style="width:300px;">&preferences.sync.description;</description>
     </prefpane>
     <script type="application/x-javascript">
     <![CDATA[
     function enableHashUrls() {
         var value = document.getElementById('location-enableHash').checked;
-        document.getElementById('location-hash-url').disabled = document.getElementById('location-includePageHash').disabled = !value;
+        document.getElementById('location-includePageHash').disabled = !value;
+        var elements = document.querySelectorAll('.hash_url');
+        for(var i = elements.length; i--; ) {
+            elements[i].disabled  = !value;
+        }
     } 
     enableHashUrls();
     ]]>

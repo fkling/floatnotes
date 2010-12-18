@@ -37,7 +37,7 @@ var _out = function(note) {
     };
 };
 
-var _updateFix = function(newValues, defaultX, defaultY, window, noteStyle) {
+var _updateFixMove = function(newValues, defaultX, defaultY, window, noteStyle) {
     if(newValues.Y + parseInt(noteStyle.height, 10) >= window.innerHeight) {
         newValues.Y = defaultY;
     }
@@ -45,6 +45,16 @@ var _updateFix = function(newValues, defaultX, defaultY, window, noteStyle) {
         newValues.X = defaultX;
     }
 };
+
+var _updateFixResize = function(newValues, defaultX, defaultY, window, noteStyle, note) {
+    if(note.data.y + parseInt(newValues.Y, 10) >= window.innerHeight) {
+        newValues.Y = defaultY;
+    }
+    if(note.data.x + parseInt(newValues.X, 10) >= window.innerWidth) {
+        newValues.X = defaultX;
+    }
+};
+
 var updateFix = function(){};
 
 var resize = function(e) {
@@ -60,14 +70,12 @@ var resize = function(e) {
         X: Math.max(movedNote.X + e.pageX,0),
         Y: Math.max(movedNote.Y + e.pageY,0)
     };
-
-    updateFix(newValues, style.width, style.height, content, style);
+    updateFix(newValues, style.width, style.height, content, style, note);
     style.width = newValues.X + "px";
     style.height =  newValues.Y + "px";
 
     scrollWindow(e, content);
 };
-
 
 var move = function(e) {
     e.stopPropagation();
@@ -79,13 +87,13 @@ var move = function(e) {
 
     var content = window.content;
     var newValues = {
-        X: Math.max(movedNote.X + e.pageX,0) + 'px',
-        Y: Math.max(movedNote.Y + e.pageY,0) + 'px'
+        X: Math.max(movedNote.X + e.pageX,0),
+        Y: Math.max(movedNote.Y + e.pageY,0)
     };
 
     updateFix(newValues, style.left, style.top, content, style);
-    style.left = newValues.X;
-    style.top =  newValues.Y;
+    style.left = newValues.X  + 'px';
+    style.top =  newValues.Y  + 'px';
 
     scrollWindow(e, content);
 };
@@ -155,7 +163,7 @@ FloatNote.prototype = {
     },
 
     set text(value) {
-        if(this.data.content != value) {
+        if(this.data.content != value || value === '') {
             this.setStatus(note_status.NEEDS_SAVE);
             this.data.content = value;
         }
@@ -262,15 +270,11 @@ FloatNote.prototype = {
     },
 
     setStatus: function(status) {
-        if(!this.hasStatus(status)) {
-            this.data.status |= status;
-        }
+        this.data.status |= status;
     },
 
     unsetStatus: function(status) {
-        if(this.hasStatus(status)) {
-            this.data.status ^= status;
-        }
+        this.data.status &= ~status;
     },
 
     hasStatus: function(status) {
@@ -356,7 +360,7 @@ FloatNote.prototype = {
         this.dom.removeEventListener('mouseover', this.inHandler, false);
 
         if(this.hasStatus(note_status.FIXED)) {
-            updateFix = _updateFix;
+            updateFix = _updateFixMove;
             scrollWindow = function(){};
         }
         Util.Css.addClass(this.view._container, 'overlay');
@@ -403,7 +407,7 @@ FloatNote.prototype = {
         this.dom.style.opacity = Preferences.draggingTransparency;
 
         if(this.hasStatus(note_status.FIXED)) {
-            updateFix = _updateFix;
+            updateFix = _updateFixResize;
             scrollWindow = function(){};
         }
 

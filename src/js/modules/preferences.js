@@ -79,19 +79,27 @@ var Preferences = {
         }
     },
 
-    addObserver: function(preference, observer) {
-        if(!(preference in this._observers)) {
-            this._observers[preference] = [];
+    addObserver: function(observer) {   /* call: addObserver(instance, pref[, pref1, pref2,...]) */
+        var preferences = Array.prototype.slice.call(arguments, 1); // first argument is oberserver
+        for(var i = preferences.length; i--; ) {
+            var preference= preferences[i];
+            if(!(preference in this._observers)) {
+                this._observers[preference] = [];
+            }
+            this._observers[preference].push(observer); LOG('Add observer for ' + preference)
         }
-        this._observers[preference].push(observer); LOG('Add observer for ' + preference)
     },
 
-    removeObserver: function(observer, preference) {
-        if(preference in this._observers) {
-            var obs = this._observers[preference];
-            Util.Js.removeObjectFromArray(observer, obs);
-            if(obs.length === 0) {
-                delete this._observers[preference];
+    removeObserver: function(observer) { /* call: removeObserver(instance, pref[, pref1, pref2,...]) */
+        var preferences = Array.prototype.slice.call(arguments); // first argument is oberserver
+        for(var i = preferences.length; i--; ) {
+            var preference= preferences[i];
+            if(preference in this._observers) {
+                var obs = this._observers[preference];
+                Util.Js.removeObjectFromArray(observer, obs);
+                if(obs.length === 0) {
+                    delete this._observers[preference];
+                }
             }
         }
     },

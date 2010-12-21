@@ -624,7 +624,8 @@ FloatNote.prototype = {
             'width:' + this.data.w  + "px",
             'height:' + this.data.h  + "px",
             'z-index:' + ZINDEX,
-            'opacity:' + Preferences.transparency
+            'opacity:' + Preferences.transparency,
+            'font-size:' + Preferences.fontSize + 'px'
         ].join(';');
         elements.content.innerHTML = this.markdownParser.makeHtml(this.data.content);
         elements.content.title = Util.Locale.get('note.last_modified',  [this.data.modification_date.toLocaleString()]);

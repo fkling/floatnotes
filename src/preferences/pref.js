@@ -4,6 +4,7 @@ pref("extensions.floatnotes.height", 200);
 pref("extensions.floatnotes.color", "#FCFACF");
 pref("extensions.floatnotes.transparency", "0.9");
 pref("extensions.floatnotes.draggingTransparency", "0.8");
+pref("extensions.floatnotes.fontSize", 13);
 
 /* location */
 

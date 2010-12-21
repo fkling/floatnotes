@@ -196,8 +196,7 @@ FloatNotesView.prototype = {
         }
         window.addEventListener('unload',remove , true);
 
-        Preferences.addObserver('showMenu', this);
-        Preferences.addObserver('showToolbarButton', this);
+        Preferences.addObserver(this, 'showMenu', 'showToolbarButton', 'fontSize');
     },
 
     removeObserver: function() {
@@ -278,6 +277,11 @@ FloatNotesView.prototype = {
                 catch(e) {}
                 
                 break;
+           case 'fontSize':
+               for(var i = this.currentNotes.length; i--; ) {
+                    this.currentNotes[i].updateDOM();
+                }
+           break;
         }
     },
 
@@ -397,10 +401,14 @@ FloatNotesView.prototype = {
         var notes = [];
         for(var i = dataSet.length -1; i > -1; --i) {
             var data = dataSet[i];
-            if(!this.notes[data.guid]) {
-                this.notes[data.guid] = new FloatNote(data, this); LOG('Created first time: ' + data.guid);
+            var note = this.notes[data.guid];
+            if(typeof note === 'undefined') {
+                this.notes[data.guid] = note = new FloatNote(data, this); LOG('Created first time: ' + data.guid);
             }
-            notes.push(this.notes[data.guid]);
+            else {
+                note.update();
+            }
+            notes.push(note);
         }
         return notes;
     },

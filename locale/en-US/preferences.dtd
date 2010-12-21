@@ -3,6 +3,8 @@
 <!ENTITY preferences.note.width "Width:" >
 <!ENTITY preferences.note.height "Height:" >
 <!ENTITY preferences.note.color "Color:" >
+<!ENTITY preferences.note.font-size.text "Font size:" >
+<!ENTITY preferences.note.font-size.unit "px" >
 
 <!ENTITY preferences.location.title "Location" >
 <!ENTITY preferences.location.default_loc "Default location" >

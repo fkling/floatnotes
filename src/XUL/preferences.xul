@@ -5,14 +5,14 @@
 <prefwindow type="prefwindow" id="FloatnotesPreferences"
 	windowtype="Browser:Preferences" title="Floatnotes Preferences"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	xmlns:html="http://www.w3.org/1999/xhtml" style="">
+	xmlns:html="http://www.w3.org/1999/xhtml" style="" buttons="accept,cancel,help">
 
     <prefpane id="note" label="&preferences.note.title;" selected="true">
 		<preferences>
 			<preference id="pref-width" name="extensions.floatnotes.width" type="int" />
 			<preference id="pref-height" name="extensions.floatnotes.height" type="int" />
 			<preference id="pref-color" name="extensions.floatnotes.color" type="string" />
-			<preference id="pref-delete" name="extensions.floatnotes.confirmDelete" type="bool" />
+			<preference id="pref-font-size" name="extensions.floatnotes.fontSize" type="int" />
 		</preferences>
 			<groupbox>
 				<caption label="&preferences.note.default_val;" />
@@ -39,8 +39,13 @@
                     </rows>
                 </grid>
             </groupbox>
+            <hbox pack="left" align="center">
+                <label value="&preferences.note.font-size.text;" />
+                <textbox style="width: 60px" type="number" min="8" max="32" preference="pref-font-size"/>
+                <label value="&preferences.note.font-size.unit;" />
+            </hbox>
     </prefpane>
-    <prefpane id="location" label="&preferences.location.title;">
+    <prefpane id="location" label="&preferences.location.title;" helpTopic="http://www.floatnotes.org/">
         <preferences>
 			<preference id="pref-location" name="extensions.floatnotes.location" type="int" />
 			<preference id="pref-updateHash" name="extensions.floatnotes.updateOnHashChange" type="bool" />
@@ -60,7 +65,7 @@
         <checkbox id="location-enableHash" preference="pref-updateHash" label="&preferences.location.updateHash;" oncommand="enableHashUrls()"/>
         <checkbox id="location-includePageHash" preference="pref-includePageHash" style="margin-left:15px" label="&preferences.location.includePageHash;" />
     </prefpane>
-    <prefpane id="view" label="&preferences.view.title;">
+    <prefpane id="view" label="&preferences.view.title;" >
         <preferences>
             <preference id="pref-indicator" name="extensions.floatnotes.showIndicator" type="bool" />
             <preference id="pref-fadeout" name="extensions.floatnotes.fadeOutAfter" type="int" />
@@ -88,7 +93,7 @@
 
     </prefpane>
 
-    <prefpane id="notifications" label="&preferences.notifications.title;">
+    <prefpane id="notifications" label="&preferences.notifications.title;" >
         <preferences>
             <preference id="pref-note_delete" name="extensions.floatnotes.confirmDelete" type="bool" />
 			<preference id="pref-site_not_supported" name="extensions.floatnotes.showSiteNotSupported" type="bool" />
@@ -98,7 +103,7 @@
         <checkbox label="&preferences.notifications.site_not_supported;" preference="pref-site_not_supported" />
 	</prefpane>
 
-    <prefpane id="sync" label="&preferences.sync.title;">
+    <prefpane id="sync" label="&preferences.sync.title;" >
         <preferences>
             <preference id="pref-sync" name="services.sync.engine.floatnotes" type="bool" />
 		</preferences>

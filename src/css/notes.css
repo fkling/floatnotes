@@ -5,6 +5,7 @@
 
 /*  ----- Note style ----- */
 
+
 @media screen,print {
 
 #floatnotes-container.overlay {
@@ -25,12 +26,12 @@
     -moz-box-shadow: 0px 0px 5px #888 !important;
     -moz-border-radius: 5px !important;
     position: absolute !important;
+    color: black !important;
 }
 
 .floatnotes-note * {
     padding:0 !important;
     margin:0 !important;
-    font-size: 13px !important;
     font-family: Arial, sans-serif !important;
 }
 
@@ -74,7 +75,6 @@
     -moz-border-radius: 5px 5px 0px 0px;
     text-align: right !important;
     vertical-align: middle !important;
-    line-height: 20px !important;
     background-color: inherit !important;
 }
 
@@ -178,7 +178,7 @@
     position: absolute !important;
     cursor: se-resize !important;
     display: none;
-    background-image: url('chrome://floatnotes/skin/resize.png');
+    background-image: url('chrome://floatnotes/skin/resize.png') !important;
 }
 
 .floatnotes-note .floatnotes-content{
@@ -197,15 +197,16 @@
     background-color: inherit !important;
 }
 
-.floatnotes-note  textarea.floatnotes-text {
+.floatnotes-note textarea.floatnotes-text {
 	font-family: Arial, sans-serif !important;
+    font-size: inherit !important;
 	width: 100% !important;
 	height: 100% !important;
 	-moz-box-sizing: border-box !important;
 	position: absolute;
 	top: 0;
 	left: 0;
-	padding: 5px 0px 5px 5px !important;
+	padding: 5px !important;
 	z-index:-1;
 	-moz-border-radius: 5px !important;
 	border: none !important;
@@ -216,55 +217,108 @@
 
 /* ------ Note content style ---- */
 
-.floatnotes-note h1 {
+
+.floatnotes-note .floatnotes-content {
+    font-size: inherit !important;
+    padding: 5px !important;
+}
+
+/* reset all styles */
+.floatnotes-note .floatnotes-content * {
+    color: black !important;
+    font-family: inherit !important;
+    font-size: 1em !important;
+    font-weight: bold !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    letter-spacing: 0px !important;
+    line-height: 1.1em !important;
+    text-align: left !important;
+    text-transform: none !important;
+    text-decoration: none !important;
+    padding-left: 0px !important;
+    padding-top: 0px !important;
+    padding-right: 0px !important;
+    padding-bottom: 0px !important;
+    margin-left: 0px !important;
+    margin-top: 0px !important;
+    margin-right: 0px !important;
+    margin-bottom: 0px !important;
+    background: none !important;
+    background-color: transparent !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+}
+
+.floatnotes-note .floatnotes-content h1 {
 	font-size: 1.4em !important;
 }
 
-.floatnotes-note h2 {
+.floatnotes-note .floatnotes-content h2 {
     font-size: 1.1em !important;
 }
 
-.floatnotes-note h1, .floatnotes-note h2 {
-    font-family: inherit !important;
-    margin: 7px 0 7px 0;
-    color: black !important;
+.floatnotes-note .floatnotes-content h1, .floatnotes-note .floatnotes-content h2 {
+    margin: 0.5em 0 !important;
     font-weight: bold !important;
-    padding: 0 !important;
+    font-style: bold !important;
 }
 
-.floatnotes-note p {   
-    margin-top: 5px !important;
-    margin-bottom: 5px !important;
+.floatnotes-note .floatnotes-content p {
+    margin: 0.8em 0px !important;
 }
 
-.floatnotes-note pre {   
+.floatnotes-note .floatnotes-content p:first-child {
+    margin-top: 0px !important;
+}
+
+.floatnotes-note .floatnotes-content a {
+    color: blue !important;
+    text-decoration: underline !important;
+}
+
+.floatnotes-note .floatnotes-content pre {   
+    color: #111 !important;
     padding: 5px !important;
     border: 1px dotted #555 !important;
     background-color: #eee !important;
     margin: 5px !important;
 }
 
-.floatnotes-note p > code {   
-    padding: 2px !important;
+.floatnotes-note .floatnotes-content p > code {   
+    color: #111 !important;
     border: 1px dotted #555 !important;
     background-color: #eee !important;
-    line-height: 1.2em !important;
 }
 
-.floatnotes-note em,  .floatnotes-note strong{   
-    font-size: inherit !important;
+.floatnotes-note .floatnotes-content em {
+    font-style: italic !important;
 }
 
-.floatnotes-note ul, .floatnotes-note ol {
+
+.floatnotes-note .floatnotes-content strong{   
+    font-weight: bold !important;
+    font-style: bold !important;
+}
+
+.floatnotes-note .floatnotes-content ul, .floatnotes-note .floatnotes-content ol {
     padding-left:30px !important;
+    margin: 0.6em 0px !important
 }
 
-.floatnotes-note ul li{   
-    list-style-type: square  !important;
-    list-style-position: outside  !important;
-    list-style-image: none  !important;
-    background: none  !important;
+.floatnotes-note .floatnotes-content ul li{   
+    list-style-type: square !important;
+    list-style-position: outside !important;
+    list-style-image: none !important;
 }
+
+.floatnotes-note .floatnotes-content table {
+	border-collapse: collapse !important;
+	border-spacing: 0 !important;
+}
+
 
 
 /*  ----- Indicator styles ----- */
@@ -302,3 +356,32 @@
 .floatnotes-indicator .floatnotes-indicator-text:hover {
     background-color: #FCFACF !important;
 }
+}
+
+@media print {
+
+.floatnotes-note {
+    opacity: 1 !important;
+    display: block !important;
+    z-index: auto !important;
+}
+
+.floatnotes-note * {
+    color: black !important;
+}
+
+.floatnotes-note.fixed {
+    position: absolute !important;
+}
+
+.floatnotes-indicator {
+    display: none !important;
+}
+
+.floatnotes-note .floatnotes-menu, 
+.floatnotes-note .floatnotes-drag, 
+.floatnotes-note .floatnotes-resize {
+    display: none !important;
+}
+}
+

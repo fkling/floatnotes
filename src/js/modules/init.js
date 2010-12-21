@@ -28,8 +28,8 @@ var Init = {
         var ios = Cc["@mozilla.org/network/io-service;1"] .getService(Ci.nsIIOService);
         var uri = ios.newURI("chrome://floatnotes/skin/notes.css", null, null);
 
-        if(!sss.sheetRegistered(uri, sss.AGENT_SHEET)) {
-            sss.loadAndRegisterSheet(uri, sss.AGENT_SHEET);
+        if(!sss.sheetRegistered(uri, sss.USER_SHEET)) {
+            sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
         }
         LOG('CSS loaded');
     },

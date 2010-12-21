@@ -322,6 +322,7 @@ FloatNotesView.prototype = {
         this._isLocationListGenerated = false;
         doc = doc || this.currentDocument;
         var domain = doc.location;
+        this.currentNotes = [];
         if(domain.protocol === 'about:') {
             this._editNoteBrdc.setAttribute('hidden', true);
             return false;
@@ -359,7 +360,7 @@ FloatNotesView.prototype = {
             if(note) {
                 notifyBox.removeNotification(note);
             } 
-            notifyBox.appendNotification(msg, 'floatnotes', 'chrome://floatnotes/skin/note_16.png', notifyBox.PRIORITY_INFO_HIGH, [{label: loc.get('button.not_show_again'), callback:function(note){ Preferences.showSiteNotSupported = false; }}, {label: loc.get('button.ok'), callback: function(note){}} ]);
+            notifyBox.appendNotification(msg, 'floatnotes', 'chrome://floatnotes/skin/note_16.png', notifyBox.PRIORITY_WARNING_LOW, [{label: loc.get('button.not_show_again'), callback:function(note){ Preferences.showSiteNotSupported = false; }}, {label: loc.get('button.ok'), callback: function(note){}} ]);
         }
     },
 

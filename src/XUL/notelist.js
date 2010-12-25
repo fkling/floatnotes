@@ -13,6 +13,25 @@ var searchBox = document.getElementById('search');
 var searchList = document.getElementById('searches');
 var tree = document.getElementById('notes');
 
+function saveData() {
+    treeView.saveCurrentSelection();
+};
+
+textBox.addEventListener('focus', function() {
+    window.addEventListener('mousedown', saveData, true);
+}, true);
+
+textBox.addEventListener('blur', function() {
+    window.removeEventListener('mousedown', saveData, true);
+}, false);
+
+
+textBox.addEventListener('click',  function(e) {
+    e.stopPropagation();    
+}, true);
+
+
+
 var observer = {
     doObserve: true,
     registerObserver: function() {
@@ -205,7 +224,6 @@ function search() {
     clear();
     if(search.dirty || (words.toString() !== search.LastSearch.toString())) {
         if(words.length > 0) {
-            treeView.clearPreviousSelection();
             search.dirty = false;
             db.getNotesContaining(words,function(notes) {
                 treeView.data = notes;
@@ -266,9 +284,9 @@ function saveNote(value, attr, selection) {
         if(typeof note !== 'undefined' && value != note[attr]) {
             note[attr] = value
             observer.doObserve = false;
-            manager.saveNote(note, function(id, guid){
+            manager.saveNote(note, function(id, guid, n){
                 observer.doObserve=true;
-                note.modification_date = manager.notes[guid].modification_date;
+                note.modification_date = n.modification_date;
                 tree.boxObject.invalidateRow(selection);
             });
         }
@@ -278,8 +296,11 @@ function saveNote(value, attr, selection) {
 function deleteNote() {
     var selection = treeView.selection;
     if(selection && selection.count >=1) {
+        doObserve = false;
         if(selection.count == 1) {
-            manager.deleteNote(treeView.data[selection.currentIndex], function() {});
+            manager.deleteNote(treeView.data[selection.currentIndex], function() {
+                doObserve = true;
+            });
             search();
         }
         else {
@@ -290,12 +311,14 @@ function deleteNote() {
             for (var t = 0; t < numRanges; t++){
                 tree.view.selection.getRangeAt(t,start,end);
                 for (var v = start.value; v <= end.value; v++){
-                    manager.deleteNote(data[v], function() {});
+                    doObserve = false;
+                    manager.deleteNote(data[v], function() {
+                        doObserve = true;
+                    });
                 }
-            } 
+            }
             search();
         }
-        treeView.clearPreviousSelection();
     }
 }
 
@@ -450,18 +473,17 @@ var treeView = {
             inputBrdcast.setAttribute('disabled', true);
             textBox.value = "";
             colorPicker.value = "";
+
         }
         else if(count == 1) {
-            this._savePreviousSelection();
-            note = this.data[this.selection.currentIndex];
+            var index = this.selection.currentIndex;
+            note = this.data[index];
             inputBrdcast.setAttribute('disabled', false);
             textBox.disabled = false;
             textBox.value = note.content;
             colorPicker.color = note.color;
-            this._prevSelection = index;
         }
         else {
-            this._savePreviousSelection();
             textBox.value = "";
             colorPicker.color = "";
             inputBrdcast.setAttribute('disabled', true);
@@ -471,17 +493,14 @@ var treeView = {
     cycleHeader: function(col) {
 
     },
-    _savePreviousSelection: function() {
-        var index = this.selection.currentIndex;
-        if(typeof this._prevSelection === 'number' && index != this._prevSelection) {
-            saveNote(textBox.value, 'content', this._prevSelection);
-            saveNote(colorPicker.color, 'color',  this._prevSelection);
+    saveCurrentSelection: function() {
+        if(this.selection.count == 1) {
+            var index = this.selection.currentIndex;
+            saveNote(textBox.value, 'content', index);
+            saveNote(colorPicker.color, 'color', index);
         }
-        this.clearPreviousSelection();
-    },
-    clearPreviousSelection: function() {
-        this._prevSelection = null;
     }
+
 };
 
 searchManager.buildList();

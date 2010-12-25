@@ -104,7 +104,7 @@ FloatNotesManager.prototype = {
             data.id = id;
             that._observer_service.notifyObservers(null, 'floatnotes-note-add', guid);
             if(typeof cb == 'function') {
-                cb(id, guid);
+                cb(id, guid, data);
             }
         });
     },
@@ -135,7 +135,7 @@ FloatNotesManager.prototype = {
             }
             that._observer_service.notifyObservers(null, 'floatnotes-note-update', note.guid);
             if(typeof cb == 'function') {
-                cb(-1, note.guid);
+                cb(-1, note.guid, note);
             }
         });
     },
@@ -146,6 +146,9 @@ FloatNotesManager.prototype = {
         }
         this.notesByUrl[newURL].push(note);
         Util.Js.removeObjectFromArray(note, this.notesByUrl[oldURL]);
+        if(this.notesByUrl[oldURL].length == 0) {
+            delete this.notesByUrl[oldURL];
+        }
     },
 
     createNote: function(document) {

@@ -66,17 +66,19 @@ var locationBuilder = {
         var moreOptionsContainer = document.createElement('vbox');
         moreOptionsContainer.style.paddingLeft = "20px";
 
-        moreOptions.setAttribute('value', loc.get('location.sites_starting_label'));
-        moreOptions.setAttribute('class',"floatnotes-location-label");
-        group.appendChild(moreOptions);
-        group.appendChild(moreOptionsContainer);
-
-
         var urls = URLHandler.getStartsWithUrls(location);
-        for(var i = 0; i < urls.length; i++) {
-            var url = urls[i];
-            item = this._addItem(group, this._shortenUrl(url), url, noteUrl, moreOptionsContainer);
-            item.setAttribute('tooltiptext', url);
+        if(urls.length > 0) {
+            moreOptions.setAttribute('value', loc.get('location.sites_starting_label'));
+            moreOptions.setAttribute('class',"floatnotes-location-label");
+            group.appendChild(moreOptions);
+            group.appendChild(moreOptionsContainer);
+
+
+            for(var i = 0; i < urls.length; i++) {
+                var url = urls[i];
+                item = this._addItem(group, this._shortenUrl(url), url, noteUrl, moreOptionsContainer);
+                item.setAttribute('tooltiptext', url);
+            }
         }
     },
 
@@ -120,6 +122,7 @@ function FloatNotesView(manager) {
     this.notesManager = manager;
     this.status = {};
     this.notes = {};
+    this.currentNotes = [];
 
     this._scrollTimer = Cc["@mozilla.org/timer;1"]
                         .createInstance(Ci.nsITimer);
@@ -623,7 +626,7 @@ FloatNotesView.prototype = {
             event.stopPropagation();
         }
         if(!("notemanager" in Shared) || Shared.notemanager.closed) {
-            Shared.notemanager = window.openDialog('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome, resizeable, centerscreen');
+            Shared.notemanager = window.openDialog('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'resizeable, centerscreen');
         }
         else {
             Shared.notemanager.focus();

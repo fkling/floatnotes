@@ -177,7 +177,7 @@ var HTTPURLParser = {
         if(location.search && includePageUrl) {
             urls.push(this.getPageQueryUrl(location));
         }
-        if(location.hash && Preferences.updateOnHashChange) {
+        if(location.hash) {
             urls.push(this.getPageAnchorUrl(location));
             urls.push(this.getPageQueryAnchorUrl(location));
         }

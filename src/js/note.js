@@ -4,38 +4,7 @@
 Cu.import("resource://floatnotes/showdown/showdown.js");
 Cu.import("resource://floatnotes/preferences.js");
 
-var note_status = {
-    SAVED: 1,
-    EDITING: 2,
-    DRAGGING: 4,
-    RESIZING: 8,
-    NEEDS_SAVE: 16,
-    MINIMIZED: 32,
-    FIXED: 64
-},
-ZINDEX = 100000;
-
-var _in = function(note) {
-    return function(e) {
-        if(note.hasStatus(note_status.MINIMIZED)) {
-            note.unminimize();
-        }
-        Util.Css.show(note.ele.drag);
-        Util.Css.show(note.ele.resize);
-        Util.Css.show(note.ele.menuspacer);
-    };
-};
-
-var _out = function(note) {
-    return function(e) {
-        Util.Css.hide(note.ele.drag);
-        Util.Css.hide(note.ele.resize);
-        Util.Css.hide(note.ele.menuspacer);
-        if(note.hasStatus(note_status.MINIMIZED)) {
-            note.minimize();
-        }
-    };
-};
+var ZINDEX = 100000;
 
 var _updateFixMove = function(newValues, defaultX, defaultY, window, noteStyle) {
     if(newValues.Y + parseInt(noteStyle.height, 10) >= window.innerHeight) {
@@ -129,6 +98,17 @@ function FloatNote(data, view) {
     this.view = view;
 }
 
+FloatNote.STATUS = {
+    SAVED: 1,
+    EDITING: 2,
+    DRAGGING: 4,
+    RESIZING: 8,
+    NEEDS_SAVE: 16,
+    MINIMIZED: 32,
+    FIXED: 64
+};
+
+
 FloatNote.prototype = {
 
     /* getter and setter */
@@ -145,7 +125,7 @@ FloatNote.prototype = {
         if(this.data.url != value) {
             this.data._prevURL = this.data.url;
             this.data.url = value;
-            this.setStatus(note_status.NEEDS_SAVE);
+            this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         }
     },
 
@@ -154,7 +134,7 @@ FloatNote.prototype = {
     },
 
     set color(value) {
-        this.setStatus(note_status.NEEDS_SAVE);
+        this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.data.color = value;
     },
 
@@ -164,7 +144,7 @@ FloatNote.prototype = {
 
     set text(value) {
         if(this.data.content != value || value === '') {
-            this.setStatus(note_status.NEEDS_SAVE);
+            this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
             this.data.content = value;
         }
         if(this.ele && this.ele.content) {
@@ -204,14 +184,14 @@ FloatNote.prototype = {
     },
 
     updateStatus: function() {
-        if(this.hasStatus(note_status.MINIMIZED)) {
+        if(this.hasStatus(FloatNote.STATUS.MINIMIZED)) {
             this.minimize();
         }
         else {
             this.unminimize();
         }
 
-        if(this.hasStatus(note_status.FIXED)) {
+        if(this.hasStatus(FloatNote.STATUS.FIXED)) {
             this.setFix();
         }
         else {
@@ -244,9 +224,9 @@ FloatNote.prototype = {
     },
 
     minimizeAndSave: function() {
-        this.setStatus(note_status.MINIMIZED);
+        this.setStatus(FloatNote.STATUS.MINIMIZED);
         this.minimize();
-        this.setStatus(note_status.NEEDS_SAVE);
+        this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.save();
     },
 
@@ -255,9 +235,9 @@ FloatNote.prototype = {
     },
 
     unminimizeAndSave: function() {
-        this.unsetStatus(note_status.MINIMIZED);
+        this.unsetStatus(FloatNote.STATUS.MINIMIZED);
         this.unminimize();
-        this.setStatus(note_status.NEEDS_SAVE);
+        this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.save();
     },
 
@@ -265,7 +245,7 @@ FloatNote.prototype = {
     updateLocation: function(newLocation) {
         this.data._prevURL = this.data.url;
         this.data.url = newLocation;
-        this.setStatus(note_status.NEEDS_SAVE);
+        this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.save();
     },
 
@@ -290,7 +270,7 @@ FloatNote.prototype = {
         textarea.focus();
 
         Util.Css.addClass(this.dom, 'note-edit');
-        this.setStatus(note_status.EDITING);
+        this.setStatus(FloatNote.STATUS.EDITING);
 
         FloatNote.editedNote = this;
         window.addEventListener('keydown', this.endEdit, true);
@@ -316,7 +296,7 @@ FloatNote.prototype = {
             } while((target = target.parentNode));
 
             note.text = note.ele.text.value;
-            note.unsetStatus(note_status.EDITING);
+            note.unsetStatus(FloatNote.STATUS.EDITING);
             note.save();
             finish = true;
         }
@@ -331,8 +311,8 @@ FloatNote.prototype = {
             Util.Css.hide(note.ele.text);
 
             Util.Css.removeClass(note.dom, 'note-edit');
-            if(note.hasStatus(note_status.EDITING)) {
-                note.unsetStatus(note_status.EDITING);
+            if(note.hasStatus(FloatNote.STATUS.EDITING)) {
+                note.unsetStatus(FloatNote.STATUS.EDITING);
             }
             FloatNote.editedNote = null;
             note.view.noteIsEditing(false);
@@ -355,43 +335,36 @@ FloatNote.prototype = {
         };
         this.dom.style.opacity = Preferences.draggingTransparency;
 
-        this.setStatus(note_status.DRAGGING);
-        this.dom.removeEventListener('mouseout', this.outHandler, false);
-        this.dom.removeEventListener('mouseover', this.inHandler, false);
+        this.setStatus(FloatNote.STATUS.DRAGGING);
 
-        if(this.hasStatus(note_status.FIXED)) {
+        if(this.hasStatus(FloatNote.STATUS.FIXED)) {
             updateFix = _updateFixMove;
             scrollWindow = function(){};
         }
-        Util.Css.addClass(this.view._container, 'overlay');
-        gBrowser.contentDocument.addEventListener("mouseup", this.endMove, true);
-        gBrowser.contentDocument.addEventListener("mousemove", move, true);
-
+        window.addEventListener("mouseup", this.endMove, true);
+        window.addEventListener("mousemove", move, true);
     },
 
     endMove: function(e) {
         e.preventDefault();
-        e.stopPropagation();
+        //e.stopPropagation();
 
         var note = FloatNote.movedNote.note;
-        note.setStatus(note_status.NEEDS_SAVE);
-        note.unsetStatus(note_status.DRAGGING);
+        note.setStatus(FloatNote.STATUS.NEEDS_SAVE);
+        note.unsetStatus(FloatNote.STATUS.DRAGGING);
         note.dom.style.opacity = FloatNote.movedNote.opacity;
         note.data.x = parseInt(note.dom.style.left, 10);
         note.data.y = parseInt(note.dom.style.top, 10);
         note.save();
 
-        if(note.hasStatus(note_status.FIXED)) {
+        if(note.hasStatus(FloatNote.STATUS.FIXED)) {
             updateFix = function(){};
             scrollWindow = _scrollWindow;
         }
 
-        note.dom.addEventListener('mouseout', note.outHandler, false);
-        note.dom.addEventListener('mouseover', note.inHandler, false);
-
-        Util.Css.removeClass(note.view._container, 'overlay');
-        gBrowser.contentDocument.removeEventListener('mousemove', move, true);
-        gBrowser.contentDocument.removeEventListener('mouseup', note.endMove, true);
+        window.removeEventListener('mousemove', move, true);
+        window.removeEventListener('mouseup', note.endMove, true);
+        Util.Dom.fireEvent(note.view.currentDocument, note.dom, 'mouseup');
     },
 
     startResize: function(e) {
@@ -406,18 +379,15 @@ FloatNote.prototype = {
         };
         this.dom.style.opacity = Preferences.draggingTransparency;
 
-        if(this.hasStatus(note_status.FIXED)) {
+        if(this.hasStatus(FloatNote.STATUS.FIXED)) {
             updateFix = _updateFixResize;
             scrollWindow = function(){};
         }
 
-        this.setStatus(note_status.RESIZING);
-        this.dom.removeEventListener('mouseout', this.outHandler, false);
-        this.dom.removeEventListener('mouseover', this.inHandler, false);
+        this.setStatus(FloatNote.STATUS.RESIZING);
 
-        Util.Css.addClass(this.view._container, 'overlay');
-        gBrowser.contentDocument.addEventListener("mouseup", this.endResize, true);
-        gBrowser.contentDocument.addEventListener("mousemove", resize, true);	
+        window.addEventListener("mouseup", this.endResize, true);
+        window.addEventListener("mousemove", resize, true);	
 
     },
 
@@ -429,8 +399,8 @@ FloatNote.prototype = {
             style = note.dom.style,
             data = note.data;
 
-        note.setStatus(note_status.NEEDS_SAVE);
-        note.unsetStatus(note_status.RESIZING);
+        note.setStatus(FloatNote.STATUS.NEEDS_SAVE);
+        note.unsetStatus(FloatNote.STATUS.RESIZING);
         style.opacity = FloatNote.movedNote.opacity;
         var newWidth = parseInt(style.width, 10); 
         var newHeight = parseInt(style.height, 10);
@@ -438,26 +408,24 @@ FloatNote.prototype = {
         data.h = style.height = Math.max(newHeight, 80);
         note.save();
 
-        if(note.hasStatus(note_status.FIXED)) {
+        if(note.hasStatus(FloatNote.STATUS.FIXED)) {
             updateFix = function(){};
             scrollWindow = _scrollWindow;
         }
 
-        note.dom.addEventListener('mouseout', note.outHandler, false);
-        note.dom.addEventListener('mouseover', note.inHandler, false);
-
-        Util.Css.removeClass(note.view._container, 'overlay');
-        gBrowser.contentDocument.removeEventListener('mousemove', resize, true);
-        gBrowser.contentDocument.removeEventListener('mouseup', note.endResize, true);
+        window.removeEventListener('mousemove', resize, true);
+        window.removeEventListener('mouseup', note.endResize, true);
+        Util.Dom.fireEvent(note.view.currentDocument, note.dom, 'mouseup');
     },
 
     save: function(){
-        if(!this.hasStatus(note_status.EDITING) && this.hasStatus(note_status.NEEDS_SAVE)) {
+        if(!this.hasStatus(FloatNote.STATUS.EDITING) && this.hasStatus(FloatNote.STATUS.NEEDS_SAVE)) {
             var that = this;
-            that.unsetStatus(note_status.NEEDS_SAVE);
+            that.unsetStatus(FloatNote.STATUS.NEEDS_SAVE);
             this.view.saveNote(this, function(id, guid) {
                 if(id > -1) {
                     that.dom.id =  'floatnotes-note-' + id;
+                    that.dom.setAttribute('rel', guid);
                 }
                 that.ele.content.title = Util.Locale.get('note.last_modified',  [that.data.modification_date.toLocaleString()]);
             });
@@ -465,13 +433,13 @@ FloatNote.prototype = {
     },
 
     setFix: function() {
-        this.setStatus(note_status.FIXED);
+        this.setStatus(FloatNote.STATUS.FIXED);
         Util.Css.addClass(this.dom, "fixed");
         this.toggleFix = this.unfix;
     },
 
     unsetFix: function() {
-        this.unsetStatus(note_status.FIXED);
+        this.unsetStatus(FloatNote.STATUS.FIXED);
         Util.Css.removeClass(this.dom, "fixed");
         this.toggleFix = this.fix;
     },
@@ -482,7 +450,7 @@ FloatNote.prototype = {
         this.setFix();
         style.top =  newTop + "px";
         this.data.y = newTop;
-        this.setStatus(note_status.NEEDS_SAVE);
+        this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.save();
     },
 
@@ -492,8 +460,30 @@ FloatNote.prototype = {
         this.unsetFix();
         style.top = newTop + "px";
         this.data.y = newTop;
-        this.setStatus(note_status.NEEDS_SAVE);
+        this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.save();
+    },
+
+    mouseenter: function() {
+        var show = Util.Css.show,
+            elements = this.ele;
+        if(this.hasStatus(FloatNote.STATUS.MINIMIZED)) {
+            this.unminimize();
+        }
+        show(elements.drag);
+        show(elements.resize);
+        show(elements.menuspacer);
+    },
+
+    mouseleave: function() {
+        var hide = Util.Css.hide,
+            elements = this.ele;
+        hide(elements.drag);
+        hide(elements.resize);
+        hide(elements.menuspacer);
+        if(this.hasStatus(FloatNote.STATUS.MINIMIZED)) {
+            this.minimize();
+        }
     },
 
     raiseToTop: function(e) {
@@ -617,6 +607,7 @@ FloatNote.prototype = {
     },
 
     setData: function(elements) {
+        elements.container.setAttribute('rel', (this.data.guid || 'new'));
         elements.container.style.cssText = [
             'background-color:' + this.data.color, 
             'left:' + this.data.x + "px",
@@ -633,81 +624,8 @@ FloatNote.prototype = {
     },
 
     attachEventHandlers: function(elements) {
-        var note = this;
-
         this.toggleFix = this.fix;
-        this.outHandler = _out(this);
-        this.inHandler = _in(this);
-
-        elements.fixer.addEventListener('click', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            note.toggleFix(e);
-        }, true);
-
-        elements.edit.addEventListener('click', function(e) {
-            note.view.openEditPopup(note, elements.edit, function(color, url) {
-                note.url = url;
-                note.color = color;
-                note.save();
-                note.update();
-                elements.container.addEventListener('mouseout', note.outHandler, false);
-                note.outHandler();
-            });
-            elements.container.removeEventListener('mouseout', note.outHandler, false);
-        }, false);
-
-        elements.del.addEventListener('click', function(e) {
-            gFloatNotesView.deleteNote(note);    
-        }, false);
-
-
-        // note minimize
-        elements.drag.addEventListener('dblclick', function(e) {
-            e.stopPropagation();
-            if(!note.hasStatus(note_status.EDITING)) {
-                note.minimizeAndSave();
-            }
-        }, false);
-
-        elements.container.addEventListener('mouseout', this.outHandler, false);
-        elements.container.addEventListener('mouseover', this.inHandler, false);
-
-        elements.content.addEventListener('dblclick', function(e) {
-            if(e.target.nodeName != 'A') {
-                note.edit();
-            }
-        }, false);
-
-        // note move
-        elements.drag.addEventListener('mousedown', function(event) {
-            note.startMove(event);
-        }, false);
-
-        // note resize          
-        elements.resize.addEventListener('mousedown', function(event) {
-            note.startResize(event);
-        }, true);
-
-        // note extend
-        elements.container.addEventListener('click', function(e) {
-            if(note.hasStatus(note_status.MINIMIZED) && e.target.className != 'floatnotes-drag' &&  e.target.className != 'floatnotes-drag-handler' && e.target.className != 'floatnotes-resize') {
-                note.unminimizeAndSave();
-            }
-            if(note.hasStatus(note_status.EDITING)) {
-                e.stopPropagation();
-            }
-        }, false);
-
-        // bring note to front
-        elements.container.addEventListener('mousedown', this.raiseToTop, true);
-
-        // set as context note
-        elements.container.addEventListener('contextmenu', function(e) {
-            note.view.contextNote = note;		
-        }, true);
     }
 
 };
-
 //!#endif

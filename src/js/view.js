@@ -159,11 +159,12 @@ FloatNotesView.prototype = {
     /* getter and setter */
 
     get _container() {
-        var container_id = 'floatnotes-container';
-        var container = this.currentDocument.getElementById(container_id);
+        var container_id = 'floatnotes-container',
+            container = this.currentDocument.getElementById(container_id);
         if(!container && this.currentDocument && this.currentDocument.body) {
-            container = this.currentDocument.createElement('div');
+            container = this._createContainer();
             container.id = container_id;
+            //container.style.zIndex = Util.Css.findHighestZIndex(this.currentDocument, 'div');
             this.currentDocument.body.appendChild(container);
         }
         return container;
@@ -171,6 +172,136 @@ FloatNotesView.prototype = {
     set _container(value) {},
 
     /* end getter and setter */
+
+
+    _createContainer: function() {
+        var container = this.currentDocument.createElement('div'),
+            hcl = Util.Css.hasClass,
+            ha = Util.Css.hasAncestorWithClass,
+            ic = Util.Css.isOrIsContained,
+            that = this,
+            moving = false,
+            resizing = false,
+            edit_open = false;
+
+        function getNote(target) {
+            var noteNode = target;
+            while(!hcl(noteNode, 'floatnotes-note')) {
+                noteNode = noteNode.parentNode;
+            };
+            var guid = noteNode.getAttribute('rel');
+            return (guid === 'new') ? that._newNote : that.notes[guid];
+        }
+
+        container.addEventListener('click', function(e) {
+            LOG('Container received ' + e.type  + ' for element: ' + e.target.className)
+            var target = e.target;
+            if(!ic(target, 'floatnotes-indicator')) {
+                var note = getNote(target);
+                if(note.hasStatus(FloatNote.STATUS.EDITING)) {
+                    e.stopPropagation();
+                }
+                else if(hcl(target, 'floatnotes-togglefix')) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    note.toggleFix(e);
+
+                }
+                else if(hcl(target, 'floatnotes-delete')) {
+                    that.deleteNote(note);
+                }
+                else if(hcl(target, 'floatnotes-edit')) {
+                    that.openEditPopup(note, target, function(color, url) {
+                        note.url = url;
+                        note.color = color;
+                        note.save();
+                        note.update();
+                        edit_open = false;
+                        note.mouseleave();
+                    });
+                    edit_open = true;
+                }
+                else if((ic(target, 'floatnotes-content') || hcl(target, 'floatnotes-note')) 
+                        && note.hasStatus(FloatNote.STATUS.MINIMIZED)) {
+                            note.unminimizeAndSave();
+                }
+            }
+        }, true);
+
+        container.addEventListener('dblclick', function(e) {
+            LOG('Container received ' + e.type  + ' for element: ' + e.target.className)
+            var target = e.target;
+            if(hcl(target, 'floatnotes-drag-handler') || hcl(target, 'floatnotes-drag')) {
+                e.stopPropagation();
+                var note = getNote(target);
+                if(!note.hasStatus(FloatNote.STATUS.EDITING)) {
+                    note.minimizeAndSave();
+                }
+            }
+            else if(hcl(target, 'floatnotes-content') || (ha(target, 'floatnotes-content') && target.nodeName.toLowerCase() !== 'a')) {
+                e.stopPropagation();
+                getNote(target).edit();
+            }
+        }, true);
+
+        container.addEventListener('mouseover', function(e) {
+            LOG('Container received ' + e.type  + ' for element: ' + e.target.className)
+            if(!(moving || resizing || edit_open)) {
+                e.stopPropagation();
+                var note = getNote(e.target);
+                note.mouseenter(); 
+            }
+        }, false);
+
+        container.addEventListener('mouseout', function(e) {
+            LOG('Container received ' + e.type  + ' for element: ' + e.target.className)
+            if(!(moving || resizing || edit_open)) {
+                e.stopPropagation();
+                var note = getNote(e.target);
+                note.mouseleave();
+            }
+        }, false);
+
+        container.addEventListener('mousedown', function(e) {
+            LOG('Container received ' + e.type  + ' for element: ' + e.target.className)
+            var target = e.target;
+            if(!ic(target, 'floatnotes-indicator')) {
+                var note = getNote(target);
+                note.raiseToTop();
+                if(hcl(target, 'floatnotes-drag-handler') || hcl(target, 'floatnotes-drag') || hcl(target, 'floatnotes-resize')) {
+                    Util.Css.addClass(container, 'overlay');
+                    container.style.width = that.currentDocument.body.clientWidth + "px";
+                    container.style.height = that.currentDocument.body.clientHeight + "px";
+                    if(hcl(target, 'floatnotes-resize')) {
+                        resizing = true;
+                        note.startResize(e);
+                    }
+                    else {
+                        moving = true;
+                        note.startMove(e);
+                    }
+                }
+            }
+        }, true);
+
+        container.addEventListener('mouseup', function(e) {
+            LOG('Container received ' + e.type  + ' for element: ' + e.target.className)
+            moving = moving ? false : moving;
+            resizing = resizing ? false : resizing;
+            Util.Css.removeClass(container, 'overlay');
+            container.style.width = "0px";
+            container.style.height = "0px";
+        }, true);
+
+        container.addEventListener('contextmenu', function(e) {
+            var note = getNote(e.target);
+            if(note) {
+                that.contextNote = note;
+            }
+        }, true);
+
+        return container;
+    },
 
     registerEventHandlers: function() {
         // attach load handler
@@ -498,7 +629,7 @@ FloatNotesView.prototype = {
         var data = this.notesManager.createNote(this.currentDocument);
         data.x = this.X;
         data.y = this.Y;
-        var note = new FloatNote(data, this);
+        var note = this._newNote = new FloatNote(data, this);
         note.attachToDocument(this.currentDocument, this._container);
         note.raiseToTop();
         this._attachAndShowIndicators();
@@ -513,6 +644,7 @@ FloatNotesView.prototype = {
             if(id > -1) {
                 that.notes[guid] = note;
                 that.currentNotes.push(note);
+                that._newNote = null;
             }
             that.doObserve = true;
             cb(id, guid);

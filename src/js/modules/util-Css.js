@@ -32,7 +32,8 @@ var Css = (function() {
         removeClass: function(node, cls) {
             if(node && node.className && util.hasClass(node, cls)) {
                 var pattern = new RegExp('\\b' + cls + '\\b');
-                node.className = node.className.replace(pattern, ' ');
+                var className = node.className.replace(pattern, ' ');
+                node.className = className.replace(/\s+/, ' ');
             }
         },
         hasClass: function(node, class) {
@@ -42,6 +43,19 @@ var Css = (function() {
             }
             return false;
         },
+        hasAncestorWithClass: function(node, class) {
+            if(node && node.parentNode) {
+                do {
+                    node = node.parentNode;
+                }
+                while(!util.hasClass(node, class) && node !== null) ;
+                return node !== null;
+            }
+            return false;
+        },
+        isOrIsContained: function(target, class) {
+            return util.hasClass(target, class) ? true : util.hasAncestorWithClass(target, class);
+        },
         toggleClass: function(node, class) {
             if(util.hasClass(node, class)) {
                 util.removeClass(node, class);
@@ -49,7 +63,18 @@ var Css = (function() {
             else {
                 util.addClass(node, class);
             }
-        }
+        },
+        findHighestZIndex: function(document, elem) {
+            var elems = document.getElementsByTagName(elem);
+            var highest = 0;
+            for (var i = 0; i < elems.length; i++) {
+                var zindex=document.defaultView.getComputedStyle(elems[i],null).getPropertyValue("z-index");
+                if ((zindex > highest) && (zindex != 'auto')) {
+                    highest = zindex;
+                }
+            }
+            return highest;
+       }
     };
     return util;
 }());

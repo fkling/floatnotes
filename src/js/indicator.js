@@ -89,7 +89,7 @@ Indicator.prototype = {
 
     _getCurrentNotesFrom: function(notes) {
         var that = this;
-        return notes.filter(function(note){ return note.position == that.type && !note.hasStatus(note_status.EDITING | note_status.FIXED);});
+        return notes.filter(function(note){ return note.position == that.type && !note.hasStatus(FloatNote.STATUS.EDITING | FloatNote.STATUS.FIXED);});
     },
 
     _updateLabel: function(nn_notes) {
@@ -170,14 +170,16 @@ Indicator.prototype = {
         Util.Css.hide(container);
 
         indicator.addEventListener('mouseover', function(e) {
+            e.stopPropagation();
             IndicatorProxy.stopTimeout();
             that._createAndShowNoteList();
-        }, false);
+        }, true);
 
         indicator.addEventListener('mouseout', function(e) {
+            e.stopPropagation();
             IndicatorProxy.startTimeout();
             that._hide();
-        }, false);
+        }, true);
 
         indicator.addEventListener('click', function(e) {
             if(e.target.className == 'floatnotes-indicator-text') {

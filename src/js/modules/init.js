@@ -1,6 +1,7 @@
 //!#include "../header.js"
 
 Cu.import("resource://floatnotes/preferences.js");
+Cu.import("resource://floatnotes/util-Mozilla.js");
 
 var EXPORTED_SYMBOLS = ['Init'];
 
@@ -9,15 +10,20 @@ var Init = {
         this.loadCSS();
         var that = this;
         this.getCurrentVersion(function(newVersion) {
+            var URL = 'http://www.floatnotes.org/thankyou';
             that.init = function(cb) {cb();};
             var lastVersion = Preferences.version;
             var firstrun = Preferences.firstrun;
             if (firstrun){
                 LOG('First run, version ' + newVersion);
                 that.runOnFirstRun();
+                Mozilla.openAndReuseOneTabPerURL(URL);
             }
             else {
-                that.upgrade(lastVersion, newVersion);
+                var upgraded = that.upgrade(lastVersion, newVersion);
+                if(upgraded) {
+                    Mozilla.openAndReuseOneTabPerURL(URL);
+                }
             }
             cb();
         });
@@ -84,6 +90,11 @@ var Init = {
         var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
         .getService(Ci.nsIVersionComparator);
 
+
+        if(versionChecker.compare(from, "0.7") >= 0) {
+            return false;
+        }
+
         if(versionChecker.compare(from, "0.6") < 0) {
             // Insert code if version is different here => upgrade
             db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');
@@ -104,5 +115,6 @@ var Init = {
             db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN protocol TEXT');
             db.executeSimpleSQL('UPDATE floatnotes SET protocol="http:"');
         }
+        return true;
     }
 }

@@ -67,6 +67,9 @@ var URLParser = {
     },
     getSearchUrls: function(location) {
         return [];
+    },
+    supports: function(location) {
+        return true;
     }
 };
 
@@ -93,7 +96,7 @@ var URLHandler = {
     },
 
     supports: function(location) {
-        return location.protocol in this._parsers;
+        return (location.protocol in this._parsers) ? this._parsers[location.protocol].supports(location) : false;
     },
 
     getNoteUrl: function(note) {
@@ -137,14 +140,14 @@ var HTTPURLParser = {
         }
         return '';
     },
-    getPageAnchorUrl: function(location) {
-        if(location.hash && Preferences.updateOnHashChange) {
+    getPageAnchorUrl: function(location, force) {
+        if(location.hash && (force || Preferences.updateOnHashChange)) {
             return location.hostname + location.pathname + location.hash;
         }
         return '';
     },
-    getPageQueryAnchorUrl: function(location) {
-        if(location.hash && location.search && Preferences.updateOnHashChange) {
+    getPageQueryAnchorUrl: function(location, force) {
+        if(location.hash && location.search && (force || Preferences.updateOnHashChange)) {
             return location.hostname + location.pathname + location.search + location.hash;
         }
         return '';
@@ -178,8 +181,8 @@ var HTTPURLParser = {
             urls.push(this.getPageQueryUrl(location));
         }
         if(location.hash) {
-            urls.push(this.getPageAnchorUrl(location));
-            urls.push(this.getPageQueryAnchorUrl(location));
+            urls.push(this.getPageAnchorUrl(location, true));
+            urls.push(this.getPageQueryAnchorUrl(location, true));
         }
         return urls;
     }
@@ -203,5 +206,22 @@ var FileURLParser = {
     }
 };
 
+/* For Firefox 4 */
+
+var AboutURLParser = {
+    __proto__: URLParser,
+    getPageUrl: function(location) {
+        return location.toString();
+    },
+    getSearchUrls: function(location) {
+        return [this.getPageUrl(location)];
+    },
+    supports: function(location) {
+        return location.href === 'about:home';
+    }
+};
+
+
 URLHandler.register(['http:', 'https:'], HTTPURLParser);
 URLHandler.register('file:', FileURLParser);
+URLHandler.register('about:', AboutURLParser);

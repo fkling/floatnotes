@@ -464,7 +464,7 @@ FloatNotesView.prototype = {
         doc = doc || this.currentDocument;
         var domain = doc.location;
         this.currentNotes = [];
-        if(domain.protocol === 'about:') {
+        if(domain.protocol === 'about:' && domain.href !== 'about:home') {
             this._editNoteBrdc.setAttribute('hidden', true);
             return false;
         }

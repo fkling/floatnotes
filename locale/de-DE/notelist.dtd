@@ -1,0 +1,15 @@
+<!ENTITY button.edit "Bearbeiten" >
+<!ENTITY button.remove "Entfernen" >
+<!ENTITY button.save "Speichern" >
+
+<!ENTITY searchtext "Tippe um nach Notizen zu suchen oder wähle eine gespeicherte Suche..." >
+
+<!ENTITY list.title "Titel" >
+<!ENTITY list.url "URL" >
+<!ENTITY list.created "Erstellt am" >
+<!ENTITY list.modified "Bearbeitet am" >
+
+<!ENTITY color "Farbe:" >
+
+<!ENTITY editsearch.name "Name:" >
+<!ENTITY editsearch.keywords "Suchworte:" >

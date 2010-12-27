@@ -1,4 +1,10 @@
-<!ENTITY floatnotes.new "Notiz erstellen..." >
+<!ENTITY floatnotes.new "Neue Notiz..." >
 <!ENTITY floatnotes.edit "Notiz bearbeiten" >
 <!ENTITY floatnotes.delete "Notiz löschen" >
 <!ENTITY floatnotes.hide "Notizen verstecken" >
+<!ENTITY floatnotes "FloatNotes" >
+<!ENTITY floatnotes.notelist "Notiz Manager..." >
+<!ENTITY floatnotes.preferences "Einstellungen..." >
+
+<!ENTITY edit_popup.color "Farbe:" >
+<!ENTITY edit_popup.location "Ort" >

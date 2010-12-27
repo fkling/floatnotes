@@ -381,7 +381,7 @@ var manager = getManager();
 var pref = Preferences;
 
 var searchManager = {
-    searches: [['All notes','']].concat(pref.savedSearches),
+    searches: [[Locale.get('notelist.saved_search.all'),'']].concat(pref.savedSearches),
     buildList: function() {
         var selectedIndex = (searchList.selectedIndex > 0) ? searchList.selectedIndex : 0;
         this.empty();

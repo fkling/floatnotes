@@ -78,7 +78,7 @@
                             observes="isEnabled"
                             onselect="saveNote(this.color, 'color')" />
                         <spacer flex="1" />
-                        <button id="delete" label="Remove" observes="isEnabled" oncommand="deleteNote()" />
+                        <button id="delete" label="&button.remove;" observes="isEnabled" oncommand="deleteNote()" />
                     </hbox>   
                 </row>
             </rows>

@@ -256,6 +256,7 @@
     border-right: none !important;
     border-bottom: none !important;
     border-left: none !important;
+    vertical-align: baseline !important;
 }
 
 .floatnotes-note .floatnotes-content h1 {
@@ -309,6 +310,20 @@
     font-style: bold !important;
 }
 
+.floatnotes-note .floatnotes-content del {
+	text-decoration: line-through !important;
+}
+
+.floatnotes-note .floatnotes-content sub {
+	vertical-align: sub !important;
+    font-size: 0.7em !important;
+}
+
+.floatnotes-note .floatnotes-content sup {
+	vertical-align: super !important;
+    font-size: 0.7em !important;
+}
+
 .floatnotes-note .floatnotes-content ul, .floatnotes-note .floatnotes-content ol {
     padding-left:30px !important;
     margin: 0.6em 0px !important
@@ -321,9 +336,31 @@
 }
 
 .floatnotes-note .floatnotes-content table {
-	border-collapse: collapse !important;
-	border-spacing: 0 !important;
+	border-collapse: separate !important;
+	border-spacing: 2px !important;
+    border-width: 1px !important;
+    border-color: gray !important;
+    border-style: groove !important;
 }
+
+.floatnotes-note .floatnotes-content table td,
+.floatnotes-note .floatnotes-content table th {
+    border-width: 2px !important;
+    border-color: gray !important;
+    border-style: groove !important;
+    vertical-align: middle !important;
+    padding: 0.4em !important;
+}
+
+.floatnotes-note .floatnotes-content table th {
+    font-weight: bold !important;
+    text-align: center !important;
+}
+.floatnotes-note .floatnotes-content table td {
+    text-align: right !important;
+}
+
+
 
 
 

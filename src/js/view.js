@@ -158,6 +158,11 @@ FloatNotesView.prototype = {
 
     /* getter and setter */
 
+
+    get currentDocument() {
+        return gBrowser.contentDocument;
+    },
+
     get _container() {
         var container_id = 'floatnotes-container',
             container = this.currentDocument.getElementById(container_id);
@@ -212,8 +217,8 @@ FloatNotesView.prototype = {
                 }
                 else if(hcl(target, 'floatnotes-edit')) {
                     that.openEditPopup(note, target, function(color, url) {
-                        note.url = url;
-                        note.color = color;
+                        note.url = url || note.url;
+                        note.color = color || note.color;
                         note.save();
                         note.update();
                         edit_open = false;
@@ -425,13 +430,11 @@ FloatNotesView.prototype = {
         var doc = win.document; // doc is document that triggered "onload" event
         var isFocusedDocument = (doc === gBrowser.contentDocument);
         if(isFocusedDocument) {
-            this.currentDocument = gBrowser.contentDocument;
             this.loadNotes();
         }
     },
 
     onTabSelect: function(e) {
-        this.currentDocument = gBrowser.contentDocument;
         this.loadNotes();
     },
 
@@ -745,7 +748,9 @@ FloatNotesView.prototype = {
         this.saveChanges = function() {
             if(this.popup.state == 'closed') {
                 LOG('Edit popup hidden');
-                cb(document.getElementById('floatnotes-edit-color').color,document.getElementById('floatnotes-edit-location-list').selectedItem.value);
+                var item = document.getElementById('floatnotes-edit-location-list').selectedItem
+                var url =  item ? item.value : '';               
+                cb(document.getElementById('floatnotes-edit-color').color,url);
             }
         };
         this.popup.openPopup(anchor, "end_before", 0, 0, false, false);

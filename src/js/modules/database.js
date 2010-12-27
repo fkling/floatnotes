@@ -273,5 +273,10 @@ DatabaseConnector.prototype = {
         };
 
         return data;
+    },
+
+    backup: function() {
+        var new_name = this.database_file.leafName + '.' + (new Date()).getTime() + '.bak';
+        this.database_file.copyTo(null, new_name);
     }
 };

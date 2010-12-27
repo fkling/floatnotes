@@ -95,6 +95,10 @@ var Init = {
             return false;
         }
 
+        /* Create a backup of the DB file, just in case */
+
+        db.backup();
+
         if(versionChecker.compare(from, "0.6") < 0) {
             // Insert code if version is different here => upgrade
             db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');

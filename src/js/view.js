@@ -770,7 +770,7 @@ FloatNotesView.prototype = {
             event.stopPropagation();
         }
         if(!("notemanager" in Shared) || Shared.notemanager.closed) {
-            Shared.notemanager = window.openDialog('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'resizeable, centerscreen');
+            Shared.notemanager = window.open('chrome://floatnotes/content/notelist.xul', 'FloatNotes', 'chrome,resizable,centerscreen');
         }
         else {
             Shared.notemanager.focus();

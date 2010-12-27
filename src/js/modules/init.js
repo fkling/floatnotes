@@ -84,9 +84,7 @@ var Init = {
 
     upgrade: function(from, to) {
         LOG("Update: " + from + " to " + to);
-        Preferences.version = to;
         var db = this.getDatabase();
-
         var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
         .getService(Ci.nsIVersionComparator);
 
@@ -119,6 +117,7 @@ var Init = {
             db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN protocol TEXT');
             db.executeSimpleSQL('UPDATE floatnotes SET protocol="http:"');
         }
+        Preferences.version = to;
         return true;
     }
 }

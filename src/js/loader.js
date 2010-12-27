@@ -28,16 +28,9 @@ var Loader = {
 
     createFloatNotesView: function() {
         Cu.import("resource://floatnotes/manager.js");
-        window[FloatNotesView.GLOBAL_NAME] = new FloatNotesView(getManager(this.getDatabase()));
+        Cu.import("resource://floatnotes/database.js");
+        window[FloatNotesView.GLOBAL_NAME] = new FloatNotesView(new FloatNotesManager(new DatabaseConnector()));
         LOG("View created");
-    },
-
-    getDatabase: function() {
-        if(!this._db) {
-            Cu.import("resource://floatnotes/database.js");
-                this._db = getDatabase(this.DB_FILE);
-        }
-        return this._db;
     }
 };
 //

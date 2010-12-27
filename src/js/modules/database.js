@@ -1,32 +1,27 @@
 //!#include "../header.js"
 
-var EXPORTED_SYMBOLS = ['getDatabase'];
+var EXPORTED_SYMBOLS = ['DatabaseConnector'];
 
-var connections = {};
+var DatabaseConnector = (function() {
+    
+    var connections = {};
+    
+    return function(database_file) {
+    
+        var default_file = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);  
+        default_file.append("floatnotes.sqlite");
 
-function getDatabase(file) {
-    if(connections[file]) {
-        return connections[file];
-    }
+        this.database_file = database_file || default_file;
+        if(this.database_file in connections) {
+            return connections[this.database_file];
+        }
 
-    var default_file = Components.classes["@mozilla.org/file/directory_service;1"]  
-    .getService(Components.interfaces.nsIProperties)  
-    .get("ProfD", Components.interfaces.nsIFile);  
-    default_file.append("floatnotes.sqlite");
+        connections[this.database_file] = this;
 
-    file = file || default_file;
-    var connection = new DatabaseConnector(file);
-    connections[file] = connection;
-    return connection;
-}
-
-
-
-function DatabaseConnector(database_file) {
-    var storageService = Components.classes["@mozilla.org/storage/service;1"]
-    .getService(Components.interfaces.mozIStorageService);
-    this._db = storageService.openDatabase(database_file);
-}
+        var storageService = Cc["@mozilla.org/storage/service;1"] .getService(Ci.mozIStorageService);
+        this._db = storageService.openDatabase(this.database_file);
+    };
+}());
 
 DatabaseConnector.prototype = {
 

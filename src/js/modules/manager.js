@@ -3,24 +3,25 @@
 Cu.import("resource://floatnotes/URLHandler.js");
 Cu.import("resource://floatnotes/preferences.js");
 
-var EXPORTED_SYMBOLS = ['getManager'];
+var EXPORTED_SYMBOLS = ['FloatNotesManager'];
 
-var manager = null;
+var FloatNotesManager = (function() {
+    var manager = null;
 
-function getManager(db) {
-    if(manager === null) {
-        manager = new FloatNotesManager(db);
-    }
-    return manager;
-}
+    return function(database) {
+        LOG('start to load manager')
+        if(manager) {
+            return manager;
+        }
 
-
-function FloatNotesManager(database) {
-    this._db = database;
-    this.notesByUrl = {};
-    this.notes = {};
-    this._observer_service = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-}
+        LOG('manager loaded')
+        manager = this;
+        this._db = database;
+        this.notesByUrl = {};
+        this.notes = {};
+        this._observer_service = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+    };
+}());
 
 /**
  * FloatNotes global object prototype. Contains all the functions to load,

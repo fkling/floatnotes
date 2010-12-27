@@ -376,8 +376,8 @@ function prepareForComparison(o) {
 }
 
 
-var db = getDatabase();
-var manager = getManager();
+var db = new DatabaseConnector();
+var manager = new FloatNotesManager(db);
 var pref = Preferences;
 
 var searchManager = {

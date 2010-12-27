@@ -77,7 +77,7 @@ var Init = {
     getDatabase: function() {
         if(!this._db) {
             Cu.import("resource://floatnotes/database.js");
-            this._db = getDatabase(this.DB_FILE);
+            this._db = new DatabaseConnector(this.DB_FILE);
         }
         return this._db;
     },

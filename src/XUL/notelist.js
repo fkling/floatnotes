@@ -298,28 +298,44 @@ function deleteNote() {
     if(selection && selection.count >=1) {
         doObserve = false;
         if(selection.count == 1) {
-            manager.deleteNote(treeView.data[selection.currentIndex], function() {
-                doObserve = true;
-            });
-            search();
+            if(deletionConfirmed(1)) {
+                manager.deleteNote(treeView.data[selection.currentIndex], function() {
+                    doObserve = true;
+                });
+                search();
+            }
         }
         else {
-            var start = {};
-            var end =  {};
-            var numRanges = tree.view.selection.getRangeCount();
-            var data = treeView.data;
-            for (var t = 0; t < numRanges; t++){
-                tree.view.selection.getRangeAt(t,start,end);
-                for (var v = start.value; v <= end.value; v++){
-                    doObserve = false;
-                    manager.deleteNote(data[v], function() {
-                        doObserve = true;
-                    });
+            if(deletionConfirmed(2)) {
+                var start = {};
+                var end =  {};
+                var numRanges = tree.view.selection.getRangeCount();
+                var data = treeView.data;
+                for (var t = 0; t < numRanges; t++){
+                    tree.view.selection.getRangeAt(t,start,end);
+                    for (var v = start.value; v <= end.value; v++){
+                        doObserve = false;
+                        manager.deleteNote(data[v], function() {
+                            doObserve = true;
+                        });
+                    }
                 }
+                search();
             }
-            search();
         }
     }
+}
+
+function deletionConfirmed(numberOfNotes) {
+    var del = true;
+    if(Preferences.confirmDelete) {
+        var msg = (numberOfNotes === 1) ? Locale.get('note.delete.popup.msg') :  Locale.get('note.delete.popup.msg_mult');
+        var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"] .getService(Components.interfaces.nsIPromptService);
+        var checkState = {value: !Preferences.confirmDelete};
+        del = promptService.confirmCheck(null, Locale.get('note.delete.title'), msg, Locale.get('button.not_ask_again'), checkState);
+        Preferences.confirmDelete = !checkState.value;
+    }
+    return del;
 }
 
 function clear() {

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="FloatNotes" default="dist" basedir="." xmlns:jsl="antlib:com.googlecode.jslint4java">
 
-	<loadfile property="version" srcfile="version.txt" />
+    <loadfile property="version" srcfile="version.txt" >
+        <filterchain>
+            <striplinebreaks/>
+      </filterchain>
+    </loadfile>
 
 	<property name="src.dir" location="src" />
 	<property name="build.dir" location="build" />
@@ -35,7 +39,8 @@
 	</target>
 
 	<target name="-copy" depends="-init">
-		<copy todir="${build.dir}/content">
+        <copy todir="${build.dir}" file="LICENSE" />
+        <copy todir="${build.dir}/content">
 			<fileset dir="${src.dir}/XUL" />
 		</copy>	
 		<copy todir="${build.dir}/defaults/preferences">

@@ -2,7 +2,7 @@
 * FloatNotes Firefox extension v@VERSION@
 * http://floatnotes.felix-kling.de
 *
-* Copyright 2010, Felix Kling
+* Copyright 2011, Felix Kling
 * Licensed under the GPL Version 2 licenses.
 *
 * Uses showdown.js

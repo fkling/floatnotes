@@ -5,6 +5,7 @@
 <!ENTITY floatnotes "FloatNotes" >
 <!ENTITY floatnotes.notelist "Notiz Manager..." >
 <!ENTITY floatnotes.preferences "Einstellungen..." >
+<!ENTITY floatnotes.reload "Notizen neu laden" >
 
 <!ENTITY edit_popup.color "Farbe:" >
 <!ENTITY edit_popup.location "Ort" >

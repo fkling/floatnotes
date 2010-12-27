@@ -4,6 +4,17 @@
 <overlay id="floatnotesOverlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
+    <commandset id="mainCommandSet">
+        <command id="cmd_floatnotes-open-manager" oncommand="gFloatNotesView.openNotesManager(event);" />
+        <command id="cmd_floatnotes-open-preferences" oncommand="gFloatNotesView.openPreferences(event)" />
+        <command id="cmd_floatnotes-force-reload" oncommand="gFloatNotesView.reload(event)" />
+    </commandset>
+
+    <keyset id="mainKeyset">
+        <key id="key_floatnotes-open-manager" key="m" modifiers="control alt accel" command="cmd_floatnotes-open-manager" />
+        <key id="key_floatnotes-force-reload" key="r" modifiers="control alt accel" command="cmd_floatnotes-force-reload" />
+    </keyset>
+
     <broadcasterset id="mainBroadcasterSet">
         <broadcaster id="floatnotes-toggle-brdc" oncommand="gFloatNotesView.toggleNotes(this)"/>
         <broadcaster id="floatnotes-edit-brdc" disabled="false"/>
@@ -15,12 +26,12 @@
             <observes element="floatnotes-toggle-brdc" attribute="oncommand" />
             <observes element="floatnotes-toggle-brdc" attribute="class" />
             <observes element="floatnotes-edit-brdc" attribute="disabled" />
-            <menupopup id="floatnotes-main-menu">
-                <menuitem label="&floatnotes.notelist;"
-                            oncommand="gFloatNotesView.openNotesManager(event);" />
+            <menupopup id="menu_floatnotes-main">
+                <menuitem label="&floatnotes.notelist;" key="key_floatnotes-open-manager" command="cmd_floatnotes-open-manager"/>
+                <menuitem label="&floatnotes.reload;" key="key_floatnotes-force-reload" command="cmd_floatnotes-force-reload" />
                 <menuseparator />
                 <menuitem label="&floatnotes.preferences;"
-                        oncommand="gFloatNotesView.openPreferences(event);" />
+                        command="cmd_floatnotes-open-preferences" />
             </menupopup>
         </toolbarbutton>
     </toolbarpalette>
@@ -51,11 +62,10 @@
             accesskey=""
             insertbefore="devToolsSeparator">
             <menupopup>
-                <menuitem label="&floatnotes.notelist;"
-                        oncommand="gFloatNotesView.openNotesManager();" />
+                <menuitem label="&floatnotes.notelist;" key="key_floatnotes-open-manager" />
+                <menuitem label="&floatnotes.reload;" key="key_floatnotes-force-reload" />
                 <menuseparator />
-                <menuitem label="&floatnotes.preferences;"
-                        oncommand="window.openDialog('chrome://floatnotes/content/preferences.xul', 'FloatNotes Preferences');" />
+                <menuitem label="&floatnotes.preferences;" command="cmd_floatnotes-open-preferences" />
             </menupopup>
         </menu>
     </menupopup>     

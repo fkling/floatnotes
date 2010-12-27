@@ -440,12 +440,19 @@ FloatNotesView.prototype = {
     },
 
     onHashChange: function(e) {
-       if(Preferences.updateOnHashChange) {
-           this.currentNotes.forEach(function(note){
-                note.detach();
-           });
-           this.loadNotes();
-       }
+        if(Preferences.updateOnHashChange) {
+            this.reload();           
+        }
+    },
+
+    reload: function(event) {
+        if(event) {
+            event.stopPropagation();
+        }
+        for(var i = this.currentNotes.length; i--; ) {
+            this.currentNotes[i].detach();
+        }
+        this.loadNotes();
     },
 
     /**

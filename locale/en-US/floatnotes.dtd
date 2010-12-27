@@ -5,6 +5,7 @@
 <!ENTITY floatnotes "FloatNotes" >
 <!ENTITY floatnotes.notelist "Notes Manager..." >
 <!ENTITY floatnotes.preferences "Preferences..." >
+<!ENTITY floatnotes.reload "Reload notes" >
 
 <!ENTITY edit_popup.color "Color:" >
 <!ENTITY edit_popup.location "Location" >

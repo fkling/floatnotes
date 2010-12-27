@@ -447,9 +447,12 @@ FloatNote.prototype = {
     fix : function(e) {
         var style = this.dom.style;
         var newTop = (this.data.y - this.view.currentDocument.defaultView.pageYOffset);
+        var newLeft = (this.data.x - this.view.currentDocument.defaultView.pageXOffset);
         this.setFix();
         style.top =  newTop + "px";
+        style.left = newLeft + "px";
         this.data.y = newTop;
+        this.data.x = newLeft;
         this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.save();
     },
@@ -457,9 +460,12 @@ FloatNote.prototype = {
     unfix: function(e) {
         var style = this.dom.style;
         var newTop = (this.data.y + this.view.currentDocument.defaultView.pageYOffset);
+        var newLeft = (this.data.x + this.view.currentDocument.defaultView.pageXOffset);
         this.unsetFix();
         style.top = newTop + "px";
+        style.left = newLeft + "px";
         this.data.y = newTop;
+        this.data.x = newLeft;
         this.setStatus(FloatNote.STATUS.NEEDS_SAVE);
         this.save();
     },

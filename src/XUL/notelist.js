@@ -31,6 +31,11 @@ textBox.addEventListener('click',  function(e) {
 }, true);
 
 
+window.addEventListener('unload', function() {
+    treeView.saveCurrentSelection();
+}, true);
+
+
 
 var observer = {
     doObserve: true,

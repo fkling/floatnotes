@@ -123,6 +123,9 @@
         document.getElementById('location-includePageHash').disabled = !value;
         var elements = document.querySelectorAll('.hash_url');
         for(var i = elements.length; i--; ) {
+            if(elements[i].selected) {
+                elements[i].parentNode.selectedIndex = 0;
+            }
             elements[i].disabled  = !value;
         }
     } 

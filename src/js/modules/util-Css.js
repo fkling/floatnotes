@@ -54,7 +54,7 @@ var Css = (function() {
             return false;
         },
         isOrIsContained: function(target, class) {
-            return util.hasClass(target, class) ? true : util.hasAncestorWithClass(target, class);
+            return (util.hasClass(target, class) || util.hasAncestorWithClass(target, class));
         },
         toggleClass: function(node, class) {
             if(util.hasClass(node, class)) {

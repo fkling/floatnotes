@@ -364,6 +364,9 @@ FloatNote.prototype = {
 
         window.removeEventListener('mousemove', move, true);
         window.removeEventListener('mouseup', note.endMove, true);
+        if(!Util.Css.isOrIsContained(e.target, 'floatnotes-note')) {
+            note.mouseleave();
+        }
         Util.Dom.fireEvent(note.view.currentDocument, note.dom, 'mouseup');
     },
 
@@ -415,6 +418,9 @@ FloatNote.prototype = {
 
         window.removeEventListener('mousemove', resize, true);
         window.removeEventListener('mouseup', note.endResize, true);
+        if(!Util.Css.isOrIsContained(e.target, 'floatnotes-note')) {
+            note.mouseleave();
+        }
         Util.Dom.fireEvent(note.view.currentDocument, note.dom, 'mouseup');
     },
 

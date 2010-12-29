@@ -286,7 +286,7 @@ function saveNote(value, attr, selection) {
         selection = (typeof selection === 'number' ) ? selection : treeView.selection.currentIndex;
         var note = treeView.data[selection];
 
-        if(typeof note !== 'undefined' && value != note[attr]) {
+        if(typeof note !== 'undefined' && value !== note[attr]) {
             note[attr] = value
             observer.doObserve = false;
             manager.saveNote(note, function(id, guid, n){
@@ -515,7 +515,7 @@ var treeView = {
 
     },
     saveCurrentSelection: function() {
-        if(this.selection.count == 1) {
+        if(this.selection && this.selection.count == 1) {
             var index = this.selection.currentIndex;
             saveNote(textBox.value, 'content', index);
             saveNote(colorPicker.color, 'color', index);

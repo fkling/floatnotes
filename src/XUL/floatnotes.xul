@@ -11,8 +11,8 @@
     </commandset>
 
     <keyset id="mainKeyset">
-        <key id="key_floatnotes-open-manager" key="m" modifiers="control alt accel" command="cmd_floatnotes-open-manager" />
-        <key id="key_floatnotes-force-reload" key="r" modifiers="control alt accel" command="cmd_floatnotes-force-reload" />
+        <key id="key_floatnotes-open-manager" key="m" modifiers="accel shift" command="cmd_floatnotes-open-manager" />
+        <key id="key_floatnotes-force-reload" key="l" modifiers="accel shift" command="cmd_floatnotes-force-reload" />
     </keyset>
 
     <broadcasterset id="mainBroadcasterSet">
@@ -62,8 +62,8 @@
             accesskey=""
             insertbefore="devToolsSeparator">
             <menupopup>
-                <menuitem label="&floatnotes.notelist;" key="key_floatnotes-open-manager" />
-                <menuitem label="&floatnotes.reload;" key="key_floatnotes-force-reload" />
+                <menuitem label="&floatnotes.notelist;" key="key_floatnotes-open-manager"  command="cmd_floatnotes-open-manager"/>
+                <menuitem label="&floatnotes.reload;" key="key_floatnotes-force-reload" command="cmd_floatnotes-force-reload"/>
                 <menuseparator />
                 <menuitem label="&floatnotes.preferences;" command="cmd_floatnotes-open-preferences" />
             </menupopup>

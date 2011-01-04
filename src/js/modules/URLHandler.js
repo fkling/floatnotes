@@ -132,34 +132,34 @@ var HTTPURLParser = {
         if(pathname.charAt(pathname.length-1) == '/') {
             pathname = pathname.substring(0, pathname.length-1);
         }
-        return location.hostname + pathname;
+        return location.host + pathname;
     },
     getPageQueryUrl: function(location) {
         if(location.search) {
-            return location.hostname + location.pathname + location.search;
+            return location.host + location.pathname + location.search;
         }
         return '';
     },
     getPageAnchorUrl: function(location, force) {
         if(location.hash && (force || Preferences.updateOnHashChange)) {
-            return location.hostname + location.pathname + location.hash;
+            return location.host + location.pathname + location.hash;
         }
         return '';
     },
     getPageQueryAnchorUrl: function(location, force) {
         if(location.hash && location.search && (force || Preferences.updateOnHashChange)) {
-            return location.hostname + location.pathname + location.search + location.hash;
+            return location.host + location.pathname + location.search + location.hash;
         }
         return '';
     },
     getSiteUrl: function(location) {
-        return location.hostname + '*'; 
+        return location.host + '*'; 
     },
     getStartsWithUrls: function(location) {
         var urls = [];
         var parts = location.pathname.split('/');
         parts.shift();
-        var path = location.hostname;
+        var path = location.host;
         if(parts[parts.length-1] === '') {
             parts.pop();
         }

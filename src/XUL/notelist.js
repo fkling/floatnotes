@@ -23,6 +23,7 @@ textBox.addEventListener('focus', function() {
 
 textBox.addEventListener('blur', function() {
     window.removeEventListener('mousedown', saveData, true);
+    saveData();
 }, false);
 
 
@@ -34,7 +35,6 @@ textBox.addEventListener('click',  function(e) {
 window.addEventListener('unload', function() {
     treeView.saveCurrentSelection();
 }, true);
-
 
 
 var observer = {
@@ -66,12 +66,8 @@ var observer = {
 
     observe: function(subject, topic, data) {
         if(this.doObserve) {
-            var selection = treeView.selection;
             search.dirty = true;
             search();
-            if(selection && selection.count === 1) {
-                selection.select(selection.currentIndex);
-            }
         }
     }
 }

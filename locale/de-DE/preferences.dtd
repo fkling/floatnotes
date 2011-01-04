@@ -8,13 +8,13 @@
 
 <!ENTITY preferences.location.title "Ort" >
 <!ENTITY preferences.location.default_loc "Standard Ort" >
-<!ENTITY preferences.location.query "... mit Parametern, z.B.: www.example.com/page?s=query" >
-<!ENTITY preferences.location.hash "... mit Anker, z.B.: www.example.com/page#anchor" >
-<!ENTITY preferences.location.query_hash "... mit Parametern und Anker, z.B.: www.example.com/page?s=query#anchor" >
-<!ENTITY preferences.location.page "Aktuelle Seite, z.B.: www.example.com/page" >
-<!ENTITY preferences.location.wild_page "Aktulle Seite und Unterseiten, z.B.: Seiten beginnend mit www.example.com/page" >
-<!ENTITY preferences.location.website "Komplette Webseite, z.B.: Seiten beginnend mit www.example.com" >
-<!ENTITY preferences.location.updateHash "Notizen aktualieren wenn sich der Anker ändert" >
+<!ENTITY preferences.location.query "... mit Parametern, z.B.: www.example.org/seite?s=parameter" >
+<!ENTITY preferences.location.hash "... mit Anker, z.B.: www.example.org/seite#anker" >
+<!ENTITY preferences.location.query_hash "... mit Parametern und Anker, z.B.: www.example.org/seite?s=parameter#anker" >
+<!ENTITY preferences.location.page "Aktuelle Seite, z.B.: www.example.org/seite" >
+<!ENTITY preferences.location.wild_page "Aktulle Seite und Unterseiten, z.B.: Seiten beginnend mit www.example.org/seite" >
+<!ENTITY preferences.location.website "Komplette Webseite, z.B.: Seiten beginnend mit www.example.org" >
+<!ENTITY preferences.location.updateHash "Notizen aktualisieren wenn sich der Anker ändert" >
 <!ENTITY preferences.location.includePageHash "Zeige Notizen der aktuellen Seite (mit Parametern)" >
 
 <!ENTITY preferences.view.title "Ansicht" >
@@ -22,7 +22,7 @@
 <!ENTITY preferences.view.indicator_timeout "Ausblenden nach:" >
 <!ENTITY preferences.view.indicator_timeout_0 "(0 = immer anzeigen)" >
 <!ENTITY preferences.view.indicator_timeout_unit "Sekunden" >
-<!ENTITY preferences.view.show_toolbar_button "Zeige Button in Symbolleiste" >
+<!ENTITY preferences.view.show_toolbar_button "Zeige Schaltfläche in Symbolleiste" >
 <!ENTITY preferences.view.show_menu "Zeige Eintrag im 'Extras' Menu" >
 <!ENTITY preferences.view.show_context_delete "Zeige 'Notiz löschen' im Kontextmenu" >
 <!ENTITY preferences.view.show_context_locations "Zeige 'Ort bearbeiten' im Kontextmenu" >

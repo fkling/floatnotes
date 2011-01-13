@@ -484,8 +484,7 @@ FloatNotesView.prototype = {
                 LOG('Notes loaded for ' + domain + ': ' + data.length);
                 that.currentNotes = that._createNotesWith(data);
                 that._attachNotesToCurrentDocument();
-                that._attachAndShowIndicators();
-                that._updateBroadcaster();
+                that.updateVisibilty(domain);
                 that.scrollToNote();                
             });
         }
@@ -695,6 +694,15 @@ FloatNotesView.prototype = {
         }
         else {
             this.hideNotes(); LOG('Nodes hidden.');
+        }
+    },
+    
+    updateVisibilty: function(location) {
+        if(this._notesHiddenFor(location)) {
+            this.hideNotes();
+        }
+        else {
+            this.showNotes();
         }
     },
 

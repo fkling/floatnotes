@@ -404,7 +404,7 @@ FloatNotesView.prototype = {
                     var pos = curSet.indexOf(myId)
                     curSet.splice(pos, 1);
 
-                    navBar.setAttribute('curentset', curSet.join(','));
+                    navBar.setAttribute('currentset', curSet.join(','));
                     navBar.currentSet = curSet.join(',');
                     document.persist(navBar.id, "currentset");
                   }

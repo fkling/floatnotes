@@ -210,6 +210,7 @@ try {
         }
         registered = true;
     }
+}
 catch(e) {
     LOG(e)
 }

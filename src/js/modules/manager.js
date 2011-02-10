@@ -43,7 +43,7 @@ FloatNotesManager.prototype = {
         var domainsToFetch = [];
         var notesToReturn = [];
 
-        for(var i = domains.length -1; i > -1; --i) {
+        for(var i = domains.length; i--; ) {
             var domain = domains[i];
             var notes = this.notesByUrl[domain];
             if(!notes) {
@@ -116,14 +116,14 @@ FloatNotesManager.prototype = {
             note = data,
             ID = data.guid;
 
-        if(this.notes[ID]) {
+        if(this.notes[ID]) { // checks whether the note is in the cache
             note = this.notes[ID];
             LOG('Note url: ' + note.url + '| data url: ' + data.url)
             if(data.url !== note.url) {
                 note._prevURL = note.url;
             }
 
-            if(note != data) {
+            if(note != data) { // update note in the cache
                 Util.Js.updateObject(note, data);
             }
         }
@@ -148,7 +148,7 @@ FloatNotesManager.prototype = {
         }
         this.notesByUrl[newURL].push(note);
         Util.Js.removeObjectFromArray(note, this.notesByUrl[oldURL]);
-        if(this.notesByUrl[oldURL].length == 0) {
+        if(this.notesByUrl[oldURL].length === 0) {
             delete this.notesByUrl[oldURL];
         }
     },
@@ -197,7 +197,7 @@ FloatNotesManager.prototype = {
 
     siteHasNotes: function(location) {
         var domains = URLHandler.getSearchUrls(location);
-        for(var i = domains.length -1; i > -1; --i) {
+        for(var i = domains.length; i--; ) {
             var domain = domains[i];
             if( domain in this.notesByUrl && this.notesByUrl[domain].length > 0) {
                 return true;

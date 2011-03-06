@@ -1,12 +1,21 @@
 //!#include "../header.js"
+
+EXPORTED_SYMBOLS = []
+
 try {
 
     Cu.import("resource://services-sync/main.js");
     Cu.import("resource://services-sync/engines.js");
-    Cu.import("resource://services-sync/base_records/crypto.js");
-    Cu.import("resource://services-sync/stores.js");
-    Cu.import("resource://services-sync/trackers.js");
     Cu.import("resource://services-sync/ext/Sync.js");
+
+    if(Util.Platform.isFF4()) {
+        Cu.import("resource://services-sync/record.js");
+    }
+    else {
+        Cu.import("resource://services-sync/base_records/crypto.js");
+        Cu.import("resource://services-sync/stores.js");
+        Cu.import("resource://services-sync/trackers.js");
+    }
 
     Cu.import("resource://floatnotes/database.js");
     Cu.import("resource://floatnotes/manager.js");
@@ -14,7 +23,7 @@ try {
     var _db = new DatabaseConnector();
     var _manager = new FloatNotesManager(_db);
 
-    var EXPORTED_SYMBOLS = ['initSync'];
+    EXPORTED_SYMBOLS = ['initSync'];
     var registered = false;
     var observe = true;
 

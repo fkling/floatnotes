@@ -3,6 +3,12 @@ EXPORTED_SYMBOLS = ['URLParser', 'URLHandler'];
 
 Cu.import("resource://floatnotes/preferences.js");
 
+var internal_protocols = {
+    'about:': true,
+    'chrome:': true,
+    'resource:': true
+}
+
 var URLParser = {
     getProtocol: function(location) {
         return location.protocol ? location.protocol : '';
@@ -109,6 +115,9 @@ var URLHandler = {
             return note.protocol + '//' + url;
         }
     },
+    isInternal: function(location) {
+        return (location.protocol in internal_protocols);
+    }
 };
 
 for(var method in URLParser) {

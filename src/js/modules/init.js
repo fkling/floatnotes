@@ -1,7 +1,6 @@
 //!#include "../header.js"
 
 Cu.import("resource://floatnotes/preferences.js");
-Cu.import("resource://floatnotes/util-Mozilla.js");
 
 var EXPORTED_SYMBOLS = ['Init'];
 
@@ -17,12 +16,12 @@ var Init = {
             if (firstrun){
                 LOG('First run, version ' + newVersion);
                 that.runOnFirstRun();
-                Mozilla.openAndReuseOneTabPerURL(URL);
+                Util.Mozilla.openAndReuseOneTabPerURL(URL);
             }
             else {
                 var upgraded = that.upgrade(lastVersion, newVersion);
                 if(upgraded) {
-                    Mozilla.openAndReuseOneTabPerURL(URL);
+                    Util.Mozilla.openAndReuseOneTabPerURL(URL);
                 }
             }
             cb();
@@ -42,24 +41,21 @@ var Init = {
 
      getCurrentVersion: function(cb) {
         if(!this._currentVersion) {
-            var appInfo = Cc["@mozilla.org/xre/app-info;1"] .getService(Ci.nsIXULAppInfo),
-                versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-            LOG('Application version: ' + appInfo.version + '. Compared to 4.0alpha: ' + versionChecker.compare(appInfo.version, "4.0alpha"));
-            if(versionChecker.compare(appInfo.version, "4.0alpha") < 0) {
-                var extensionManager = Cc["@mozilla.org/extensions/manager;1"].getService(Ci.nsIExtensionManager);
-                this._currentVersion = extensionManager.getItemForID("floatnotes@felix-kling.de").version;
-                LOG('Extension version: ' + this._currentVersion);
-                cb(this._currentVersion);
-            }
-            else {
-                var scope = {}, that = this;
+            if(Util.Platform.isFF4()) {
+                var scope = {}, 
+                    that = this;
                 Cu.import("resource://gre/modules/AddonManager.jsm", scope);
                     scope.AddonManager.getAddonByID('floatnotes@felix-kling.de', function(addon) {
                     that._currentVersion = addon.version;
                     LOG('Extension version: ' + that._currentVersion);
                     cb(that._currentVersion);
                 });
-
+            }
+            else {
+                var extensionManager = Cc["@mozilla.org/extensions/manager;1"].getService(Ci.nsIExtensionManager);
+                this._currentVersion = extensionManager.getItemForID("floatnotes@felix-kling.de").version;
+                LOG('Extension version: ' + this._currentVersion);
+                cb(this._currentVersion);
             }
         }
         else {

@@ -79,15 +79,15 @@ FloatNotesManager.prototype = {
 
     },
 
-    saveNote: function(data, cb) {
+    saveNote: function(note, cb) {
         // new or update ?
-        var ID = data.id;
+        var ID = note.id;
 
         if(typeof ID == "undefined") {
-            this.addNote(data, cb);
+            this.addNote(note, cb);
         }
         else {
-            this.updateNote(data, cb);
+            this.updateNote(note, cb);
         }		
     },
 
@@ -152,9 +152,11 @@ FloatNotesManager.prototype = {
         }
     },
 
-    createNote: function(document) {
+    createNote: function(document, x, y) {
         var domain = URLHandler.getDefaultUrl(document.location);
-        var data = {
+        var note = {
+            x: x,
+            y: y,
             w: Preferences.width,
             h: Preferences.height,
             content: "",
@@ -162,8 +164,8 @@ FloatNotesManager.prototype = {
             protocol: URLHandler.getProtocol(document.location),
             color: Preferences.color,
             status: 0};
-        data.creation_date = data.modification_date = new Date();
-        return data;
+        note.creation_date = note.modification_date = new Date();
+        return note;
     },
 
     deleteNote: function(data, cb) {

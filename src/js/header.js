@@ -52,7 +52,7 @@ var Asserter = (function() {
 //!#define AF(expr, msg)
 //!#endif
 var Util = (function() {
-    var modules = ['Dom', 'Js', 'Locale', 'Css'];
+    var modules = ['Dom', 'Js', 'Locale', 'Css', 'Mozilla'];
     var t = {_modules:{}};
     for(var i  = modules.length; i--;) {
         var module = modules[i];

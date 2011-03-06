@@ -1,3 +1,5 @@
+//!#include "../header.js"
+
 EXPORTED_SYMBOLS = ['Mozilla'];
 
 var Mozilla = {
@@ -43,5 +45,65 @@ var Mozilla = {
                 var win = window.open(url);
             }
         }
+    },
+
+    registerObserver: function(observer) {
+        var events = Array.prototype.slice.call(arguments, 1);
+        if(!this._observerService) {
+             this._observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+        }
+        for(var i = events.length; i--; ) {
+            this._observerService.addObserver(observer, events[i], false);
+        }
+    },
+
+    notifyObserver: function(event, data) {
+        if(!this._observerService) {
+             this._observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+        }
+        this._observerService.notifyObservers(null, event, data);
+    },
+
+    removeObserver: function(observer) {
+        var events = Array.prototype.slice.call(arguments, 1);
+        if(!this._observerService) {
+             this._observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+        }
+        for(var i = events.length; i--; ) {
+            this._observerService.removeObserver(observer, events[i]);
+        }
+    },
+
+    showNotSupportedNotification: function(message) {
+        var notifyBox = gBrowser.getNotificationBox(),
+            note = notifyBox.getNotificationWithValue('floatnotes'),
+            loc = Util.Locale;
+        if(note) {
+            notifyBox.removeNotification(note);
+        } 
+        notifyBox.appendNotification(msg, 
+                                     'floatnotes', 
+                                     'chrome://floatnotes/skin/note_16.png', 
+                                     notifyBox.PRIORITY_WARNING_LOW, 
+                                     [
+                                         {
+                                            label: loc.get('button.not_show_again'), 
+                                            callback:function(note){ Preferences.showSiteNotSupported = false; }
+                                         }, 
+                                         {
+                                            label: loc.get('button.ok'), 
+                                            callback: function(note){}
+                                         } ]
+                                    );
+
+    },
+
+    getRecentWindow: function() {
+        if(!this._wm) {
+            this._wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                    .getService(Components.interfaces.nsIWindowMediator);
+        }
+        return this._wm.getMostRecentWindow("navigator:browser");
     }
+
 };

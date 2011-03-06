@@ -15,5 +15,16 @@ var Js = {
                 object[attr] = value;
             }
         }
+    },
+
+    bind: function(func, obj) {
+        if(typeof Function.prototype.bind === "function") {
+            return func.bind(obj);
+        }
+        else {
+            return function() {
+                func.apply(obj, arguments);
+            }
+        }
     }
 }

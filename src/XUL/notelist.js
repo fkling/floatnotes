@@ -2,6 +2,7 @@ Components.utils.import("resource://floatnotes/database.js");
 Components.utils.import("resource://floatnotes/manager.js");
 Components.utils.import("resource://floatnotes/preferences.js");
 Components.utils.import("resource://floatnotes/util-Locale.js");
+Components.utils.import("resource://floatnotes/util-Dialog.js");
 Components.utils.import("resource://floatnotes/URLHandler.js");
 
 var textBox = document.getElementById('text');
@@ -299,7 +300,7 @@ function deleteNote() {
     if(selection && selection.count >=1) {
         doObserve = false;
         if(selection.count == 1) {
-            if(deletionConfirmed(1)) {
+            if(Dialog.confirmDeletion(1)) {
                 manager.deleteNote(treeView.data[selection.currentIndex], function() {
                     doObserve = true;
                 });
@@ -307,7 +308,7 @@ function deleteNote() {
             }
         }
         else {
-            if(deletionConfirmed(2)) {
+            if(Dialog.confirmDeletion(2)) {
                 var start = {};
                 var end =  {};
                 var numRanges = tree.view.selection.getRangeCount();
@@ -327,17 +328,6 @@ function deleteNote() {
     }
 }
 
-function deletionConfirmed(numberOfNotes) {
-    var del = true;
-    if(Preferences.confirmDelete) {
-        var msg = (numberOfNotes === 1) ? Locale.get('note.delete.popup.msg') :  Locale.get('note.delete.popup.msg_mult');
-        var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"] .getService(Components.interfaces.nsIPromptService);
-        var checkState = {value: !Preferences.confirmDelete};
-        del = promptService.confirmCheck(null, Locale.get('note.delete.title'), msg, Locale.get('button.not_ask_again'), checkState);
-        Preferences.confirmDelete = !checkState.value;
-    }
-    return del;
-}
 
 function clear() {
     if(treeView.selection) {

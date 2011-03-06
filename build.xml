@@ -52,6 +52,9 @@
 		<copy todir="${build.dir}/modules">
 			<fileset dir="lib" />
 		</copy>
+		<copy todir="${build.dir}/components">
+            <fileset dir="${src.dir}/js/components" />
+		</copy>
 		<copy todir="${build.dir}/skin">
 			<fileset dir="${src.dir}/css" />
 			<fileset dir="images" />

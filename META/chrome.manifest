@@ -1,6 +1,8 @@
-resource floatnotes modules/
+resource floatnotes modules/ 
 
-content floatnotes content/  contentaccessible=yes
+content floatnotes content/
+content floatnotes content/ contentaccessible=yes
+
 overlay chrome://browser/content/browser.xul chrome://floatnotes/content/floatnotes.xul
 
 skin floatnotes classic/1.0 skin/
@@ -8,3 +10,10 @@ style chrome://browser/content/browser.xul chrome://floatnotes/skin/notes.css
 
 locale floatnotes en-US locale/en-US/
 locale floatnotes de-DE locale/de-DE/
+
+EXTRA_PP_COMPONENTS = \
+      FloatNotesProtocol.js \
+    $(NULL)
+
+component {86BF9652-3D85-4007-955B-DD8A725F6764} components/FloatNotesProtocol.js
+contract @mozilla.org/network/protocol;1?name=floatnotes {86BF9652-3D85-4007-955B-DD8A725F6764}

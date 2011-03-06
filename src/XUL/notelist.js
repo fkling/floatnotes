@@ -4,6 +4,7 @@ Components.utils.import("resource://floatnotes/preferences.js");
 Components.utils.import("resource://floatnotes/util-Locale.js");
 Components.utils.import("resource://floatnotes/util-Dialog.js");
 Components.utils.import("resource://floatnotes/URLHandler.js");
+Components.utils.import("resource://floatnotes/Shared.js");
 
 var textBox = document.getElementById('text');
 var colorPicker = document.getElementById('color');
@@ -138,12 +139,13 @@ function loadPage() {
                 promptService.alert(window, '',Locale.get('notelist.notify_multiple_pages'));
                 return;
             }
-            openAndReuseOneTabPerURL(url, note.guid);
+            Shared.focusNote = note.guid;
+            openAndReuseOneTabPerURL(url);
         }
     }
 }
 
-function openAndReuseOneTabPerURL(url, guid) {
+function openAndReuseOneTabPerURL(url) {
     var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
     .getService(Components.interfaces.nsIWindowMediator);
     var browserEnumerator = wm.getEnumerator("navigator:browser");
@@ -167,7 +169,6 @@ function openAndReuseOneTabPerURL(url, guid) {
                 // The URL is already opened. Select this tab.
                 tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
 
-                browserWin.gFloatNotesView.scroll_to_note = guid;
                 // Focus *this* browser-window
                 browserWin.focus();
 
@@ -182,7 +183,6 @@ function openAndReuseOneTabPerURL(url, guid) {
         var recentWindow = wm.getMostRecentWindow("navigator:browser");
         if (recentWindow) {
             // Use an existing browser window
-            recentWindow.gFloatNotesView.scroll_to_note = guid;
             recentWindow.delayedOpenTab(url, null, null, null, null);
         }
         else {

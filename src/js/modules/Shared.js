@@ -1,3 +1,5 @@
 EXPORTED_SYMBOLS = ['Shared'];
 
-Shared = {};
+Shared = {
+    focusNote: null
+};

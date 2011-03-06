@@ -74,30 +74,6 @@ var Mozilla = {
         }
     },
 
-    showNotSupportedNotification: function(message) {
-        var notifyBox = gBrowser.getNotificationBox(),
-            note = notifyBox.getNotificationWithValue('floatnotes'),
-            loc = Util.Locale;
-        if(note) {
-            notifyBox.removeNotification(note);
-        } 
-        notifyBox.appendNotification(msg, 
-                                     'floatnotes', 
-                                     'chrome://floatnotes/skin/note_16.png', 
-                                     notifyBox.PRIORITY_WARNING_LOW, 
-                                     [
-                                         {
-                                            label: loc.get('button.not_show_again'), 
-                                            callback:function(note){ Preferences.showSiteNotSupported = false; }
-                                         }, 
-                                         {
-                                            label: loc.get('button.ok'), 
-                                            callback: function(note){}
-                                         } ]
-                                    );
-
-    },
-
     getRecentWindow: function() {
         if(!this._wm) {
             this._wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]

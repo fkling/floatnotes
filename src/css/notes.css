@@ -187,7 +187,7 @@
     background-image: url('chrome://floatnotes/skin/resize.png') !important;
 }
 
-.floatnotes-note .floatnotes-content{
+.floatnotes-note iframe {
 	padding: 5px !important;
     overflow:auto !important;
     position:absolute !important;
@@ -201,36 +201,47 @@
     height: 100% !important;
     -moz-border-radius: 5px !important;
     background-color: inherit !important;
+    border: none !important;
+    outline: none !important;
 }
 
-.floatnotes-note textarea.floatnotes-text {
-	font-family: Arial, sans-serif !important;
-    font-size: inherit !important;
-	width: 100% !important;
-	height: 100% !important;
-	-moz-box-sizing: border-box !important;
-	position: absolute;
-	top: 0;
-	left: 0;
-	padding: 5px !important;
-	z-index:-1;
-	-moz-border-radius: 5px !important;
-	border: none !important;
-	outline: none !important;
-	resize: none !important;
-    background-color: inherit !important;
+.floatnotes-note .iframe-fix {
+    top: 0 !important;
+    left: 0 !important;
+    position: absolute;
+    -moz-box-sizing: border-box !important;
+    width: 100% !important;
+    height: 100% !important;
+    display:none;
 }
+
+#floatnotes-container.moving .iframe-fix {
+    display: block;
+} 
 
 /* ------ Note content style ---- */
 
 
-.floatnotes-note .floatnotes-content {
-    font-size: inherit !important;
+
+
+
+
+/*  ----- Indicator styles ----- */
+
+.floatnotes-indicator {
+    font-family: Verdana,Arial,sans-serif !important;
+    text-align: left !important;
+    max-width: 200px !important;
+    opacity: .9 !important;
+    border: 1px solid black !important;
+    z-index: 1000000 !important;
+    background-color: #CCC !important;
+    color: black !important;
     padding: 5px !important;
+    margin-left: 5px !important;
 }
 
-/* reset all styles */
-.floatnotes-note .floatnotes-content * {
+.floatnotes-indicator * {
     color: black !important;
     font-family: inherit !important;
     font-size: 1em !important;
@@ -238,7 +249,7 @@
     font-style: normal !important;
     font-weight: normal !important;
     letter-spacing: 0px !important;
-    line-height: 1.1em !important;
+    line-height: 1em !important;
     text-align: left !important;
     text-transform: none !important;
     text-decoration: none !important;
@@ -259,126 +270,6 @@
     vertical-align: baseline !important;
 }
 
-.floatnotes-note .floatnotes-content h1 {
-	font-size: 1.4em !important;
-}
-
-.floatnotes-note .floatnotes-content h2 {
-    font-size: 1.1em !important;
-}
-
-.floatnotes-note .floatnotes-content h1, .floatnotes-note .floatnotes-content h2 {
-    margin: 0.5em 0 !important;
-    font-weight: bold !important;
-    font-style: bold !important;
-}
-
-.floatnotes-note .floatnotes-content p {
-    margin: 0.8em 0px !important;
-}
-
-.floatnotes-note .floatnotes-content p:first-child {
-    margin-top: 0px !important;
-}
-
-.floatnotes-note .floatnotes-content a {
-    color: blue !important;
-    text-decoration: underline !important;
-}
-
-.floatnotes-note .floatnotes-content pre {   
-    color: #111 !important;
-    padding: 5px !important;
-    border: 1px dotted #555 !important;
-    background-color: #eee !important;
-    margin: 5px !important;
-}
-
-.floatnotes-note .floatnotes-content p > code {   
-    color: #111 !important;
-    border: 1px dotted #555 !important;
-    background-color: #eee !important;
-}
-
-.floatnotes-note .floatnotes-content em {
-    font-style: italic !important;
-}
-
-
-.floatnotes-note .floatnotes-content strong{   
-    font-weight: bold !important;
-    font-style: bold !important;
-}
-
-.floatnotes-note .floatnotes-content del {
-	text-decoration: line-through !important;
-}
-
-.floatnotes-note .floatnotes-content sub {
-	vertical-align: sub !important;
-    font-size: 0.7em !important;
-}
-
-.floatnotes-note .floatnotes-content sup {
-	vertical-align: super !important;
-    font-size: 0.7em !important;
-}
-
-.floatnotes-note .floatnotes-content ul, .floatnotes-note .floatnotes-content ol {
-    padding-left:30px !important;
-    margin: 0.6em 0px !important
-}
-
-.floatnotes-note .floatnotes-content ul li{   
-    list-style-type: square !important;
-    list-style-position: outside !important;
-    list-style-image: none !important;
-}
-
-.floatnotes-note .floatnotes-content table {
-	border-collapse: separate !important;
-	border-spacing: 2px !important;
-    border-width: 1px !important;
-    border-color: gray !important;
-    border-style: groove !important;
-}
-
-.floatnotes-note .floatnotes-content table td,
-.floatnotes-note .floatnotes-content table th {
-    border-width: 2px !important;
-    border-color: gray !important;
-    border-style: groove !important;
-    vertical-align: middle !important;
-    padding: 0.4em !important;
-}
-
-.floatnotes-note .floatnotes-content table th {
-    font-weight: bold !important;
-    text-align: center !important;
-}
-.floatnotes-note .floatnotes-content table td {
-    text-align: right !important;
-}
-
-
-
-
-
-/*  ----- Indicator styles ----- */
-
-.floatnotes-indicator {
-    font-family: Verdana,Arial,sans-serif !important;
-    font-size: 12px !important;
-    text-align: left !important;
-    max-width: 200px !important;
-    opacity: .9 !important;
-    border: 1px solid black !important;
-    z-index: 1000000 !important;
-    background-color: #CCC !important;
-    color: black !important;
-    padding: 5px !important;
-    margin-left: 5px !important;
-}
 
 .floatnotes-indicator .floatnotes-indicator-container {
     padding: 5px 0 5px 0 !important;	
@@ -403,10 +294,10 @@
 
 @media print {
 
-.floatnotes-note {
-    opacity: 1 !important;
-    display: block !important;
-    z-index: auto !important;
+    .floatnotes-note {
+        opacity: 1 !important;
+        display: block !important;
+        z-index: auto !important;
 }
 
 .floatnotes-note * {

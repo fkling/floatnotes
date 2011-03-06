@@ -1,5 +1,5 @@
 //!#include "header.js"
-//!#include "view.js"
+//!#include "MainUI.js"
 var Loader = {  
 
     listenToApplicationLoad: function() {
@@ -29,7 +29,8 @@ var Loader = {
     createFloatNotesView: function() {
         Cu.import("resource://floatnotes/manager.js");
         Cu.import("resource://floatnotes/database.js");
-        window[FloatNotesView.GLOBAL_NAME] = new FloatNotesView(new FloatNotesManager(new DatabaseConnector()));
+        Cu.import("resource://floatnotes/InPageNotesUI.js");
+        window[MainUI.GLOBAL_NAME] = new MainUI(new FloatNotesManager(new DatabaseConnector()), new InPageNotesUI());
         LOG("View created");
     }
 };

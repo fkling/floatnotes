@@ -1,6 +1,7 @@
 //!#include "../header.js"
 
 Cu.import("resource://floatnotes/URLHandler.js");
+Cu.import("resource://floatnotes/database.js");
 Cu.import("resource://floatnotes/preferences.js");
 
 var EXPORTED_SYMBOLS = ['FloatNotesManager'];
@@ -16,7 +17,7 @@ var FloatNotesManager = (function() {
 
         LOG('manager loaded')
         manager = this;
-        this._db = database;
+        this._db = database || new DatabaseConnector();
         this.notesByUrl = {};
         this.notes = {};
         this._observer_service = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);

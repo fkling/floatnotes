@@ -14,9 +14,42 @@ var logger = {
         this.log(msg);
     }
 };
+
+var Asserter = (function() {
+    function AssertionError(msg) {
+        this.message = msg;
+    }
+
+    AssertionError.prototype = {
+        name: 'FloatNotes AssertionError',
+        toString: function() {
+            return this.name + ': ' + this.message;
+        }
+    };
+
+    function assert(expr, msg) {
+        if(!expr)
+            throw new AssertionError(msg);
+    }
+
+    return {
+        assert: assert,
+        assertTrue: function(expr, msg) {
+            assert.apply(null, arguments)
+        },
+        assertFalse: function(expr, msg) {
+            assert(!expr, msg);
+        }
+    }
+}());
+
 //!#define LOG(msg) logger.log((msg))
+//!#define AT(expr, msg) Asserter.assertTrue((expr), (msg))
+//!#define AF(expr, msg) Asserter.assertFalse((expr), (msg))
 //!#else
 //!#define LOG(msg)
+//!#define AT(expr, msg)
+//!#define AF(expr, msg)
 //!#endif
 var Util = (function() {
     var modules = ['Dom', 'Js', 'Locale', 'Css'];

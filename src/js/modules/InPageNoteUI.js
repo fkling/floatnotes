@@ -103,7 +103,7 @@ var scrollWindow = function(e, window) {
     }
 
     if(x || y) { LOG('Scroll detect by x:' + x + ' and y:' + y);
-        content.scrollBy(x,y);
+        window.scrollBy(x,y);
     }
     return false;
 };

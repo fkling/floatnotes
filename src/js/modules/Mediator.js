@@ -41,6 +41,9 @@ var Mediator = (function() {
 
 
         return {
+            getCurrentWindow: function() {
+                return _window;
+            },
             setCurrentWindow: function(window) {
                 _window = window;
             },

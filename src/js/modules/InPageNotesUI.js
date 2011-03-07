@@ -82,7 +82,12 @@ InPageNotesUI.prototype =  (function() {
             }
             else if(hcl(target, 'floatnotes-content') || (ha(target, 'floatnotes-content') && target.nodeName.toLowerCase() !== 'a')) {
                 e.stopPropagation();
-                getNote(target).edit();
+                var note =  getNote(target);
+                if(!note.isValid()) {
+                    Util.Dialog.showTamperDetectionAlert();
+                    return;
+                }
+                note.edit();
             }
         }, true);
 

@@ -111,6 +111,170 @@ var scrollWindow = function(e, window) {
 var _scrollWindow = scrollWindow;
 
 
+/** ---- creation functions ----- **/
+
+var getDomElement = function(doc) {  
+    var elements = createDOMElements(doc);
+    attachEventHandlers(elements);
+    return elements;
+};
+
+var createDOMElements =  function(doc) {
+    var container, drag, resize, content_frame, content, text, ifix, fixer, edit, del, menuspacer, menu;
+
+    container = doc.createElement('div');
+    container.className = 'floatnotes-note';
+
+    drag = doc.createElement('div');
+    drag.className = 'floatnotes-drag';
+    drag.innerHTML = '<div class="floatnotes-drag-handler"></div>';
+
+    menuspacer = doc.createElement('div');
+    menuspacer.className = 'floatnotes-menuspacer';
+
+    menu = doc.createElement('div');
+    menu.className = 'floatnotes-menu';
+
+    fixer = doc.createElement('span');
+    fixer.className = 'floatnotes-togglefix floatnotes-menu-entry';
+    fixer.title = Util.Locale.get('note.menu.pin');
+
+    edit = doc.createElement('span');
+    edit.className= 'floatnotes-edit floatnotes-menu-entry';	
+    edit.title = Util.Locale.get('note.menu.edit');
+
+    del = doc.createElement('span');
+    del.className= 'floatnotes-delete floatnotes-menu-entry';	
+    del.title = Util.Locale.get('note.menu.delete');
+
+    content_frame = doc.createElement('iframe');
+    content_frame.className = 'floatnotes-content';
+    content_frame.src = "floatnotes:blank";
+
+    content = doc.createElement('div');
+    content.className = 'floatnotes-content';
+
+    resize = doc.createElement('div');
+    resize.className = 'floatnotes-resize';
+
+    text = doc.createElement('textarea');
+    text.className = 'floatnotes-text';
+    text.style.cssText = "display: none;";
+    text.rows = 1;
+    text.cols = 1;
+
+    ifix = doc.createElement('div');
+    ifix.className = 'iframe-fix';
+
+    InPageNoteUI.prototype.dom = {
+        container: container, 
+        drag: drag, 
+        resize: resize, 
+        content_frame: content_frame, 
+        content: content, 
+        text: text,
+        fixer: fixer,
+        ifix: ifix,
+        edit: edit,
+        del: del,
+        menu: menu,
+        menuspacer: menuspacer
+    };
+
+    drag = content = content_frame = ifix = resize = text = fixer = edit = del = menu = menuspacer = null;
+
+    createDOMElements = function(doc) {
+        var elements = InPageNoteUI.prototype.dom;
+        var new_elements = {
+            container: elements.container.cloneNode(false), 
+            drag: elements.drag.cloneNode(true), 
+            resize: elements.resize.cloneNode(false), 
+            content_frame: elements.content_frame.cloneNode(false), 
+            content: elements.content.cloneNode(false), 
+            text: elements.text.cloneNode(false),
+            fixer: elements.fixer.cloneNode(false),
+            ifix: elements.ifix.cloneNode(false),
+            edit: elements.edit.cloneNode(false),
+            del: elements.del.cloneNode(false),
+            menu: elements.menu.cloneNode(false),
+            menuspacer: elements.menuspacer.cloneNode(false)
+        };
+
+        var container = new_elements.container;
+        var menu = new_elements.menu;
+        menu.appendChild(new_elements.fixer);
+        menu.appendChild(new_elements.edit);
+        menu.appendChild(new_elements.del);
+        new_elements.menuspacer.appendChild(menu);
+        container.appendChild(new_elements.drag);
+        container.appendChild(new_elements.menuspacer);
+        container.appendChild(new_elements.content_frame);
+        container.appendChild(new_elements.ifix);
+        container.appendChild(new_elements.resize);
+
+
+
+        return new_elements;
+    };
+
+    return createDOMElements(doc);
+};
+
+
+
+var attachEventHandlers = function(elements) {
+    var fireEvent =  Util.Dom.fireEvent,
+    propEvent = Util.Dom.propagateEvent,
+    frame = elements.content_frame,
+    fire = function(event) {
+        fireEvent(frame.ownerDocument, frame, event);
+    };
+    elements.content.addEventListener('dblclick', function(e){
+        fire('dblclick');
+    }, true);
+
+    elements.content.addEventListener('mousedown', function(e){
+        fire('mousedown');
+    }, true);
+
+    elements.content.addEventListener('mouseup', function(e){
+        fire('mouseup');
+    }, true);
+
+    elements.content.addEventListener('click', function(e){
+        if(e.target.nodeName === 'A') {
+            e.preventDefault();
+            frame.ownerDocument.defaultView.location = e.target.href;
+        }
+        fire('click');
+    }, false);
+
+    elements.text.addEventListener('click', function(e){
+        e.stopPropagation();
+    }, false);
+
+    elements.content_frame.addEventListener('load', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if(this.src !== "floatnotes:blank") {
+            Util.Dialog.showTamperDetectionAlert();
+            //elements.content_frame.src = "floatnotes:blank";
+            return;
+        }
+        var body = this.contentDocument.body;
+        body.appendChild(elements.content);                
+        body.appendChild(elements.text);
+        this.contentDocument.addEventListener('contextmenu', function(e) {
+            e.stopPropagation();
+            fire('contextmenu');
+        }, true);
+        if(elements.text.style.display === 'block') {
+            elements.text.focus();
+        }
+        //this.removeEventListener('load', arguments.callee, false);
+    }, false);
+};
+
 var public = {
 
     /* getter and setter */
@@ -138,7 +302,8 @@ var public = {
     _attachTo: function(doc, container) {
         if(doc) {
             if(this.dom === null) {
-                this.dom = this.getDomElement(doc);
+                this.ele = getDomElement(doc);
+                this.dom = this.ele.container;
                 if(this.data.id) {
                     this.dom.id = 'floatnotes-note-' + this.data.id;
                 }
@@ -150,13 +315,16 @@ var public = {
                 container.appendChild(this.dom);
                 this.doc = doc;
             }
+            if(this.ele.content_frame.src !== "floatnotes:blank") {
+               this.ele.content_frame.src = "floatnotes:blank";
+            }
         }
     },
 
     _detach: function() {
         if(this.dom && this.dom.parentNode) {
             this.dom.parentNode.removeChild(this.dom);
-            //this.dom.parentNode = null;
+            this.doc = null;
         }
     },
 
@@ -191,7 +359,7 @@ var public = {
         window.addEventListener('keydown', this.endEdit, true);
         window.addEventListener('click', this.endEdit, false);
         Util.Mozilla.notifyObserver('floatnotes-note-edit', true);     
-   },
+    },
 
     endEdit: function(e) {
         var finish = false;
@@ -382,7 +550,7 @@ var public = {
 
         style.top =  newTop + "px";
         style.left = newLeft + "px";
-        
+
         return {x: newLeft, y: newTop};
     },
 
@@ -435,114 +603,6 @@ var public = {
         style.zIndex = maxz+1;  
     },
 
-    getDomElement: function(doc) {	
-        var elements = this.createDOMElements(doc);
-        this.attachEventHandlers(elements);
-        this.ele = elements;
-        return elements.container;
-
-    },
-
-    createDOMElements: function(doc) {
-        var container, drag, resize, content_frame, content, text, ifix, fixer, edit, del, menuspacer, menu;
-
-        container = doc.createElement('div');
-        container.className = 'floatnotes-note';
-
-        drag = doc.createElement('div');
-        drag.className = 'floatnotes-drag';
-        drag.innerHTML = '<div class="floatnotes-drag-handler"></div>';
-
-        menuspacer = doc.createElement('div');
-        menuspacer.className = 'floatnotes-menuspacer';
-
-        menu = doc.createElement('div');
-        menu.className = 'floatnotes-menu';
-
-        fixer = doc.createElement('span');
-        fixer.className = 'floatnotes-togglefix floatnotes-menu-entry';
-        fixer.title = Util.Locale.get('note.menu.pin');
-
-        edit = doc.createElement('span');
-        edit.className= 'floatnotes-edit floatnotes-menu-entry';	
-        edit.title = Util.Locale.get('note.menu.edit');
-
-        del = doc.createElement('span');
-        del.className= 'floatnotes-delete floatnotes-menu-entry';	
-        del.title = Util.Locale.get('note.menu.delete');
-
-        content_frame = doc.createElement('iframe');
-        content_frame.className = 'floatnotes-content';
-        content_frame.src = "floatnotes:blank";
-
-        content = doc.createElement('div');
-        content.className = 'floatnotes-content';
-
-        resize = doc.createElement('div');
-        resize.className = 'floatnotes-resize';
-
-        text = doc.createElement('textarea');
-        text.className = 'floatnotes-text';
-        text.style.cssText = "display: none;";
-        text.rows = 1;
-        text.cols = 1;
-
-        ifix = doc.createElement('div');
-        ifix.className = 'iframe-fix';
-
-        InPageNoteUI.prototype.dom = {
-            container: container, 
-            drag: drag, 
-            resize: resize, 
-            content_frame: content_frame, 
-            content: content, 
-            text: text,
-            fixer: fixer,
-            ifix: ifix,
-            edit: edit,
-            del: del,
-            menu: menu,
-            menuspacer: menuspacer
-        };
-
-        drag = content = content_frame = ifix = resize = text = fixer = edit = del = menu = menuspacer = null;
-
-        InPageNoteUI.prototype.createDOMElements = function(doc) {
-            var elements = InPageNoteUI.prototype.dom;
-            var new_elements = {
-                container: elements.container.cloneNode(false), 
-                drag: elements.drag.cloneNode(true), 
-                resize: elements.resize.cloneNode(false), 
-                content_frame: elements.content_frame.cloneNode(false), 
-                content: elements.content.cloneNode(false), 
-                text: elements.text.cloneNode(false),
-                fixer: elements.fixer.cloneNode(false),
-                ifix: elements.ifix.cloneNode(false),
-                edit: elements.edit.cloneNode(false),
-                del: elements.del.cloneNode(false),
-                menu: elements.menu.cloneNode(false),
-                menuspacer: elements.menuspacer.cloneNode(false)
-            };
-
-            var container = new_elements.container;
-            var menu = new_elements.menu;
-            menu.appendChild(new_elements.fixer);
-            menu.appendChild(new_elements.edit);
-            menu.appendChild(new_elements.del);
-            new_elements.menuspacer.appendChild(menu);
-            container.appendChild(new_elements.drag);
-            container.appendChild(new_elements.menuspacer);
-            container.appendChild(new_elements.content_frame);
-            container.appendChild(new_elements.ifix);
-            container.appendChild(new_elements.resize);
-
-
-
-            return new_elements;
-        };
-
-        return this.createDOMElements(doc);
-    },
 
     setData: function(elements) {
         elements.container.setAttribute('rel', (this.data.guid || 'new'));
@@ -563,51 +623,13 @@ var public = {
         elements.menu.style.backgroundColor = this.data.color;
     },
 
-    attachEventHandlers: function(elements) {
-        var fireEvent =  Util.Dom.fireEvent,
-            propEvent = Util.Dom.propagateEvent,
-            frame = elements.content_frame,
-            fire = function(event) {
-                fireEvent(frame.ownerDocument, frame, event);
-            };
-        elements.content.addEventListener('dblclick', function(e){
-            fire('dblclick');
-        }, true);
-
-        elements.content.addEventListener('mousedown', function(e){
-            fire('mousedown');
-        }, true);
-
-        elements.content.addEventListener('mouseup', function(e){
-            fire('mouseup');
-        }, true);
-
-        elements.content.addEventListener('click', function(e){
-            if(e.target.nodeName === 'A') {
-                e.preventDefault();
-                frame.ownerDocument.defaultView.location = e.target.href;
-            }
-            fire('click');
-        }, false);
-
-        elements.text.addEventListener('click', function(e){
-            e.stopPropagation();
-        }, false);
-
-        elements.content_frame.addEventListener('load', function(e) {
-            var body = this.contentDocument.body;
-            body.appendChild(elements.content);                
-            body.appendChild(elements.text);
-            this.contentDocument.addEventListener('contextmenu', function(e) {
-                e.stopPropagation();
-                fire('contextmenu');
-            }, true);
-            if(elements.text.style.display === 'block') {
-                elements.text.focus();
-            }
-            //this.removeEventListener('load', arguments.callee, false);
-        }, false);
+    isValid: function() {
+        if(this.ele) {
+            return this.ele.content_frame.src === "floatnotes:blank";
+        }
+        return false;
     }
+
 }
 
 return public;

@@ -1,8 +1,20 @@
 Components.utils.import("resource://floatnotes/util-Locale.js");
 Components.utils.import("resource://floatnotes/preferences.js");
 Components.utils.import("resource://floatnotes/util-Mozilla.js");
+Components.utils.import("resource://floatnotes/Mediator.js");
 
 EXPORTED_SYMBOLS = ['Dialog'];
+
+
+function getNotifyBox() {
+    var notifyBox = Mozilla.getRecentWindow().gBrowser.getNotificationBox(),
+    note = notifyBox.getNotificationWithValue('floatnotes');
+    if(note) {
+        notifyBox.removeNotification(note);
+    }
+    return notifyBox;
+}
+
 
 var Dialog = {
     confirmDeletion: function(numberOfNotes) {
@@ -20,12 +32,8 @@ var Dialog = {
     },
 
     showNotSupportedNotification: function(msg) {
-        var notifyBox = Mozilla.getRecentWindow().gBrowser.getNotificationBox(),
-        note = notifyBox.getNotificationWithValue('floatnotes'),
+        var notifyBox = getNotifyBox(), 
         loc = Locale;
-        if(note) {
-            notifyBox.removeNotification(note);
-        } 
         notifyBox.appendNotification(msg, 
                                      'floatnotes', 
                                      'chrome://floatnotes/skin/note_16.png', 
@@ -41,5 +49,22 @@ var Dialog = {
                                      } ]
                                     );
 
+    },
+
+    showTamperDetectionAlert: function() {
+        var notifyBox = getNotifyBox(), 
+        loc = Locale;
+        notifyBox.appendNotification(loc.get('messages.tamper_detection'), 
+                                     'floatnotes', 
+                                     'chrome://floatnotes/skin/note_16.png', 
+                                     notifyBox.PRIORITY_CRITICAL_HIGH,
+                                     [
+                                        {
+                                         label: loc.get('button.reload_notes'), 
+                                         callback: function(note){
+                                            Mediator.getCurrentWindow().reload(); 
+                                         }
+                                     } ]
+        );
     }
 };

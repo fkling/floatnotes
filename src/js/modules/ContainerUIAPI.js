@@ -34,6 +34,7 @@ var ContainerUIAPI = {
         }
     },
     setNotes: function(notes){
+        LOG('notes to be added: ' + notes.map(function(n){ return n.guid}).join(','))
         var ids = {};
         for(var i = notes.length; i--;) {
             ids[notes[i].guid] = true;
@@ -41,8 +42,7 @@ var ContainerUIAPI = {
         for(var i in this._currentNotes) {
             var note = this._currentNotes[i];
             if(this._currentNotes.hasOwnProperty(i) && !(this._currentNotes[i].guid in ids)) {
-                delete this._currentNotes[i];
-                this._currentNotesLength--;
+                this.detachNote(i);
             }
         }
         this.addNotes(notes);

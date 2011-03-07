@@ -243,12 +243,16 @@ MainUI.prototype = {
     },
 
     onTabSelect: function(e) {
-        this.loadNotes();
+        if(this.currentDocument && this.currentDocument.readyState === 'complete') {
+            this.loadNotes();
+        }
     },
 
     onWindowActivated: function(e) {
         Mediator.setCurrentWindow(this);
-        this.reload();
+        if(this.currentDocument && this.currentDocument.readyState === 'complete') {
+            this.loadNotes();
+        }
     },
 
     onHashChange: function(e) {

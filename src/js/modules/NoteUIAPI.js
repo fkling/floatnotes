@@ -78,8 +78,8 @@ var NoteUIAPI = (function() {
             this.updateUI();
         },
 
-        detach: function() {
-            this._detach();    
+        detach: function(doc) {
+            this._detach(doc);    
         },
 
         updateStatus: function() {

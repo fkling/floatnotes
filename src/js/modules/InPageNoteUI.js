@@ -258,7 +258,6 @@ var attachEventHandlers = function(elements) {
         e.stopPropagation();
         if(this.src !== "floatnotes:blank") {
             Util.Dialog.showTamperDetectionAlert();
-            //elements.content_frame.src = "floatnotes:blank";
             return;
         }
         var body = this.contentDocument.body;
@@ -321,8 +320,8 @@ var public = {
         }
     },
 
-    _detach: function() {
-        if(this.dom && this.dom.parentNode) {
+    _detach: function(doc) {
+        if(this.dom && this.dom.parentNode && (!doc || doc == this.doc)) {
             this.dom.parentNode.removeChild(this.dom);
             this.doc = null;
         }

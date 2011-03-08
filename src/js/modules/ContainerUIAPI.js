@@ -57,7 +57,7 @@ var ContainerUIAPI = {
     detachNote: function(noteId){
         var noteUI = this._currentNotes[noteId];
         if(typeof noteUI !== "undefined") {
-            noteUI.detach();
+            noteUI.detach(this._mainUI.currentDocument);
             this._currentNotesLength--;
             delete this._currentNotes[noteId];
         }

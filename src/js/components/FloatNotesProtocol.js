@@ -14,6 +14,7 @@ FloatnotesAboutHandler.prototype = {
         var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
         var channel = ios.newChannel("chrome://floatnotes/content/note.html", null, null);
         channel.originalURI = aURI;
+        channel.owner = null;
         return channel;
     },
     allowPort: function() {

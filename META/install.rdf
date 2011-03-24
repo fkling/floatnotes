@@ -6,12 +6,11 @@
 		<em:type>2</em:type>
 		<em:name>FloatNotes</em:name>
 		<em:version>@VERSION@</em:version>
-		<em:description>Create floating notes on any web site.
-		</em:description>
+		<em:description>Create sticky notes on any web site.</em:description>
 		<em:creator>Felix Kling</em:creator>
+        <em:translator>Luis Eduardo Pineda Morales</em:translator>
 		<em:homepageURL>http://thoughts.felix-kling.de/floatnotes</em:homepageURL>
-		<em:optionsURL>chrome://floatnotes/content/preferences.xul
-		</em:optionsURL>
+		<em:optionsURL>chrome://floatnotes/content/preferences.xul</em:optionsURL>
 		<em:targetApplication>
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
@@ -22,9 +21,13 @@
 		<em:localized>
 			<Description>
 				<em:locale>de-DE</em:locale>
-				<em:name>FloatNotes</em:name>
 				<em:description>Erstellt Notizzettel auf jeder Webseite.</em:description>
 			</Description>
 		</em:localized>
+		<em:localized>
+			<Description>
+				<em:locale>es</em:locale>
+				<em:description>Cree notas adhesivas en cualquier sitio web.</em:description>
+			</Description>
 	</Description>
 </RDF>

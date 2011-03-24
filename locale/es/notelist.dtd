@@ -1,0 +1,15 @@
+<!ENTITY button.edit "Editar" >
+<!ENTITY button.remove "Eliminar" >
+<!ENTITY button.save "Guardar" >
+
+<!ENTITY searchtext "Escriba para buscar notas y/o seleccione de la izquiera una de las bœsquedas guardadas..." >
+
+<!ENTITY list.title "T’tulo" >
+<!ENTITY list.url "URL" >
+<!ENTITY list.created "Creada" >
+<!ENTITY list.modified "Modificada" >
+
+<!ENTITY color "Color:" >
+
+<!ENTITY editsearch.name "Nombre:" >
+<!ENTITY editsearch.keywords "Palabras clave:" >

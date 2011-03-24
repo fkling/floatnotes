@@ -1,0 +1,37 @@
+<!ENTITY preferences.note.title "Notas" >
+<!ENTITY preferences.note.default_val "Valores predeterminados" >
+<!ENTITY preferences.note.width "Ancho:" >
+<!ENTITY preferences.note.height "Alto:" >
+<!ENTITY preferences.note.color "Color:" >
+<!ENTITY preferences.note.font-size.text "Tama–o de fuente:" >
+<!ENTITY preferences.note.font-size.unit "px" >
+
+<!ENTITY preferences.location.title "Ubicaci—n" >
+<!ENTITY preferences.location.default_loc "Ubicaci—n predeterminada" >
+<!ENTITY preferences.location.query "... con consulta, p. ej.: www.ejemplo.com/pag?s=consulta" >
+<!ENTITY preferences.location.hash "... con marcador, p. ej.: www.ejemplo.com/pag#marcador" >
+<!ENTITY preferences.location.query_hash "... con consulta y marcador, p. ej.: www.ejemplo.com/pag?s=consulta#marcador" >
+<!ENTITY preferences.location.page "P‡gina actual, p. ej.: www.ejemplo.com/pag" >
+<!ENTITY preferences.location.wild_page "P‡gina y subp‡ginas actuales, p. ej.: P‡ginas que comienzan con www.ejemplo.com/pag" >
+<!ENTITY preferences.location.website "Todo el sitio, p. ej.: P‡ginas que comienzan con www.ejemplo.com" >
+<!ENTITY preferences.location.updateHash "Actualizar notas cuando el marcador cambie" >
+<!ENTITY preferences.location.includePageHash "Mostrar notas de la p‡gina (incluyendo la cadena de consulta)" >
+
+<!ENTITY preferences.view.title "Ver" >
+<!ENTITY preferences.view.show_indicator "Mostrar indicadores para notas que est‡n fuera de la vista actual" >
+<!ENTITY preferences.view.indicator_timeout "Desvanecer despuŽs de:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = no desvanecer)" >
+<!ENTITY preferences.view.indicator_timeout_unit "segundos" >
+<!ENTITY preferences.view.show_toolbar_button "Mostrar bot—n en la barra de herramientas" >
+<!ENTITY preferences.view.show_menu "Mostrar entrada en el menœ 'Herramientas'" >
+<!ENTITY preferences.view.show_context_delete "Mostrar 'Eliminar nota' en el menœ contextual" >
+<!ENTITY preferences.view.show_context_locations "Mostrar 'Editar ubicaci—n' en el menœ contextual" >
+<!ENTITY preferences.view.show_context_hide "Mostrar 'Ocultar notas' en el menœ contextual" >
+
+<!ENTITY preferences.notifications.title "Notificaciones" >
+<!ENTITY preferences.notifications.note_deletion "Confirmar antes de eliminar notas" >
+<!ENTITY preferences.notifications.site_not_supported "Mostrar advertencia cuando el sitio no sea soportado" >
+
+
+<!ENTITY preferences.sync.title "Sync" >
+<!ENTITY preferences.sync.enable "Habilitar sincronizaci—n (requiere Firefox Sync)" >

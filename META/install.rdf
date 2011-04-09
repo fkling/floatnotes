@@ -29,5 +29,6 @@
 				<em:locale>es</em:locale>
 				<em:description>Cree notas adhesivas en cualquier sitio web.</em:description>
 			</Description>
-	</Description>
+        </em:localized>
+    </Description>
 </RDF>

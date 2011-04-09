@@ -6,16 +6,8 @@ try {
 
     Cu.import("resource://services-sync/main.js");
     Cu.import("resource://services-sync/engines.js");
-    Cu.import("resource://services-sync/ext/Sync.js");
-
-    if(Util.Platform.isFF4()) {
-        Cu.import("resource://services-sync/record.js");
-    }
-    else {
-        Cu.import("resource://services-sync/base_records/crypto.js");
-        Cu.import("resource://services-sync/stores.js");
-        Cu.import("resource://services-sync/trackers.js");
-    }
+    Cu.import("resource://services-sync/record.js");
+    Cu.import("resource://services-sync/util.js");
 
     Cu.import("resource://floatnotes/database.js");
     Cu.import("resource://floatnotes/manager.js");
@@ -74,18 +66,19 @@ try {
         __proto__: Store.prototype,
 
         itemExists: (function() {
-            var exists = Sync(_db.noteExistsWithId, _db);
+            var scb = Utils.makeSyncCallback();
             return function(id) {
-                LOG('Note ' + id + ' exists: ' + exists(id))
-                return exists(id);
+                _db.noteExistsWithId(scb, id);
+                return Utils.waitForSyncCallback(scb);
             }
         }()),
 
         createRecord: (function() {
-            var getNote = Sync(_db.getNote, _db);
+            var scb = Utils.makeSyncCallback();
             return function(id, uri) {
                 LOG('Create record for: ' + id)
-                var data = getNote(id);
+                _db.getNote(scb, id);
+                var data = Utils.waitForSyncCallback(scb);
                 var record = new NoteRecord(uri, data);
                 LOG('This is what we get: ' + data)
                 if(typeof data == 'undefined') {
@@ -98,9 +91,10 @@ try {
         changeItemID: function(oid, nid) {},
 
         getAllIDs: (function() {
-            var getAll = Sync(_db.getAllIds, _db);
+            var scb = Utils.makeSyncCallback();
             return function() {
-                var IDs = getAll();
+                _db.getAllIds(scb);
+                var IDs = Utils.waitForSyncCallback(scb);
                 LOG('Number of notes ' + IDs.length)
                 var obj = {};
                 IDs.forEach(function(id) {

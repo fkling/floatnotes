@@ -1,0 +1,11 @@
+<!ENTITY floatnotes.new "Crea nota..." >
+<!ENTITY floatnotes.edit "Modifica nota" >
+<!ENTITY floatnotes.delete "Elimina nota" >
+<!ENTITY floatnotes.hide "Nascondi note" >
+<!ENTITY floatnotes "FloatNotes" >
+<!ENTITY floatnotes.notelist "Gestore Note..." >
+<!ENTITY floatnotes.preferences "Preferenze..." >
+<!ENTITY floatnotes.reload "Ricarica note" >
+
+<!ENTITY edit_popup.color "Colore:" >
+<!ENTITY edit_popup.location "Posizione" >

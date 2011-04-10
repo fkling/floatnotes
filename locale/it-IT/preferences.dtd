@@ -1,0 +1,37 @@
+<!ENTITY preferences.note.title "Note" >
+<!ENTITY preferences.note.default_val "Valori di default" >
+<!ENTITY preferences.note.width "Larghezza:" >
+<!ENTITY preferences.note.height "Altezza:" >
+<!ENTITY preferences.note.color "Colore:" >
+<!ENTITY preferences.note.font-size.text "Dimensione del carattere:" >
+<!ENTITY preferences.note.font-size.unit "px" >
+
+<!ENTITY preferences.location.title "Posizione" >
+<!ENTITY preferences.location.default_loc "Posizione di default" >
+<!ENTITY preferences.location.query "... con query, per es.: www.esempio.com/pag?s=query" >
+<!ENTITY preferences.location.hash "... con fragment, per es.: www.esempio.com/pag#mfragment" >
+<!ENTITY preferences.location.query_hash "... con query e fragment, per es.: www.esempio.com/pag?s=query#fragment" >
+<!ENTITY preferences.location.page "Pagina attuale, per es.: www.esempio.com/pag" >
+<!ENTITY preferences.location.wild_page "Pagina e sottopagine attuali, per es.: Pagine che iniziano con www.esempio.com/pag" >
+<!ENTITY preferences.location.website "Tutto il sito, per es.: Pagine che iniziano con www.esempio.com" >
+<!ENTITY preferences.location.updateHash "Aggiorna note quando il fragment cambia" >
+<!ENTITY preferences.location.includePageHash "Mostra note della pagina (includendo la stringa di query)" >
+
+<!ENTITY preferences.view.title "Vista" >
+<!ENTITY preferences.view.show_indicator "Mostra indicatori per le note che sono fuori dalla vista corrente" >
+<!ENTITY preferences.view.indicator_timeout "Dissolvi dopo:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = non dissolvere)" >
+<!ENTITY preferences.view.indicator_timeout_unit "secondi" >
+<!ENTITY preferences.view.show_toolbar_button "Mostra bottone nella barra degli strumenti" >
+<!ENTITY preferences.view.show_menu "Mostra voce nel menu 'Strumenti'" >
+<!ENTITY preferences.view.show_context_delete "Mostra 'Elimina nota' nel menu contestuale" >
+<!ENTITY preferences.view.show_context_locations "Mostra 'Modifica posizione' nel menu contestuale" >
+<!ENTITY preferences.view.show_context_hide "Mostra 'Nascondi note' nel menu contestuale" >
+
+<!ENTITY preferences.notifications.title "Notifiche" >
+<!ENTITY preferences.notifications.note_deletion "Conferma prima eliminare le note" >
+<!ENTITY preferences.notifications.site_not_supported "Mostra avviso quando il sito non  supportato" >
+
+
+<!ENTITY preferences.sync.title "Sync" >
+<!ENTITY preferences.sync.enable "Abilita sincronizzazione (richiede Firefox Sync)" >

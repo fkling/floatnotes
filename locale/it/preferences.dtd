@@ -1,4 +1,4 @@
-<!ENTITY preferences.note.title "Note" >
+﻿<!ENTITY preferences.note.title "Note" >
 <!ENTITY preferences.note.default_val "Valori di default" >
 <!ENTITY preferences.note.width "Larghezza:" >
 <!ENTITY preferences.note.height "Altezza:" >
@@ -30,8 +30,7 @@
 
 <!ENTITY preferences.notifications.title "Notifiche" >
 <!ENTITY preferences.notifications.note_deletion "Conferma prima eliminare le note" >
-<!ENTITY preferences.notifications.site_not_supported "Mostra avviso quando il sito non � supportato" >
-
+<!ENTITY preferences.notifications.site_not_supported "Mostra avviso quando il sito non è supportato" >
 
 <!ENTITY preferences.sync.title "Sync" >
 <!ENTITY preferences.sync.enable "Abilita sincronizzazione (richiede Firefox Sync)" >

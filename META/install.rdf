@@ -33,8 +33,8 @@
         </em:localized>
 		<em:localized>
 			<Description>
-				<em:locale>it-IT</em:locale>
-				<em:description>Something missing here ;)</em:description>
+				<em:locale>it</em:locale>
+                <em:description>Crea note adesive su qualsiasi sito web<em:description>
 			</Description>
         </em:localized>
     </Description>

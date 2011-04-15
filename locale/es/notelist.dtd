@@ -2,9 +2,9 @@
 <!ENTITY button.remove "Eliminar" >
 <!ENTITY button.save "Guardar" >
 
-<!ENTITY searchtext "Escriba para buscar notas y/o seleccione de la izquiera una de las bœsquedas guardadas..." >
+<!ENTITY searchtext "Escriba para buscar notas y/o seleccione de la izquiera una de las bÃºsquedas guardadas..." >
 
-<!ENTITY list.title "T’tulo" >
+<!ENTITY list.title "TÃ­tulo" >
 <!ENTITY list.url "URL" >
 <!ENTITY list.created "Creada" >
 <!ENTITY list.modified "Modificada" >

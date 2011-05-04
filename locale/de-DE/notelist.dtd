@@ -11,5 +11,6 @@
 
 <!ENTITY color "Farbe:" >
 
+<!ENTITY editsearch.title "Edit search" >
 <!ENTITY editsearch.name "Name:" >
 <!ENTITY editsearch.keywords "Suchworte:" >

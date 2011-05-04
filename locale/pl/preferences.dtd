@@ -1,0 +1,39 @@
+<!ENTITY preferences.title "Ustawienia Floatnotes" >
+
+<!ENTITY preferences.note.title "Notatki" >
+<!ENTITY preferences.note.default_val "Domyślne wartości" >
+<!ENTITY preferences.note.width "Szerokość:" >
+<!ENTITY preferences.note.height "Wysokość:" >
+<!ENTITY preferences.note.color "Kolor:" >
+<!ENTITY preferences.note.font-size.text "Rozmiar czcionki:" >
+<!ENTITY preferences.note.font-size.unit "px" >
+
+<!ENTITY preferences.location.title "Położenie" >
+<!ENTITY preferences.location.default_loc "Domyślne położenie" >
+<!ENTITY preferences.location.query "... z zapytaniem, np.: www.example.com/strona?s=zapytanie" >
+<!ENTITY preferences.location.hash "... z kotwicą, np.: www.example.com/strona#kotwica" >
+<!ENTITY preferences.location.query_hash "... z zapytaniem i kotwicą, np.: www.example.com/strona?s=zapytanie#kotwica" >
+<!ENTITY preferences.location.page "Bieżąca strona, np.: www.example.com/strona" >
+<!ENTITY preferences.location.wild_page "Bieżąca strona wraz z podstronami, np.: strony zaczynające się od www.example.com/strona" >
+<!ENTITY preferences.location.website "Cała witryna, np.: strony zaczynające się od www.example.com" >
+<!ENTITY preferences.location.updateHash "Uaktualnij notatki gdy zmieni się kotwica" >
+<!ENTITY preferences.location.includePageHash "Pokaż notatki ze strony (wliczając ciąg zapytania)" >
+
+<!ENTITY preferences.view.title "Widok" >
+<!ENTITY preferences.view.show_indicator "Pokaż wskaźniki dla notatek znajdujących się poza bieżącym widokiem" >
+<!ENTITY preferences.view.indicator_timeout "Ukryj po:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = nie ukrywaj)" >
+<!ENTITY preferences.view.indicator_timeout_unit "sek." >
+<!ENTITY preferences.view.show_toolbar_button "Pokaż przycisk na pasku narzędzi" >
+<!ENTITY preferences.view.show_menu "Pokaż wpis w menu 'Narzędzia'" >
+<!ENTITY preferences.view.show_context_delete "Pokaż 'Usuń notatkę' w menu kontekstowym" >
+<!ENTITY preferences.view.show_context_locations "Pokaż 'Edytuj położenie' w menu kontekstowym" >
+<!ENTITY preferences.view.show_context_hide "Pokaż 'Ukryj notatki' w menu kontekstowym" >
+
+<!ENTITY preferences.notifications.title "Powiadomienia" >
+<!ENTITY preferences.notifications.note_deletion "Potwierdź usunięcie notatki" >
+<!ENTITY preferences.notifications.site_not_supported "Ostrzegaj, jeśli strona nie jest obsługiwana" >
+
+
+<!ENTITY preferences.sync.title "Synchronizacja" >
+<!ENTITY preferences.sync.enable "Włącz synchronizację (wymagany Firefox Sync)" >

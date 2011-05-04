@@ -10,6 +10,7 @@
 		<em:creator>Felix Kling</em:creator>
         <em:translator>Luis Eduardo Pineda Morales</em:translator>
         <em:translator>Lorenzo Mariani</em:translator>
+        <em:translator>Krzysztof Klimczak</em:translator>
 		<em:homepageURL>http://thoughts.felix-kling.de/floatnotes</em:homepageURL>
 		<em:optionsURL>chrome://floatnotes/content/preferences.xul</em:optionsURL>
 		<em:targetApplication>
@@ -30,12 +31,18 @@
 				<em:locale>es</em:locale>
 				<em:description>Cree notas adhesivas en cualquier sitio web.</em:description>
 			</Description>
-        </em:localized>
+    </em:localized>
 		<em:localized>
 			<Description>
 				<em:locale>it</em:locale>
                 <em:description>Crea note adesive su qualsiasi sito web<em:description>
 			</Description>
-        </em:localized>
+    </em:localized>
+    <em:localized>
+			<Description>
+				<em:locale>pl</em:locale>
+				<em:description>Przylepia żółte karteczki na dowolnej stronie</em:description>
+			</Description>
+    </em:localized>
     </Description>
 </RDF>

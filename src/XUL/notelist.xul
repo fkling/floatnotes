@@ -9,7 +9,7 @@
         style="width:600px;height:400px;"  
         orient="horizontal"
         persist="screenX screenY width height"
-        title="FloatNotes Manager">
+        title="&manager.title;">
 
 
     <commandset>

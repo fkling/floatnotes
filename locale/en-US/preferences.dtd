@@ -1,3 +1,5 @@
+<!ENTITY preferences.title "Floatnotes Preferences" >
+
 <!ENTITY preferences.note.title "Notes" >
 <!ENTITY preferences.note.default_val "Default values" >
 <!ENTITY preferences.note.width "Width:" >

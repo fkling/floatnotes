@@ -1,4 +1,29 @@
-//!#include "../header.js"
+Components.utils.import("resource://gre/modules/PluralForm.jsm");
+
+
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cr = Components.results;
+var Cu = Components.utils;
+var Util = (function() {
+    var modules = ['Dom', 'Js', 'Locale', 'Css', 'Mozilla', 'Platform', 'Dialog'];
+    var t = {_modules:{}};
+    for(var i  = modules.length; i--;) {
+        var module = modules[i];
+        t.__defineGetter__(module, (function(module) {
+            return function() {
+                Cu.import("resource://floatnotes/util-" + module + ".js", this._modules);
+                this.__defineGetter__(module, function() {
+                    return this._modules[module];
+                });
+                return this[module];
+            };
+        }(module)));
+    }
+    return t;
+}());
+Cu.import("resource://floatnotes/Shared.js");
 
 Cu.import("resource://floatnotes/preferences.js");
 
@@ -78,7 +103,7 @@ Indicator.prototype = {
         if(this.ele) {
             var count = 0;
             this.lastNotes = this._getCurrentNotesFrom(notes);
-            count = this.lastNotes.length; LOG(count + ' notes ' + this.type);
+            count = this.lastNotes.length; ;
 
             if(count > 0) {
                 if(count != this.lastCount) {
@@ -103,7 +128,7 @@ Indicator.prototype = {
     },
 
     _updateLabel: function(nn_notes) {
-        this.ele.label.innerHTML = nn_notes + ' ' + (nn_notes > 1 ? Util.Locale.get('pluralNote'): Util.Locale.get('singularNote')) +  " " + this.label;
+        this.ele.label.innerHTML = nn_notes + ' ' + PluralForm.get(nn_notes, Util.Locale.get('indicatorNote')) +  " " + this.label;
     },
 
     _show: function() {

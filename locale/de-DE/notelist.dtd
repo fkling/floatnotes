@@ -1,3 +1,5 @@
+<!ENTITY manager.title "FloatNotes Manager" >
+
 <!ENTITY button.edit "Bearbeiten" >
 <!ENTITY button.remove "Entfernen" >
 <!ENTITY button.save "Speichern" >

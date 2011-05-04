@@ -3,7 +3,7 @@
 <!DOCTYPE window SYSTEM "chrome://floatnotes/locale/preferences.dtd">
 
 <prefwindow type="prefwindow" id="FloatnotesPreferences"
-	windowtype="Browser:Preferences" title="Floatnotes Preferences"
+	windowtype="Browser:Preferences" title="&preferences.title;"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     xmlns:html="http://www.w3.org/1999/xhtml" style="" buttons="accept,cancel,help" ondialoghelp="openHelp()">
 

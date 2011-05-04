@@ -1,0 +1,11 @@
+<!ENTITY floatnotes.new "Utwórz notatkę" >
+<!ENTITY floatnotes.edit "Edytuj notatkę" >
+<!ENTITY floatnotes.delete "Usuń notatkę" >
+<!ENTITY floatnotes.hide "Ukryj notatki" >
+<!ENTITY floatnotes "FloatNotes" >
+<!ENTITY floatnotes.notelist "Manadżer notatek" >
+<!ENTITY floatnotes.preferences "Ustawienia" >
+<!ENTITY floatnotes.reload "Przeładuj notatki" >
+
+<!ENTITY edit_popup.color "Kolor:" >
+<!ENTITY edit_popup.location "Położenie" >

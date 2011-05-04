@@ -9,6 +9,9 @@ style chrome://browser/content/browser.xul chrome://floatnotes/skin/notes.css
 
 locale floatnotes en-US locale/en-US/
 locale floatnotes de-DE locale/de-DE/
+locale floatnotes es locale/es/
+locale floatnotes it-IT locale/it-IT/
+locale floatnotes pl locale/pl/
 
 EXTRA_PP_COMPONENTS = \
       FloatNotesProtocol.js \

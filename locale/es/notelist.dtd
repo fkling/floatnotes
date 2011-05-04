@@ -1,3 +1,5 @@
+<!ENTITY manager.title "FloatNotes Manager" >
+
 <!ENTITY button.edit "Editar" >
 <!ENTITY button.remove "Eliminar" >
 <!ENTITY button.save "Guardar" >
@@ -11,5 +13,6 @@
 
 <!ENTITY color "Color:" >
 
+<!ENTITY editsearch.title "Edit search" >
 <!ENTITY editsearch.name "Nombre:" >
 <!ENTITY editsearch.keywords "Palabras clave:" >

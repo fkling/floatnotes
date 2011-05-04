@@ -1,0 +1,18 @@
+<!ENTITY manager.title "Menadżer FloatNotes" >
+
+<!ENTITY button.edit "Edytuj" >
+<!ENTITY button.remove "Usuń" >
+<!ENTITY button.save "Zapisz" >
+
+<!ENTITY searchtext "Zacznij pisać by wyszukać notatki lub wybierz wcześniej zapisane wyszukiwanie z listy po lewej" >
+
+<!ENTITY list.title "Tytuł" >
+<!ENTITY list.url "URL" >
+<!ENTITY list.created "Stworzono" >
+<!ENTITY list.modified "Zmodyfikowano" >
+
+<!ENTITY color "Kolor:" >
+
+<!ENTITY editsearch.title "Edytuj wyszukiwanie" >
+<!ENTITY editsearch.name "Nazwa:" >
+<!ENTITY editsearch.keywords "Słowa kluczowe:" >

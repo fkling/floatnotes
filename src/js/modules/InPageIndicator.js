@@ -103,7 +103,7 @@ Indicator.prototype = {
     },
 
     _updateLabel: function(nn_notes) {
-        this.ele.label.innerHTML = nn_notes + ' ' + (nn_notes > 1 ? Util.Locale.get('pluralNote'): Util.Locale.get('singularNote')) +  " " + this.label;
+        this.ele.label.innerHTML = nn_notes + ' ' + PluralForm.get(nn_notes, Util.Locale.get('indicatorNote')) +  " " + this.label;
     },
 
     _show: function() {

@@ -5,6 +5,7 @@ Components.utils.import("resource://floatnotes/util-Locale.js");
 Components.utils.import("resource://floatnotes/util-Dialog.js");
 Components.utils.import("resource://floatnotes/URLHandler.js");
 Components.utils.import("resource://floatnotes/Shared.js");
+Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
 var textBox = document.getElementById('text');
 var colorPicker = document.getElementById('color');
@@ -269,12 +270,7 @@ function getTitle(text) {
 
 function updateCounter() {
     var str = treeView.rowCount;
-    if(str === 1) {
-        str += ' ' + Locale.get('singularNote');
-    }
-    else {
-        str += ' ' + Locale.get('pluralNote');
-    }
+    str += ' ' + PluralForm.get(str, Locale.get('indicatorNote'));
     document.getElementById('counter').value = str;
 }
 

@@ -1,6 +1,7 @@
 //!#include "../header.js"
 
 Cu.import("resource://floatnotes/preferences.js");
+Cu.import("resource://gre/modules/PluralForm.jsm");
 
 EXPORTED_SYMBOLS = ["IndicatorProxy", "Indicator"];
 

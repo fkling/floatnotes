@@ -36,32 +36,32 @@ var Css = (function() {
                 node.className = className.replace(/\s+/, ' ');
             }
         },
-        hasClass: function(node, class) {
+        hasClass: function(node, cls) {
             if(node && node.className) {
-                var pattern = new RegExp('\\b' + class + '\\b');
-                return pattern.test(node.className);
+                var pattern = new RegExp(' ' + cls + ' ');
+                return pattern.test(' ' + node.className + ' ');
             }
             return false;
         },
-        hasAncestorWithClass: function(node, class) {
+        hasAncestorWithClass: function(node, cls) {
             if(node && node.parentNode) {
                 do {
                     node = node.parentNode;
                 }
-                while(!util.hasClass(node, class) && node !== null) ;
+                while(!util.hasClass(node, cls) && node !== null) ;
                 return node !== null;
             }
             return false;
         },
-        isOrIsContained: function(target, class) {
-            return (util.hasClass(target, class) || util.hasAncestorWithClass(target, class));
+        isOrIsContained: function(target, cls) {
+            return (util.hasClass(target, cls) || util.hasAncestorWithClass(target, cls));
         },
-        toggleClass: function(node, class) {
-            if(util.hasClass(node, class)) {
-                util.removeClass(node, class);
+        toggleClass: function(node, cls) {
+            if(util.hasClass(node, cls)) {
+                util.removeClass(node, cls);
             }
             else {
-                util.addClass(node, class);
+                util.addClass(node, cls);
             }
         },
         findHighestZIndex: function(document, elem) {

@@ -24,7 +24,7 @@ var Init = {
                     Util.Mozilla.openAndReuseOneTabPerURL(URL);
                 }
             }
-            cb();
+            cb(firstrun);
         });
     },
 

@@ -6,6 +6,7 @@ overlay chrome://browser/content/browser.xul chrome://floatnotes/content/floatno
 
 skin floatnotes classic/1.0 skin/
 style chrome://browser/content/browser.xul chrome://floatnotes/skin/notes.css
+style chrome://global/content/customizeToolbar.xul chrome://floatnotes/skin/floatnotes.css
 
 locale floatnotes en-US locale/en-US/
 locale floatnotes de-DE locale/de-DE/

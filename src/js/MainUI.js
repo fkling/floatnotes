@@ -114,7 +114,7 @@ var locationBuilder = {
         return text;
     }
 };
- 
+
 
 function MainUI(manager, display){
     this.display = display;
@@ -138,7 +138,6 @@ function MainUI(manager, display){
     this._menuEntry = document.getElementById('floatnotes-menu');
     this.onPreferenceChange('showMenu', Preferences.showMenu);
     this._toolbarButton = document.getElementById('floatnotes-toolbar-button');
-    this.onPreferenceChange('showToolbarButton', Preferences.showToolbarButton);
 
     this.popup = document.getElementById('floatnotes-edit-popup');
 
@@ -179,7 +178,7 @@ MainUI.prototype = {
         }
         window.addEventListener('unload',remove , true);
 
-        Preferences.addObserver(this, 'showMenu', 'showToolbarButton', 'fontSize');
+        Preferences.addObserver(this, 'showMenu', 'fontSize');
     },
 
     removeObserver: function() {
@@ -197,37 +196,6 @@ MainUI.prototype = {
         switch(pref) {
             case 'showMenu':
                 this._menuEntry.hidden = !value;
-            break;
-            //TODO: refactor, put in own method
-            case 'showToolbarButton':
-                try {
-                var myId    = "floatnotes-toolbar-button";
-                var afterId = "search-container";
-                var navBar  = document.getElementById("nav-bar");
-                var curSet  = navBar.currentSet.split(",");
-                if(value && curSet.indexOf(myId) == -1 ) {
-                    var pos = curSet.indexOf(afterId) + 1 || curSet.length;
-                    var set = curSet.slice(0, pos).concat(myId).concat(curSet.slice(pos));
-
-                    navBar.setAttribute("currentset", set.join(","));
-                    navBar.currentSet = set.join(",");
-                    document.persist(navBar.id, "currentset");
-                }
-                else if(!value && curSet.indexOf(myId) > -1) {
-                    var pos = curSet.indexOf(myId)
-                    curSet.splice(pos, 1);
-
-                    navBar.setAttribute('currentset', curSet.join(','));
-                    navBar.currentSet = curSet.join(',');
-                    document.persist(navBar.id, "currentset");
-                }
-                try {
-                    BrowserToolboxCustomizeDone(true);
-                }
-                catch (e) {}
-            }
-            catch(e) {}
-
             break;
         }
     },
@@ -322,7 +290,11 @@ MainUI.prototype = {
             this._toggleNotesBrdc.setAttribute('disabled', true);
             this._toggleNotesBrdc.setAttribute('hidden', true);
             this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/note_dis_16.png');
-                this._toggleNotesBrdc.setAttribute('class', 'hidden');
+            this._toggleNotesBrdc.setAttribute('class', 'hidden');
+            
+            if(this._toolbarButton) {
+            	Util.Css.addClass(this._toolbarButton, 'hidden');
+            }
         }
         else {
             var text = Util.Locale.get('hideNotesString');
@@ -332,6 +304,10 @@ MainUI.prototype = {
             this._toggleNotesBrdc.setAttribute('hidden', false);
             this._toggleNotesBrdc.setAttribute('image', 'chrome://floatnotes/skin/note_16.png');
                 this._toggleNotesBrdc.setAttribute('class', '');
+                
+            if(this._toolbarButton) {
+              	Util.Css.removeClass(this._toolbarButton, 'hidden');
+            }
         }
 
     },

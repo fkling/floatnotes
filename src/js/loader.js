@@ -9,8 +9,8 @@ var Loader = {
             LOG("Window loaded");
             var runAfter = function() {
                 Cu.import("resource://floatnotes/init.js");
-                Init.init(function() {
-                    that.createFloatNotesView();
+                Init.init(function(firstrun) {
+                    that.createFloatNotesView(firstrun);
                 });
             }
             var timer = Components.classes["@mozilla.org/timer;1"]
@@ -26,12 +26,33 @@ var Loader = {
         window.addEventListener('load', runWhenLoaded, false);           
     },
 
-    createFloatNotesView: function() {
+    createFloatNotesView: function(firstrun) {
         Cu.import("resource://floatnotes/manager.js");
         Cu.import("resource://floatnotes/database.js");
         Cu.import("resource://floatnotes/InPageNotesUI.js");
         window[MainUI.GLOBAL_NAME] = new MainUI(new FloatNotesManager(new DatabaseConnector()), new InPageNotesUI());
         LOG("View created");
+        // add toolbar button
+        if (firstrun) {
+            this.installButton("nav-bar", "floatnotes-toolbar-button", "search-container");
+        }
+    },
+    
+    installButton: function(toolbarId, id, afterId) {
+        if (!document.getElementById(id)) {
+            var toolbar = document.getElementById(toolbarId);
+
+            var before = toolbar.firstChild;
+            if (afterId) {
+                let elem = before = document.getElementById(afterId);
+                if (elem && elem.parentNode == toolbar)
+                    before = elem.nextElementSibling;
+            }
+
+            toolbar.insertItem(id, before);
+            toolbar.setAttribute("currentset", toolbar.currentSet);
+            document.persist(toolbar.id, "currentset");
+        }
     }
 };
 //

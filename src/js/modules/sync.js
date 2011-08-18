@@ -1,16 +1,25 @@
 //!#include "../header.js"
 
 EXPORTED_SYMBOLS = []
-
 try {
 
     Cu.import("resource://services-sync/main.js");
     Cu.import("resource://services-sync/engines.js");
     Cu.import("resource://services-sync/record.js");
     Cu.import("resource://services-sync/util.js");
+    	
 
     Cu.import("resource://floatnotes/database.js");
     Cu.import("resource://floatnotes/manager.js");
+    
+    // These methods moved to `async.js`
+    if(Utils.makeSyncCallback) {
+    	var Async = Utils;
+    }
+    else {
+    	Cu.import("resource://services-sync/async.js");
+    }
+    
 
     var _db = new DatabaseConnector();
     var _manager = new FloatNotesManager(_db);
@@ -66,19 +75,19 @@ try {
         __proto__: Store.prototype,
 
         itemExists: (function() {
-            var scb = Utils.makeSyncCallback();
+            var scb = Async.makeSyncCallback();
             return function(id) {
                 _db.noteExistsWithId(scb, id);
-                return Utils.waitForSyncCallback(scb);
+                return Async.waitForSyncCallback(scb);
             }
         }()),
 
         createRecord: (function() {
-            var scb = Utils.makeSyncCallback();
+            var scb = Async.makeSyncCallback();
             return function(id, uri) {
                 LOG('Create record for: ' + id)
                 _db.getNote(scb, id);
-                var data = Utils.waitForSyncCallback(scb);
+                var data = Async.waitForSyncCallback(scb);
                 var record = new NoteRecord(uri, data);
                 LOG('This is what we get: ' + data)
                 if(typeof data == 'undefined') {
@@ -91,10 +100,10 @@ try {
         changeItemID: function(oid, nid) {},
 
         getAllIDs: (function() {
-            var scb = Utils.makeSyncCallback();
+            var scb = Async.makeSyncCallback();
             return function() {
                 _db.getAllIds(scb);
-                var IDs = Utils.waitForSyncCallback(scb);
+                var IDs = Async.waitForSyncCallback(scb);
                 LOG('Number of notes ' + IDs.length)
                 var obj = {};
                 IDs.forEach(function(id) {

@@ -2,12 +2,12 @@ Components.utils.import("resource://floatnotes/URLHandler.js");
 Components.utils.import("resource://floatnotes/util-Mozilla.js");
 Components.utils.import("resource://floatnotes/manager.js");
 
-EXPORTED_SYMBOLS = ["Mediator"];
+const EXPORTED_SYMBOLS = ["Mediator"];
 
 
-var manager = new FloatNotesManager();
+let manager = new FloatNotesManager();
 
-var Mediator = (function() {
+let Mediator = (function() {
 
     var _window,
     _observe = true;

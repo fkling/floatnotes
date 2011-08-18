@@ -1,8 +1,8 @@
 //!#include "../header.js"
 
-var EXPORTED_SYMBOLS = ['DatabaseConnector'];
+const EXPORTED_SYMBOLS = ['DatabaseConnector'];
 
-var DatabaseConnector = (function() {
+let DatabaseConnector = (function() {
     
     var connections = {};
     

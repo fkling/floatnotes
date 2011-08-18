@@ -4,10 +4,10 @@ Cu.import("resource://floatnotes/ContainerUIAPI.js");
 Cu.import("resource://floatnotes/InPageNoteUI.js");
 Cu.import("resource://floatnotes/InPageIndicator.js");
 
-EXPORTED_SYMBOLS = ["InPageNotesUI"];
+const EXPORTED_SYMBOLS = ["InPageNotesUI"];
 
 
-function InPageNotesUI() {
+let InPageNotesUI = function() {
     this._currentNotes = {};
     this._newNote = undefined;
     this._currentNotesLength = 0;

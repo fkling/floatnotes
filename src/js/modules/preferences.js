@@ -1,8 +1,8 @@
 //!#include "../header.js"
 
-var EXPORTED_SYMBOLS = ['Preferences'];
+const EXPORTED_SYMBOLS = ['Preferences'];
 
-var Preferences = {
+let Preferences = {
     _observers: {},
     _do_observe: true,
 

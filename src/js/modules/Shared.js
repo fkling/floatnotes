@@ -1,5 +1,5 @@
-EXPORTED_SYMBOLS = ['Shared'];
+const EXPORTED_SYMBOLS = ['Shared'];
 
-Shared = {
+let Shared = {
     focusNote: null
 };

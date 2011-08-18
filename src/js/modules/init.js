@@ -2,9 +2,9 @@
 
 Cu.import("resource://floatnotes/preferences.js");
 
-var EXPORTED_SYMBOLS = ['Init'];
+const EXPORTED_SYMBOLS = ['Init'];
 
-var Init = {
+let Init = {
     init: function(cb) {
         this.loadCSS();
         var that = this;

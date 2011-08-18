@@ -1,5 +1,5 @@
 //!#include "../header.js"
-EXPORTED_SYMBOLS = ['URLParser', 'URLHandler'];
+const EXPORTED_SYMBOLS = ['URLParser', 'URLHandler'];
 
 Cu.import("resource://floatnotes/preferences.js");
 
@@ -9,7 +9,7 @@ var internal_protocols = {
     'resource:': true
 }
 
-var URLParser = {
+let URLParser = {
     getProtocol: function(location) {
         return location.protocol ? location.protocol : '';
     },
@@ -79,7 +79,7 @@ var URLParser = {
     }
 };
 
-var URLHandler = {
+let URLHandler = {
     PAGE_URL: -2,
     PAGE_QUERY_URL: -1,
     PAGE_ANCHOR_URL: -5,
@@ -134,7 +134,7 @@ for(var method in URLParser) {
     }
 }
 
-var HTTPURLParser = {
+let HTTPURLParser = {
     __proto__: URLParser,
     getPageUrl: function(location) {
         var pathname =  location.pathname;
@@ -197,7 +197,7 @@ var HTTPURLParser = {
     }
 };
 
-var FileURLParser = {
+let FileURLParser = {
     __proto__: URLParser,
     getPageUrl: function(location) {
         return location.toString();
@@ -217,7 +217,7 @@ var FileURLParser = {
 
 /* For Firefox 4 */
 
-var AboutURLParser = {
+let AboutURLParser = {
     __proto__: URLParser,
     getPageUrl: function(location) {
         return location.toString();

@@ -35,11 +35,11 @@ NoteUI.prototype.view_ = null;
 NoteUI.prototype.markdownParser_ = new Showdown.converter();
 
 
-NoteUI.prototype.getDocument_ = function() {
+NoteUI.prototype.getDocument = function() {
     return this.view_ && this.view_.currentDocument;
 };
 
-NoteUI.prototype.getWindow_ = function() {
+NoteUI.prototype.getWindow = function() {
     return this.view_.currentDocument.defaultView;
 };
 
@@ -88,6 +88,9 @@ NoteUI.prototype.getTitle = function() {
     return text.substring(0, index > -1 ? index : text.length);
 };
 
+NoteUI.prototype.getNoteData = function() {
+    return this.noteData_;
+}; 
 
 NoteUI.prototype.isFixed = function() {
     return this.hasStatus(NoteUI.STATUS.FIXED);
@@ -110,8 +113,8 @@ NoteUI.prototype.attachTo = function(document, container) {
 };
 
 
-NoteUI.prototype.detach = function() {
-    this.detach_();
+NoteUI.prototype.detach = function(document) {
+    this.detach_(document);
 };
 
 
@@ -172,19 +175,17 @@ NoteUI.prototype.unfix = Util.Js.empty;
 
 NoteUI.prototype.fixAndSave = function() {
     this.setStatus(NoteUI.STATUS.FIXED);
-    if(this.setNewPosition_(this.calculateNewPosition_())) {
-        this.fix();
-        this.setSaveNeededAndSave_();
-    }
+    this.setNewPosition_(this.calculateNewPosition_());
+    this.fix();
+    this.setSaveNeededAndSave_();
 };
 
 
 NoteUI.prototype.unfixAndSave = function(e) {
     this.unsetStatus(NoteUI.STATUS.FIXED);
-    if(this.setNewPosition_(this.calculateNewPosition_())) {
-        this.unfix();
-        this.setSaveNeededAndSave_();
-    }
+    this.setNewPosition_(this.calculateNewPosition_());
+    this.unfix();
+    this.setSaveNeededAndSave_();
 };
 
 
@@ -195,7 +196,6 @@ NoteUI.prototype.toggleFix = function() {
     else {
         this.fixAndSave();
     }
-    this.redraw();
 };
 
 

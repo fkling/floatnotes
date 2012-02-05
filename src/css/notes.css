@@ -239,6 +239,22 @@
     color: black !important;
     padding: 5px !important;
     margin-left: 5px !important;
+    display: none;
+}
+
+#floatnotes-above.floatnotes-indicator {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+#floatnotes-below.floatnotes-indicator {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+}
+
+#floatnotes-below.floatnotes-indicator .floatnotes-container{
 }
 
 .floatnotes-indicator * {

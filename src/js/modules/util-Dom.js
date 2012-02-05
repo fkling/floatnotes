@@ -1,12 +1,22 @@
-EXPORTED_SYMBOLS = ['Dom'];
+//!#include "../header.js"
+"use strict";
+
+var EXPORTED_SYMBOLS = ['Dom'];
 
 var events = {};
 
 var Dom = {
     removeChildren: function(node) {
-        while(node.hasChildNodes()) {
+        while(node.firstChild) {
             node.removeChild(node.firstChild);
         }
+    },
+
+    detach: function(node) {
+        if(node.parentNode) {
+            node.parentNode.removeChild(node);
+        }
+        return node;
     },
 
     fireEvent: function(document, element, event) {
@@ -32,5 +42,26 @@ var Dom = {
         if(event) {
             event.target.removeEventListener(event.event, event.func, event.capture);
         }
+    },
+
+    scrollWindow: function(e, window) {
+        var x, y;
+        if(e.pageY < window.pageYOffset) {
+            y = e.pageY - window.pageYOffset;
+        }
+        else if (e.pageY > window.innerHeight + window.pageYOffset) {
+            y = e.pageY - (window.innerHeight + window.pageYOffset);
+        }
+
+        if(e.pageX < window.pageXOffset) {
+            x = e.pageX - window.pageXOffset;
+        }
+        else if (e.pageX > window.innerWidth + window.pageXOffset) {
+            x = e.pageX - (window.innerWidth + window.pageXOffset);
+        }
+
+        if(x || y) { LOG('Scroll detect by x:' + x + ' and y:' + y);
+            window.scrollBy(x,y);
+        }
     }
-}
+};

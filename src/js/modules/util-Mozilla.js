@@ -4,6 +4,9 @@ EXPORTED_SYMBOLS = ['Mozilla'];
 
 var Mozilla = {
 
+    /*
+     * Opens a new tab for the given URL or reuses the an existing tab.
+     */
     openAndReuseOneTabPerURL: function(url) {
         var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
                     .getService(Components.interfaces.nsIWindowMediator);
@@ -76,10 +79,14 @@ var Mozilla = {
 
     getRecentWindow: function() {
         if(!this._wm) {
-            this._wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                    .getService(Components.interfaces.nsIWindowMediator);
+            this._wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                    .getService(Ci.nsIWindowMediator);
         }
         return this._wm.getMostRecentWindow("navigator:browser");
+    },
+
+    getTimer: function() {
+        return Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
     }
 
 };

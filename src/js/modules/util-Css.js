@@ -1,22 +1,38 @@
-EXPORTED_SYMBOLS = ['Css'];
+"use strict";
+var EXPORTED_SYMBOLS = ['Css'];
 
 var Css = (function() {
     var util = {
-        css: function(node, style) {
-            if(node && node.style) {
-                for (var key in style) {
-                    node.style[key] = style[key];
+        css: function(node, property, value) {
+            if(arguments.length === 2) {
+                if(typeof property === 'string') {
+                    return node.style[property];
+                }
+                else {
+                    var style = node.style;
+                    for(var prop in property) {
+                        style[prop] = property[value];
+                    }
+                }
+            }
+            else if(arguments.length === 3) {
+                node.style[property] = value;
+            }
+        },
+        show: function() {
+            for(var i = arguments.length; i--; ) {
+                var node = arguments[i];
+                if(node.style) {
+                    node.style.display = "block";
                 }
             }
         },
-        show: function(node) {
-            if(node && node.style) {
-                node.style.display = "block";
-            }
-        },
-        hide: function(node) {
-            if(node && node.style) {
-                node.style.display = "none";
+        hide: function() {
+            for(var i = arguments.length; i--; ) {
+                var node = arguments[i];
+                if(node.style) {
+                    node.style.display = "none";
+                }
             }
         },
         addClass: function(node, cls) {

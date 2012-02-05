@@ -371,7 +371,7 @@ MainUI.prototype = {
                 var that = this;
                 Mediator.observe(false);
                 this.notesManager.deleteNote(note, function() {
-                    that.display.removeNote(note.guid);                    
+                    that.display.removeNote(note);
                     that.contextNote = null;
                     Mediator.observe(true);
                 });
@@ -384,7 +384,7 @@ MainUI.prototype = {
         var domain = this.currentDocument.location;
         if(this._notesHiddenFor(domain)) {
             this.display.showNotes(); LOG('Nodes shown.');
-            this.display.updateUI();
+            this.display.redraw();
         }
         else {
             this.display.hideNotes(); LOG('Nodes hidden.');

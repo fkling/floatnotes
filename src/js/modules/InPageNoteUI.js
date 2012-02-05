@@ -31,6 +31,10 @@ InPageNoteUI.prototype.setText = function(text) {
     }
 };
 
+InPageNoteUI.prototype.getElementNode = function() {
+    return this.elementNode_;
+};
+
 InPageNoteUI.prototype.attachTo_ = function(document, container) {
     if (document) {
         if (this.domElements_ === null) {
@@ -206,9 +210,9 @@ InPageNoteUI.prototype.createDomElements_ = function(doc) {
     return this.createDomElements_(doc);
 };
 
-InPageNoteUI.prototype.detach = function(document) {
-    if (this.elementNode_ && this.elementNode_.parentNode && (!document || document == this.document_)) {
-        this.elementNode_.parentNode.removeChild(this.elementNode_);
+InPageNoteUI.prototype.detach_ = function(document) {
+    if (this.elementNode_ && (!document || document === this.document_)) {
+        Util.Dom.detach(this.elementNode_);
         this.document_ = null;
     }
 };
@@ -314,7 +318,7 @@ InPageNoteUI.prototype.startMove = function(e) {
     Util.Js.addEventListener(window,
                              'mousemove',
                              this.onMove, true,
-                             this, [this.getWindow_(), x, y, this.noteData_.w, this.noteData_.h, this.elementNode_.style, this.hasStatus(FloatNotesNoteUI.STATUS.FIXED)]);
+                             this, [this.getWindow(), x, y, this.noteData_.w, this.noteData_.h, this.elementNode_.style, this.hasStatus(FloatNotesNoteUI.STATUS.FIXED)]);
 };
 
 InPageNoteUI.prototype.onMove = function(window, startX, startY, width, height, style, fix, e) {
@@ -357,7 +361,7 @@ InPageNoteUI.prototype.endMove = function(opacity, e) {
     if (!Util.Css.isOrIsContained(e.target, 'floatnotes-note')) {
         this.mouseleave();
     }
-    Util.Dom.fireEvent(this.getDocument_(), this.elementNode_, 'mouseup');
+    Util.Dom.fireEvent(this.getDocument(), this.elementNode_, 'mouseup');
 };
 
 InPageNoteUI.prototype.startResize = function(e) {
@@ -376,7 +380,7 @@ InPageNoteUI.prototype.startResize = function(e) {
     Util.Js.addEventListener(window,
                              'mousemove',
                              this.onResize, true,
-                             this, [this.getWindow_(), width, height, this.noteData_.x, this.noteData_.y, this.elementNode_.style, this.hasStatus(FloatNotesNoteUI.STATUS.FIXED)]);
+                             this, [this.getWindow(), width, height, this.noteData_.x, this.noteData_.y, this.elementNode_.style, this.hasStatus(FloatNotesNoteUI.STATUS.FIXED)]);
 
 };
 
@@ -421,7 +425,7 @@ InPageNoteUI.prototype.endResize = function(opacity, e) {
     if (!Util.Css.isOrIsContained(e.target, 'floatnotes-note')) {
         this.mouseleave();
     }
-    Util.Dom.fireEvent(this.getDocument_i(), this.elementNode_, 'mouseup');
+    Util.Dom.fireEvent(this.getDocument(), this.elementNode_, 'mouseup');
 };
 
 InPageNoteUI.prototype.onAfterSave_ = function(id, guid) {
@@ -442,7 +446,7 @@ InPageNoteUI.prototype.unfix = function() {
 
 InPageNoteUI.prototype.calculateNewPosition_ = function() {
     var newTop, newLeft,
-    win = this.getWindow_(),
+    win = this.getWindow(),
     style = this.elementNode_.style;
 
     if (this.hasStatus(FloatNotesNoteUI.STATUS.FIXED)) {

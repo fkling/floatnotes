@@ -1,57 +1,76 @@
 //!#include "header.js"
 //!#include "MainUI.js"
-var Loader = {  
+
+/*global MainUI:true */
+
+/*jshint browser:true*/
+
+var Loader = {
 
     listenToApplicationLoad: function() {
+        "use strict";
+        LOG('Application loaded');
         var that = this;
-        var runWhenLoaded = function(event){
-            window.removeEventListener('load', runWhenLoaded, false);           
-            LOG("Window loaded");
-            var runAfter = function() {
-                Cu.import("resource://floatnotes/init.js");
-                Init.init(function(firstrun) {
-                    that.createFloatNotesView(firstrun);
-                });
-            }
-            var timer = Components.classes["@mozilla.org/timer;1"]
-                        .createInstance(Components.interfaces.nsITimer);
-            timer.initWithCallback({notify: runAfter}, 500, timer.ONE_SHOT);
-        }
+        var runWhenLoaded = function(event) {
+            window.removeEventListener('load', runWhenLoaded, false);
+            LOG('Window loaded');
+            var timer = Util.Mozilla.getTimer();
+            var ob = {
+                notify: function() {
+                    LOG('Floatnotes is loading...');
+                    Cu['import']('resource://floatnotes/init.js'); /*global Init:true*/
+                    Init.init(function(firstrun) {
+                        that.createFloatNotesView(firstrun);
+                    });
+                }
+            };
+            LOG('Window loaded');
+            timer.initWithCallback(ob, 100, timer.TYPE_ONE_SHOT);
+        };
+
         try {
-            Cu.import("resource://floatnotes/sync.js");
+            LOG('Import sync...');
+            Cu['import']('resource://floatnotes/sync.js');
+            LOG('Import sync successful');
         }
-        catch(e) {
-            LOG(e)
+        catch (e) {
+            Cu.reportError(e);
         }
-        window.addEventListener('load', runWhenLoaded, false);           
+        window.addEventListener('load', runWhenLoaded, false);
     },
 
     createFloatNotesView: function(firstrun) {
-        Cu.import("resource://floatnotes/manager.js");
-        Cu.import("resource://floatnotes/database.js");
-        Cu.import("resource://floatnotes/InPageNotesUI.js");
-        window[MainUI.GLOBAL_NAME] = new MainUI(new FloatNotesManager(new DatabaseConnector()), new InPageNotesUI());
-        LOG("View created");
+        "use strict";
+        Cu['import']('resource://floatnotes/manager.js');
+        Cu['import']('resource://floatnotes/database.js');
+        Cu['import']('resource://floatnotes/InPageNotesContainer.js');
+        /*global FloatNotesManager:true, DatabaseConnector:true, FloatNotesInPageNotesContainer: true*/
+
+        window[MainUI.GLOBAL_NAME] = new MainUI(new FloatNotesManager(new DatabaseConnector()), new FloatNotesInPageNotesContainer());
+        LOG('View created');
         // add toolbar button
         if (firstrun) {
-            this.installButton("nav-bar", "floatnotes-toolbar-button", "search-container");
+            this.installButton('nav-bar', 'floatnotes-toolbar-button', 'search-container');
         }
     },
-    
+
     installButton: function(toolbarId, id, afterId) {
+        "use strict";
         if (!document.getElementById(id)) {
             var toolbar = document.getElementById(toolbarId);
 
             var before = toolbar.firstChild;
             if (afterId) {
-                let elem = before = document.getElementById(afterId);
-                if (elem && elem.parentNode == toolbar)
+                var elem = document.getElementById(afterId);
+                before = elem;
+                if (elem && elem.parentNode == toolbar) {
                     before = elem.nextElementSibling;
+                }
             }
 
             toolbar.insertItem(id, before);
-            toolbar.setAttribute("currentset", toolbar.currentSet);
-            document.persist(toolbar.id, "currentset");
+            toolbar.setAttribute('currentset', toolbar.currentSet);
+            document.persist(toolbar.id, 'currentset');
         }
     }
 };

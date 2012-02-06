@@ -36,11 +36,11 @@ NoteUI.prototype.markdownParser_ = new Showdown.converter();
 
 
 NoteUI.prototype.getDocument = function() {
-    return this.view_ && this.view_.currentDocument;
+    return this.view_ && this.view_.getCurrentDocument();
 };
 
 NoteUI.prototype.getWindow = function() {
-    return this.view_.currentDocument.defaultView;
+    return this.view_.getCurrentDocument().defaultView;
 };
 
 NoteUI.prototype.getGuid = function() {

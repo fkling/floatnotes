@@ -1,13 +1,15 @@
-Components.utils.import("resource://floatnotes/URLHandler.js");
-Components.utils.import("resource://floatnotes/util-Mozilla.js");
-Components.utils.import("resource://floatnotes/manager.js");
+"use strict";
+Components.utils['import']("resource://floatnotes/URLHandler.js");
+Components.utils['import']("resource://floatnotes/util-Mozilla.js");
+Components.utils['import']("resource://floatnotes/manager.js");
+/*global URLHandler:true, Mozilla:true, FloatNotesManager:true*/
 
-const EXPORTED_SYMBOLS = ["Mediator"];
+var EXPORTED_SYMBOLS = ["Mediator"];
 
 
-let manager = new FloatNotesManager();
+var manager = new FloatNotesManager();
 
-let Mediator = (function() {
+var Mediator = (function() {
 
     var _window,
     _observe = true;
@@ -17,18 +19,18 @@ let Mediator = (function() {
             if(_window && _observe) {
                 switch(topic) {
                     case 'floatnotes-note-update':  // value is the note ID
-                        _window.display.updateNote(value);                    
+                        _window.getNoteContainer().updateNote(value);                    
                     break;
                     case 'floatnotes-note-delete':
-                        _window.display.removeNote(value);
+                        _window.getNoteContainer().removeNote(value);
                     break;
                     case 'floatnotes-note-urlchange': // detach the note, "fallthrough" will add the note again if needed
-                        _window.display.detachNote(value);
+                        _window.getNoteContainer().detachNote(value);
                     case 'floatnotes-note-add':
                         var locations =  URLHandler.getSearchUrls(_window.currentDocument.location);
                         var note = manager.notes[value];
                         if (locations.indexOf(note.url) > -1) {
-                            _window.display.addNote(note);
+                            _window.getNoteContainer().addNote(note);
                         }
                 }
             }

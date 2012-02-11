@@ -42,11 +42,11 @@ var Loader = {
     createFloatNotesView: function(firstrun) {
         "use strict";
         Cu['import']('resource://floatnotes/manager.js');
-        Cu['import']('resource://floatnotes/database.js');
+        Cu['import']('resource://floatnotes/SQLiteDatabase.js');
         Cu['import']('resource://floatnotes/InPageNotesContainer.js');
-        /*global FloatNotesManager:true, DatabaseConnector:true, FloatNotesInPageNotesContainer: true*/
+        /*global FloatNotesManager:true, FloatNotesSQLiteDatabase:true, FloatNotesInPageNotesContainer: true*/
 
-        window[MainUI.GLOBAL_NAME] = new MainUI(new FloatNotesManager(new DatabaseConnector()), new FloatNotesInPageNotesContainer());
+        window[MainUI.GLOBAL_NAME] = new MainUI(new FloatNotesManager(FloatNotesSQLiteDatabase.getInstance()), new FloatNotesInPageNotesContainer());
         LOG('View created');
         // add toolbar button
         if (firstrun) {

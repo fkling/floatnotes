@@ -1,7 +1,7 @@
 //!#include "../header.js"
 "use strict";
 
-var EXPORTED_SYMBOLS = ['FloatNotesSQliteDatabase'];
+var EXPORTED_SYMBOLS = ['FloatNotesSQLiteDatabase'];
 
 function SQLiteDatabase(file) {
     this.setDatabase(file);
@@ -27,20 +27,20 @@ SQLiteDatabase.prototype.setDatabase = function(file) {
 
 
 SQLiteDatabase.prototype.createTables = function() {
-    this._db.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, protocol TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, creation_date DATETME, modification_date DATETIME)');
-    this._db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
-    this._db.executeSimpleSQL('CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)');
+    this.db_.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, protocol TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, creation_date DATETME, modification_date DATETIME)');
+    this.db_.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
+    this.db_.executeSimpleSQL('CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)');
 };
 
 
 SQLiteDatabase.prototype.clearTables = function() {
-    this._db.executeSimpleSQL('DROP TABLE IF EXISTS floatnotes');
+    this.db_.executeSimpleSQL('DROP TABLE IF EXISTS floatnotes');
     this.createTables();
 };
 
 
 SQLiteDatabase.prototype.getURLs = function(callback) {
-    var statement = this._db.createStatement("SELECT DISTINCT url FROM floatnotes ORDER BY url DESC");
+    var statement = this.db_.createStatement("SELECT DISTINCT url FROM floatnotes ORDER BY url DESC");
     var urls = [];
     statement.executeAsync({
         handleResult: function(aResultSet) {
@@ -55,7 +55,7 @@ SQLiteDatabase.prototype.getURLs = function(callback) {
 };
 
 SQLiteDatabase.prototype.getAllNotes = function(callback) {
-    var statement = this._db.createStatement("SELECT * FROM floatnotes ORDER BY content DESC");
+    var statement = this.db_.createStatement("SELECT * FROM floatnotes ORDER BY content DESC");
     var notes = [];
     var that = this;
     statement.executeAsync({
@@ -78,7 +78,7 @@ SQLiteDatabase.prototype.getNotesContaining = function(wordList, runWhenFinished
         ands.push('uc LIKE :w' + i + " ESCAPE '~'");
     }
 
-    var statement = this._db.createStatement("SELECT *, url || content AS uc FROM floatnotes WHERE " + ands.join(' AND ') + " ORDER BY content");
+    var statement = this.db_.createStatement("SELECT *, url || content AS uc FROM floatnotes WHERE " + ands.join(' AND ') + " ORDER BY content");
     for (i = wordList.length; i--;) {
         statement.params['w' + i] =  '%' + statement.escapeStringForLIKE(wordList[i], "~") + '%';
         LOG('Include word: ' + statement.escapeStringForLIKE(wordList[i], "~"));
@@ -100,7 +100,7 @@ SQLiteDatabase.prototype.getNotesContaining = function(wordList, runWhenFinished
 
 
 SQLiteDatabase.prototype.getNotesForURLs = function(urls, callback) {
-    var statement = this._db.createStatement("SELECT * FROM floatnotes WHERE url = :url ORDER BY y ASC"),
+    var statement = this.db_.createStatement("SELECT * FROM floatnotes WHERE url = :url ORDER BY y ASC"),
         params = statement.newBindingParamsArray(),
         notes = [];
     var that = this;
@@ -132,7 +132,7 @@ SQLiteDatabase.prototype.createNoteAndGetId = function(note, callback) {
         sql = sql.replace(':guid', 'hex(randomblob(16))');
     }
     LOG('Generated statment: ' + sql);
-    var statement = this._db.createStatement(sql);
+    var statement = this.db_.createStatement(sql);
     try {
         for (var param in statement.params) {
             statement.params[param] = note[param];				
@@ -144,10 +144,10 @@ SQLiteDatabase.prototype.createNoteAndGetId = function(note, callback) {
                     return null;
                 }
                 var guid = note.guid;
-                var id = that._db.lastInsertRowID;
+                var id = that.db_.lastInsertRowID;
                 LOG('INSERTED ID: ' + id);
                 if(!guid) {
-                    var statement = that._db.createStatement("SELECT guid FROM floatnotes WHERE id = :id");
+                    var statement = that.db_.createStatement("SELECT guid FROM floatnotes WHERE id = :id");
                     statement.params.id = id;
                     statement.executeStep();
                     guid = statement.row.guid;
@@ -162,7 +162,7 @@ SQLiteDatabase.prototype.createNoteAndGetId = function(note, callback) {
 };
 
 SQLiteDatabase.prototype.updateNote = function(note, callback) {
-    var statement = this._db.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, status=:status, color=:color, url=:url, protocol=:protocol, modification_date=:modification_date WHERE guid = :guid");
+    var statement = this.db_.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, status=:status, color=:color, url=:url, protocol=:protocol, modification_date=:modification_date WHERE guid = :guid");
     try {
         for (var param in statement.params) {
             statement.params[param] = note[param];
@@ -184,7 +184,7 @@ SQLiteDatabase.prototype.updateNote = function(note, callback) {
 
 SQLiteDatabase.prototype.deleteNote = function(note_guid, callback) {
     LOG('DB:DELETE note with GUID:' + note_guid);
-    var statement = this._db.createStatement("DELETE FROM floatnotes WHERE guid = :guid");
+    var statement = this.db_.createStatement("DELETE FROM floatnotes WHERE guid = :guid");
     try {
         statement.params.guid = note_guid;
         var that = this;
@@ -203,11 +203,11 @@ SQLiteDatabase.prototype.deleteNote = function(note_guid, callback) {
 };
 
 SQLiteDatabase.prototype.executeSimpleSQL = function(statement) {
-    return this._db.executeSimpleSQL(statement);
+    return this.db_.executeSimpleSQL(statement);
 };
 
 SQLiteDatabase.prototype.noteExistsWithId = function(callback, note_guid) {
-    var statement = this._db.createStatement("SELECT COUNT(*) as counter FROM floatnotes WHERE guid = :guid"),
+    var statement = this.db_.createStatement("SELECT COUNT(*) as counter FROM floatnotes WHERE guid = :guid"),
         count = 0,
         that = this;
     statement.params.guid = note_guid;
@@ -225,7 +225,7 @@ SQLiteDatabase.prototype.noteExistsWithId = function(callback, note_guid) {
 
 SQLiteDatabase.prototype.getNote = function(callback, note_guid) {
     LOG('Get note with GUID ' + note_guid);
-    var statement = this._db.createStatement("SELECT * FROM floatnotes WHERE guid = :guid"),
+    var statement = this.db_.createStatement("SELECT * FROM floatnotes WHERE guid = :guid"),
         note,
         that = this;
     statement.params.guid = note_guid;
@@ -242,7 +242,7 @@ SQLiteDatabase.prototype.getNote = function(callback, note_guid) {
 };
 
 SQLiteDatabase.prototype.getAllIds = function(callback) {
-    var statement = this._db.createStatement("SELECT guid FROM floatnotes"),
+    var statement = this.db_.createStatement("SELECT guid FROM floatnotes"),
         ids = [],
         that = this;
     LOG('Get all IDs');

@@ -2,6 +2,22 @@
 var EXPORTED_SYMBOLS = ['Js'];
 
 var Js = {
+
+    addSingletonGetter: function(Constr) {
+        Constr.getInstance = function() {
+            if(Constr.__instance__) {
+                return Constr.__instance__;
+            }
+            return Constr.__instance__ = (function(args) {
+                function F() {
+                    return Constr.apply(this, args);
+                }
+                F.prototype = Constr.prototype;
+                return new F();
+            }(arguments));
+        };
+    },
+
     removeObjectFromArray: function(object, array) {
         var index = array.indexOf(object);
         if(index >= 0) {

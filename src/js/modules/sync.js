@@ -1,27 +1,29 @@
 //!#include "../header.js"
-
-EXPORTED_SYMBOLS = []
+/*jshint es5:true*/
+"use strict";
+LOG('Sync loading...');
+var EXPORTED_SYMBOLS = [];
 try {
 
-    Cu.import("resource://services-sync/main.js");
-    Cu.import("resource://services-sync/engines.js");
-    Cu.import("resource://services-sync/record.js");
-    Cu.import("resource://services-sync/util.js");
-    	
+    Cu['import']("resource://services-sync/main.js");
+    Cu['import']("resource://services-sync/engines.js");
+    Cu['import']("resource://services-sync/record.js");
+    Cu['import']("resource://services-sync/util.js");
 
-    Cu.import("resource://floatnotes/database.js");
-    Cu.import("resource://floatnotes/manager.js");
+    Cu['import']("resource://floatnotes/SQLiteDatabase.js");
+    Cu['import']("resource://floatnotes/manager.js");
+    /*global FloatNotesSQLiteDatabase:true, FloatNotesManager:true, Utils:true, CryptoWrapper:true, Store:true, Tracker:true, Weave:true*/
     
     // These methods moved to `async.js`
     if(Utils.makeSyncCallback) {
-    	var Async = Utils;
+        var Async = Utils;
     }
     else {
-    	Cu.import("resource://services-sync/async.js");
+        Cu['import']("resource://services-sync/async.js");
     }
     
 
-    var _db = new DatabaseConnector();
+    var _db = FloatNotesSQLiteDatabase.getInstance();
     var _manager = new FloatNotesManager(_db);
 
     EXPORTED_SYMBOLS = ['initSync'];
@@ -38,7 +40,7 @@ try {
                     this[property] = data[property];
                 }
             }
-            LOG('Create record with id ' + data.guid)
+            LOG('Create record with id ' + data.guid);
             this.id = data.guid;
         }
     }
@@ -54,7 +56,7 @@ try {
             obj.id = null;
             return obj;
         }
-    }
+    };
 
     fields.forEach(function(prop) {
         if(prop == 'modification_date' || prop == 'creation_date') {
@@ -79,22 +81,22 @@ try {
             return function(id) {
                 _db.noteExistsWithId(scb, id);
                 return Async.waitForSyncCallback(scb);
-            }
+            };
         }()),
 
         createRecord: (function() {
             var scb = Async.makeSyncCallback();
             return function(id, uri) {
-                LOG('Create record for: ' + id)
+                LOG('Create record for: ' + id);
                 _db.getNote(scb, id);
                 var data = Async.waitForSyncCallback(scb);
                 var record = new NoteRecord(uri, data);
-                LOG('This is what we get: ' + data)
+                LOG('This is what we get: ' + data);
                 if(typeof data == 'undefined') {
                     record.deleted = true;
                 }
                 return record;
-            }
+            };
         }()),
 
         changeItemID: function(oid, nid) {},
@@ -104,17 +106,17 @@ try {
             return function() {
                 _db.getAllIds(scb);
                 var IDs = Async.waitForSyncCallback(scb);
-                LOG('Number of notes ' + IDs.length)
+                LOG('Number of notes ' + IDs.length);
                 var obj = {};
                 IDs.forEach(function(id) {
                     obj[id] = 1;
                 });
                 return obj;
-            }
+            };
         }()),
 
         create: function(record) {
-            LOG('Sync: New note ' + record.id)
+            LOG('Sync: New note ' + record.id);
             observe = false;
             _manager.addNote(record.note_data, function() {
                 observe = true;               
@@ -122,7 +124,7 @@ try {
         },
 
         update: function(record) {
-            LOG('Sync: Update note ' + record.id)
+            LOG('Sync: Update note ' + record.id);
             observe = false;
             _manager.updateNote(record.note_data, function() {
                 observe = true;               
@@ -130,7 +132,7 @@ try {
         },
 
         remove: function(record) {
-            LOG('Sync: Delete note ' + record.id)
+            LOG('Sync: Delete note ' + record.id);
             observe = false;
             _manager.deleteNote({guid: record.id}, function() {
                 observe = true;               
@@ -140,7 +142,7 @@ try {
         wipe: function() {
             _db.clearTables();
         }
-    }
+    };
 
     function FloatNotesTracker(name) {
         Tracker.call(this, name);
@@ -154,12 +156,12 @@ try {
 
         _enabled: false,
         observe: function(subject, topic, data) {
-            var score = 15;
+            var score = 15, obsService;
             switch (topic) {
                 case "weave:engine:start-tracking":
                     if (!this._enabled) {
-                        LOG('sync about to register')
-                        var obsService = Components.classes["@mozilla.org/observer-service;1"]
+                        LOG('sync about to register');
+                        obsService = Components.classes["@mozilla.org/observer-service;1"]
                         .getService(Components.interfaces.nsIObserverService);
                         obsService.addObserver(this, "floatnotes-note-add", false);
                         obsService.addObserver(this, "floatnotes-note-update", false);
@@ -169,7 +171,7 @@ try {
                 break;
                 case "weave:engine:stop-tracking":
                     if (this._enabled) {
-                        var obsService = Components.classes["@mozilla.org/observer-service;1"]
+                        obsService = Components.classes["@mozilla.org/observer-service;1"]
                         .getService(Components.interfaces.nsIObserverService);
                         obsService.removeObserver(this, "floatnotes-note-add");
                         obsService.removeObserver(this, "floatnotes-note-update");
@@ -191,7 +193,7 @@ try {
         onChange: function(guid, score) {
             score = score || 15;
             if(observe) {
-                LOG('Sync sees changes: ' + guid)
+                LOG('Sync sees changes: ' + guid);
                 this.addChangedID(guid);
                 this.score += score;
             }
@@ -211,18 +213,19 @@ try {
 
 
     if(!registered) {
-        Weave.FloatNotesEngine = FloatNotesEngine; LOG('Lets go')
+        Weave.FloatNotesEngine = FloatNotesEngine;
         var prefService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);  
         var branch = prefService.getBranch("services.sync.");
         var engines = branch.getCharPref('registerEngines');
-        if(!(engines.indexOf('FloatNotes') >= 0)) {
+        if(engines.indexOf('FloatNotes')  < 0) {
             engines = engines.split(',');
             engines.push('FloatNotes');
             branch.setCharPref('registerEngines',engines.join(','));
         }
         registered = true;
+        LOG('Sync manager registered');
     }
 }
 catch(e) {
-    LOG(e)
+    LOG(e);
 }

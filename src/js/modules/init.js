@@ -72,8 +72,8 @@ let Init = {
     },
     getDatabase: function() {
         if(!this._db) {
-            Cu.import("resource://floatnotes/database.js");
-            this._db = new DatabaseConnector(this.DB_FILE);
+            Cu['import']("resource://floatnotes/SQLiteDatabase.js");
+            this._db = FloatNotesSQLiteDatabase.getInstance();
         }
         return this._db;
     },

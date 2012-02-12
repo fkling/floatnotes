@@ -7,7 +7,7 @@ Components.utils['import']("resource://floatnotes/manager.js");
 var EXPORTED_SYMBOLS = ["Mediator"];
 
 
-var manager = new FloatNotesManager();
+var manager = FloatNotesManager.getInstance();
 
 var Mediator = (function() {
 
@@ -28,7 +28,7 @@ var Mediator = (function() {
                         _window.getNoteContainer().detachNote(value);
                     case 'floatnotes-note-add':
                         var locations =  URLHandler.getSearchUrls(_window.currentDocument.location);
-                        var note = manager.notes[value];
+                        var note = manager.getNotes()[value];
                         if (locations.indexOf(note.url) > -1) {
                             _window.getNoteContainer().addNote(note);
                         }

@@ -46,7 +46,7 @@ var Loader = {
         Cu['import']('resource://floatnotes/InPageNotesContainer.js');
         /*global FloatNotesManager:true, FloatNotesSQLiteDatabase:true, FloatNotesInPageNotesContainer: true*/
 
-        window[MainUI.GLOBAL_NAME] = new MainUI(new FloatNotesManager(FloatNotesSQLiteDatabase.getInstance()), new FloatNotesInPageNotesContainer());
+        window[MainUI.GLOBAL_NAME] = new MainUI(FloatNotesManager.getInstance(FloatNotesSQLiteDatabase.getInstance()), new FloatNotesInPageNotesContainer());
         LOG('View created');
         // add toolbar button
         if (firstrun) {

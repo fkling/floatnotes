@@ -12,10 +12,7 @@ function MainUI(noteManager, noteContainer) {
     this.noteContainer_.setMainUI(this);
     this.notesManager_ = noteManager;
     this.status_ = {};
-    this.notes_ = {};
-    this.currentNotes_ = [];
 
-    this.scrollTimer_ = Util.Mozilla.getTimer();
     this.locationListBuilder_ = new FloatNotesLocationListBuilder(document.getElementById('floatnotes-edit-location-list'));
 
     // get references to UI items
@@ -47,9 +44,6 @@ MainUI.GLOBAL_NAME = 'gFloatNotesView';
 MainUI.prototype.noteContainer_ = null;
 MainUI.prototype.notesManager_ = null;
 MainUI.prototype.status_ = null;
-MainUI.prototype.notes_ = null;
-MainUI.prototype.curentNotes_ = null;
-MainUI.prototype.scrollTimer_ = null;
 MainUI.prototype.menuEntryElements_ = null;
 MainUI.prototype.broadcastElements_ = null;
 MainUI.prototype.popupElement_ = null;
@@ -66,8 +60,9 @@ MainUI.prototype.getNoteContainer = function() {
     return this.noteContainer_;
 };
 
-MainUI.prototype.setContextNote_ = function(noteData) {
+MainUI.prototype.setContextNote = function(noteData) {
     "use strict";
+    LOG('Context note set');
     this.contextNote_ = noteData;
 };
 
@@ -250,9 +245,10 @@ MainUI.prototype.attachScrollHandlerTo_ = function(doc) {
     "use strict";
     this.removeScrollHandler_(doc);
 
-    var handler = Util.Js.bind(function() {
-        this.startScrollTimeout_();
-    }, this);
+    var handler = Util.Js.debounce(
+        Util.Js.bind(this.noteContainer_.redraw, this.noteContainer_),
+        Preferences.scrolltimer
+    );
 
     doc.addEventListener('scroll', handler, false);
 
@@ -263,13 +259,6 @@ MainUI.prototype.attachScrollHandlerTo_ = function(doc) {
 };
 
 MainUI.prototype.removeScrollHandler_ = Util.Js.empty;
-
-MainUI.prototype.startScrollTimeout_ = function() {
-    "use strict";
-    this.scrollTimer_.initWithCallback({
-        notify: Util.Js.bind(this.noteContainer_.redraw, this.noteContainer_)
-    }, Preferences.scrolltimer, this.scrollTimer_.TYPE_ONE_SHOT);
-};
 
 MainUI.prototype.addNote = function() {
     "use strict";
@@ -350,6 +339,7 @@ MainUI.prototype.setNotesVisibilityForTo_ = function(location, visible) {
 
 MainUI.prototype.updateContext_ = function(event) {
     "use strict";
+    LOG('Reset context');
     this.contextNote_ = null;
     this.X_ = event.pageX;
     this.Y_ = event.pageY;
@@ -382,7 +372,7 @@ MainUI.prototype.openEditPopup = function(note, anchor, cb) {
 MainUI.prototype.generateLocationList_ = function(note) {
     "use strict";
     if (this.isLocationListGenerated_) {
-        this.locationListBuilder_.updateSelectedElement(note.getUrl());
+        this.locationListBuilder_.selectLocation(note.getUrl());
     }
     else {
         this.locationListBuilder_.buildLocationList(this.getCurrentDocument().location, note.getUrl());

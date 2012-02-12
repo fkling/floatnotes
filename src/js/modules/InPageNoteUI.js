@@ -335,11 +335,11 @@ InPageNoteUI.prototype.onMove = function(window, startX, startY, width, height, 
         if (x + width > window.innerWidth) {
             x = window.innerWidth - width;
         }
-        Util.Dom.scrollWindow(e, window);
     }
 
     style.left = x + 'px';
     style.top = y + 'px';
+    Util.Dom.scrollWindow(e, window);
 };
 
 
@@ -398,11 +398,11 @@ InPageNoteUI.prototype.onResize = function(window, startWidth, startHeight, x, y
         if (x + width > window.innerWidth) {
             width = window.innerWidth - x;
         }
-        Util.Dom.scrollWindow(e, window);
     }
 
     style.width = width + 'px';
     style.height = height + 'px';
+    Util.Dom.scrollWindow(e, window);
 };
 
 InPageNoteUI.prototype.endResize = function(opacity, e) {
@@ -522,6 +522,9 @@ InPageNoteUI.prototype.updateDomElements_ = function() {
     ].join(';');
     elements.content.style.fontSize = Preferences.fontSize + 'px';
     elements.text.style.fontSize = Preferences.fontSize + 'px';
+    var color = Util.Css.getComplementaryColor(this.noteData_.color);
+    elements.content.style.color = elements.text.style.color = color;
+    elements.drag.children[0].style.backgroundColor = color;
     elements.content.innerHTML = this.markdownParser_.makeHtml(this.noteData_.content);
     elements.content.title = Util.Locale.get('note.last_modified', [this.noteData_.modification_date.toLocaleString()]);
     elements.menu.style.backgroundColor = this.noteData_.color;

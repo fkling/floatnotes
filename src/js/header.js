@@ -7,15 +7,17 @@ var Cu = Components.utils;
 //!#if DEBUG
 var logger = {
     log: function(msg) {
-        this._consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+        "use strict";
+        this._consoleService = Cc['@mozilla.org/consoleservice;1'].getService(Ci.nsIConsoleService);
         this.log = function(msg) {
-            this._consoleService.logStringMessage("FloatNotes: " + msg);
-        }
+            this._consoleService.logStringMessage('FloatNotes: ' + msg);
+        };
         this.log(msg);
     }
 };
 
 var Asserter = (function() {
+    "use strict";
     function AssertionError(msg) {
         this.message = msg;
     }
@@ -28,19 +30,20 @@ var Asserter = (function() {
     };
 
     function assert(expr, msg) {
-        if(!expr)
+        if (!expr) {
             throw new AssertionError(msg);
+        }
     }
 
     return {
         assert: assert,
         assertTrue: function(expr, msg) {
-            assert.apply(null, arguments)
+            assert.apply(null, arguments);
         },
         assertFalse: function(expr, msg) {
             assert(!expr, msg);
         }
-    }
+    };
 }());
 
 //!#define LOG(msg) logger.log((msg))
@@ -52,13 +55,14 @@ var Asserter = (function() {
 //!#define AF(expr, msg)
 //!#endif
 var Util = (function() {
+    "use strict";
     var modules = ['Dom', 'Js', 'Locale', 'Css', 'Mozilla', 'Platform', 'Dialog'];
-    var t = {_modules:{}};
-    for(var i  = modules.length; i--;) {
+    var t = {_modules: {}};
+    for (var i = modules.length; i--;) {
         var module = modules[i];
         t.__defineGetter__(module, (function(module) {
             return function() {
-                Cu.import("resource://floatnotes/util-" + module + ".js", this._modules);
+                Cu['import']('resource://floatnotes/util-' + module + '.js', this._modules);
                 this.__defineGetter__(module, function() {
                     return this._modules[module];
                 });
@@ -68,5 +72,5 @@ var Util = (function() {
     }
     return t;
 }());
-Cu.import("resource://floatnotes/Shared.js");
+Cu['import']('resource://floatnotes/Shared.js');
 //!#endif

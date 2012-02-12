@@ -24,7 +24,7 @@ try {
     
 
     var _db = FloatNotesSQLiteDatabase.getInstance();
-    var _manager = new FloatNotesManager(_db);
+    var _manager = FloatNotesManager.getInstance();
 
     EXPORTED_SYMBOLS = ['initSync'];
     var registered = false;

@@ -58,7 +58,7 @@ NotesContainer.prototype.setNotes = function(noteDataArray) {
     for(var id in this.currentNotes_) {
         var note = this.currentNotes_[id];
         if(this.currentNotes_.hasOwnProperty(id) && !(note.getGuid() in gids)) {
-            this.detachNote(note.getNoteData());
+            this.detachNote(note.getGuid());
         }
     }
     this.addNotes(noteDataArray);

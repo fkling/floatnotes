@@ -1,10 +1,10 @@
 //!#include "../header.js"
 
-Cu.import("resource://floatnotes/preferences.js");
+Cu['import']("resource://floatnotes/preferences.js");
 
-const EXPORTED_SYMBOLS = ['Init'];
+var EXPORTED_SYMBOLS = ['Init'];
 
-let Init = {
+var Init = {
     init: function(cb) {
         this.loadCSS();
         var that = this;
@@ -44,7 +44,7 @@ let Init = {
             if(Util.Platform.isFF4()) {
                 var scope = {}, 
                     that = this;
-                Cu.import("resource://gre/modules/AddonManager.jsm", scope);
+                Cu['import']("resource://gre/modules/AddonManager.jsm", scope);
                     scope.AddonManager.getAddonByID('floatnotes@felix-kling.de', function(addon) {
                     that._currentVersion = addon.version;
                     LOG('Extension version: ' + that._currentVersion);
@@ -79,23 +79,23 @@ let Init = {
     },
 
     upgrade: function(from, to) {
-        LOG("Update: " + from + " to " + to);
-        var db = this.getDatabase();
         var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
-        .getService(Ci.nsIVersionComparator);
+        .getService(Ci.nsIVersionComparator),
+        upgrade = false;
 
-
-        if(versionChecker.compare(from, "0.7") >= 0) {
+        if(versionChecker.compare(from, to) === 0) {
             return false;
         }
 
-        /* Create a backup of the DB file, just in case */
+        LOG("Update: " + from + " to " + to);
+        Preferences.version = to;
 
-        db.backup();
+        var db = this.getDatabase();
 
         if(versionChecker.compare(from, "0.6") < 0) {
             // Insert code if version is different here => upgrade
             db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');
+            upgraded = true;
         }
         if(versionChecker.compare(from, "0.7") < 0) {
             // Change column collapse to status
@@ -112,8 +112,17 @@ let Init = {
 
             db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN protocol TEXT');
             db.executeSimpleSQL('UPDATE floatnotes SET protocol="http:"');
+            upgraded = true;
         }
-        Preferences.version = to;
-        return true;
+        if(versionChecker.compare(from, "0.8") < 0) {
+            LOG('UPGRADE to regex');
+            //db.executeSimpleSQL('UPDATE floatnotes SET url=replace(replace(url,".","\."),"*",".*")');
+            upgraded = true;
+        }
+
+        if(upgraded) {
+            db.backup();
+        }
+        return upgraded;
     }
-}
+};

@@ -1,3 +1,4 @@
+//!#include "../header.js"
 "use strict";
 var EXPORTED_SYMBOLS = ['Js'];
 
@@ -158,6 +159,18 @@ var Js = {
                 func.apply(obj, args.concat(arguments));
             };
         }
+    },
+
+    debounce: function(func, timeout) {
+        var timer = Util.Mozilla.getTimer();
+        return function() {
+            var args = arguments;
+            timer.initWithCallback({
+                notify: function() {
+                    func.apply(null, args);
+                }
+            }, timeout, timer.TYPE_ONE_SHOT);
+        };
     },
 
     empty: function(){},

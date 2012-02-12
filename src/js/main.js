@@ -6,8 +6,8 @@
 * Licensed under the GPL Version 2 licenses.
 *
 * Uses showdown.js
-* Copyright 2007, John Fraser  
-* http://www.attacklab.net/ 
+* Copyright 2007, John Fraser
+* http://www.attacklab.net/
 *
 * Date: @DATE@
 */

@@ -108,7 +108,9 @@
     -moz-border-radius: 5px;
 }
 
-
+.floatnotes-note.dark .floatnotes-drag  .floatnotes-drag-handler {
+   background-color: white !important;
+}
 
 .floatnotes-note .floatnotes-menuspacer {
     position: absolute !important;
@@ -144,12 +146,24 @@
 
 
 .floatnotes-note .floatnotes-menu-entry {
+    color: #555 !important;
     background-repeat: no-repeat;
 	display: block !important;
     cursor: pointer !important;
     width: 20px !important;
     height: 20px !important;
     margin: 5px 0px !important;
+    font-size: 25px;
+    line-height: 25px;
+    opacity: 0.6;
+}
+
+.floatnotes-note.dark .floatnotes-menu-entry {
+    color: white !important;    
+}
+
+.floatnotes-note .floatnotes-menu-entry:hover {
+    opacity: 1;
 }
 
 .floatnotes-note .floatnotes-togglefix {
@@ -169,14 +183,14 @@
 }
 
 .floatnotes-note .floatnotes-delete {
-    background-image: url('chrome://floatnotes/skin/delete_small.png') !important;
+    /*background-image: url('chrome://floatnotes/skin/delete_small.png') !important;*/
 }
 
 .floatnotes-note .floatnotes-delete:hover {
-    background-image: url('chrome://floatnotes/skin/delete_small_hover.png') !important;
+    /*background-image: url('chrome://floatnotes/skin/delete_small_hover.png') !important;*/
 }
 
-.floatnotes-note .floatnotes-resize{
+.floatnotes-note .floatnotes-resize {
     bottom: 0px !important;
     right: 0px !important;
     width: 16px !important;

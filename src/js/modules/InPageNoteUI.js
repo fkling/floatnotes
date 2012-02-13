@@ -522,12 +522,14 @@ InPageNoteUI.prototype.updateDomElements_ = function() {
     ].join(';');
     elements.content.style.fontSize = Preferences.fontSize + 'px';
     elements.text.style.fontSize = Preferences.fontSize + 'px';
-    var color = Util.Css.getComplementaryColor(this.noteData_.color);
-    elements.content.style.color = elements.text.style.color = color;
-    elements.drag.children[0].style.backgroundColor = color;
     elements.content.innerHTML = this.markdownParser_.makeHtml(this.noteData_.content);
     elements.content.title = Util.Locale.get('note.last_modified', [this.noteData_.modification_date.toLocaleString()]);
     elements.menu.style.backgroundColor = this.noteData_.color;
+
+    var darkColor = Util.Css.isDarkColor(this.noteData_.color);
+    Util.Css.toggleClass(elements.content, 'dark', darkColor);
+    Util.Css.toggleClass(elements.text, 'dark', darkColor);
+    Util.Css.toggleClass(elements.container, 'dark', darkColor);
 };
 
 InPageNoteUI.prototype.isValid = function() {

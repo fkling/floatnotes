@@ -136,17 +136,23 @@ var Css = (function() {
         },
         removeClass: function(node, cls) {
             if(node && node.className && util.hasClass(node, cls)) {
-                var pattern = new RegExp('\\b' + cls + '\\b');
-                var className = node.className.replace(pattern, ' ');
-                node.className = className.replace(/\s+/, ' ');
+                var className = (' ' + node.className + ' ').replace(' ' + cls + ' ', ' ');
+                node.className = className.replace(/\s+/, ' ').replace(/^\s+|\s+$/g, '');
             }
         },
         hasClass: function(node, cls) {
             if(node && node.className) {
-                var pattern = new RegExp(' ' + cls + ' ');
-                return pattern.test(' ' + node.className + ' ');
+                return (' ' + node.className + ' ').indexOf(' ' + cls + ' ') > -1;
             }
             return false;
+        },
+        toggleClass: function(node, cls, add) {
+            if(node && (add || typeof add === 'undefined' && !Css.hasClass(node, cls))) {
+                Css.addClass(node, cls);
+            }
+            else if(node && (typeof add !== 'undefined' && !add ||  Css.hasClass(node, cls))) {
+                Css.removeClass(node, cls);
+            }
         },
         hasAncestorWithClass: function(node, cls) {
             if(node && node.parentNode) {
@@ -161,14 +167,6 @@ var Css = (function() {
         isOrIsContained: function(target, cls) {
             return (util.hasClass(target, cls) || util.hasAncestorWithClass(target, cls));
         },
-        toggleClass: function(node, cls) {
-            if(util.hasClass(node, cls)) {
-                util.removeClass(node, cls);
-            }
-            else {
-                util.addClass(node, cls);
-            }
-        },
         findHighestZIndex: function(document, elem) {
             var elems = document.getElementsByTagName(elem);
             var highest = 0;
@@ -180,19 +178,17 @@ var Css = (function() {
             }
             return highest;
         },
+        isDarkColor: function(rgb) {
+            var values = rgb.match(/\w{2}/g);
+            return (parseInt(values[0], 16) + parseInt(values[1], 16) + parseInt(values[2], 16)) / 3 <= 128; 
+        },
         getComplementaryColor: function(rgb) {
             var values = rgb.match(/\w{2}/g);
-            return (parseInt(values[0], 16) + parseInt(values[1], 16) + parseInt(values[2], 16)) / 3 > 128 ? '#111' : 'white';
-/*
-LOG(rgb);
-var values = rgb.match(/\w{2}/g),
-hsv = RGB2HSV({r: parseInt(values[0], 16), g: parseInt(values[1], 16), b: parseInt(values[2], 16)});
+            hsv = RGB2HSV({r: parseInt(values[0], 16), g: parseInt(values[1], 16), b: parseInt(values[2], 16)});
 
-LOG(([hsv.hue, hsv.saturation, hsv.value].join()));
-hsv.hue = HueShift(hsv.hue, 180.0);
-var rgb_ = HSV2RGB(hsv);
-return ['#', Dec2Hex(rgb_.r), Dec2Hex(rgb_.g), Dec2Hex(rgb_.b)].join('');
-*/
+            hsv.hue = HueShift(hsv.hue, 180.0);
+            var rgb_ = HSV2RGB(hsv);
+            return ['#', Dec2Hex(rgb_.r), Dec2Hex(rgb_.g), Dec2Hex(rgb_.b)].join('');
         }
     };
     return util;

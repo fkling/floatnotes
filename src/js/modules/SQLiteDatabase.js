@@ -1,31 +1,118 @@
 //!#include "../header.js"
 "use strict";
 
+Cu['import']("resource://floatnotes/preferences.js");
+/*global Preferences:true*/
+
 var EXPORTED_SYMBOLS = ['FloatNotesSQLiteDatabase'];
 
+/**
+ * Provides low level methods to retrieve and store notes to a SQLite database.
+ *
+ * This is a singlton class, don't call the constructor, but
+ * `var db = SQLiteDatabase.getInstance();` to get a reference.
+ * 
+ * @param {?} file A file pointer to the SQLite database file
+ * @constructor
+ */
 function SQLiteDatabase(file) {
     this.setDatabase(file);
 }
 
 var FloatNotesSQLiteDatabase = SQLiteDatabase;
 
+// We only want one instance to exist
 Util.Js.addSingletonGetter(SQLiteDatabase);
 
+/**
+ * File pointer
+ * @type {?}
+ * @private
+ */
 SQLiteDatabase.prototype.file_ = null;
+
+
+/**
+ * Database connection
+ * @type {?}
+ * @private
+ */
 SQLiteDatabase.prototype.db_ = null;
 
 
+/**
+ * Sets the database file to use and opens a connection to the database.
+ *
+ * @param {?} File pointer to database file
+ */
 SQLiteDatabase.prototype.setDatabase = function(file) {
     if(!file) {
-        file =  Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
-        file.append('floatnotes.sqlite');
+        if(Preferences.dbLocation === 0 || !Preferences.dbDir) {
+            file = this.getDefaultStorageFile();
+        }
+        else {
+            file = Cc["@mozilla.org/file/local;1"]
+                .createInstance(Ci.nsILocalFile);
+            file.initWithPath(Preferences.dbDir);
+        }
     }
+    LOG(file.path);
     this.file_ = file;
     this.db_ = Cc["@mozilla.org/storage/service;1"].getService(Ci.mozIStorageService).openDatabase(this.file_);
+    this.createTables();
     LOG(file + ' loaded');
 };
 
 
+/**
+ * Moves the current database to a new location, indicated by file.
+ *
+ * @param {?} file The location to move the database file to
+ */
+SQLiteDatabase.prototype.moveTo = function(file) {
+    if(!this.file_.equals(file)) {
+        this.file_.moveTo(file.parent, file.leafName);
+        this.setDatabase(this.file_);
+    }
+};
+
+
+/**
+ * Merges the current database with the data in the other file.
+ *
+ * @param {?} file The location to move the database file to
+ */
+SQLiteDatabase.prototype.merge = function(file) {
+
+};
+
+
+/**
+ * Returns a reference to the file the current database is stored in.
+ *
+ * @return {?}
+ */
+SQLiteDatabase.prototype.getStorageFile = function() {
+    return this.file_;
+};
+
+
+/**
+ * Returns a file pointer to the default database location. This is a file with
+ * the name 'floatnotes.sqlite' in the Firefox profile folder.
+ *
+ * @return {?}
+ */
+SQLiteDatabase.prototype.getDefaultStorageFile = function() {
+    var file =  Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
+    file.append('floatnotes.sqlite');
+    return file;
+};
+
+
+/**
+ * Triggers the routines to create base database tables and indexes.
+ */
 SQLiteDatabase.prototype.createTables = function() {
     this.db_.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, protocol TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, creation_date DATETME, modification_date DATETIME)');
     this.db_.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
@@ -33,6 +120,10 @@ SQLiteDatabase.prototype.createTables = function() {
 };
 
 
+/**
+ * Discards existing tables and recreates them, effectivly deleting all exsting
+ * notes.
+ */
 SQLiteDatabase.prototype.clearTables = function() {
     this.db_.executeSimpleSQL('DROP TABLE IF EXISTS floatnotes');
     this.createTables();

@@ -1,3 +1,8 @@
+/*storage*/
+pref("extensions.floatnotes.dbLocation", 0);
+pref("extensions.floatnotes.dbDir", "");
+
+
 /* note properties */
 pref("extensions.floatnotes.width", 150);
 pref("extensions.floatnotes.height", 150);

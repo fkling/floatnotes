@@ -109,25 +109,21 @@
 		</preferences>
         <checkbox  label="&preferences.sync.enable;" preference="pref-sync" />
     </prefpane>
-    <script type="application/x-javascript">
-        <![CDATA[
 
-        function openHelp() {
-        var helpURL = document.getElementsByTagName("prefwindow")[0].currentPane.helpTopic;
-        openUILinkIn(helpURL, 'tab');
-        }
-    function enableHashUrls() {
-        var value = document.getElementById('location-enableHash').checked;
-        document.getElementById('location-includePageHash').disabled = !value;
-        var elements = document.querySelectorAll('.hash_url');
-        for(var i = elements.length; i--; ) {
-            if(elements[i].selected) {
-                elements[i].parentNode.selectedIndex = 0;
-            }
-            elements[i].disabled  = !value;
-        }
-    } 
-    enableHashUrls();
-    ]]>
-    </script>
+    <prefpane id="storage" label="&preferences.storage.title;" helpTopic="http://www.floatnotes.org/documentation/preferences">
+        <preferences>
+            <preference id="dbDir" name="extensions.floatnotes.dbDir" type="string" />
+            <preference id="dbLocation" name="extensions.floatnotes.dbLocation" type="int" />
+        </preferences>
+        <radiogroup id="saveWhere" preference="dbLocation" onsyncfrompreference="readDbLocation()" onsynctopreference="updateDb.call(this)">
+            <radio value="0" label="&preferences.storage.default_location;" />
+            <hbox>
+                <radio value="1" label="&preferences.storage.custom_location;" />
+                <filefield id="dbFileField" preference="dbDir" preference-editable="true" onsyncfrompreference="displayFilePref()"/>
+                <button id="chooseDir" label="&preferences.storage.choose;" oncommand="chooseFile()" />
+            </hbox>
+        </radiogroup>
+    </prefpane>
+
+	<script type="application/javascript" src="chrome://floatnotes/content/preferences.js" />
 </prefwindow>

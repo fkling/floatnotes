@@ -39,3 +39,6 @@ pref("extensions.floatnotes.showSiteNotSupported", true);
 /* meta data */
 pref("extensions.floatnotes.firstrun", true);
 pref("extensions.floatnotes.version", "0.0");
+
+/* Dropbox default path */
+pref("extensions.floatnotes.dropbox", "");

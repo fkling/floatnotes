@@ -36,4 +36,5 @@
 
 
 <!ENTITY preferences.sync.title "Sync" >
+<!ENTITY preferences.sync.dropbox "Path to dropbox folder" >
 <!ENTITY preferences.sync.enable "Enable synchronisation (requires Firefox Sync)" >

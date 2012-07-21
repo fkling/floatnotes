@@ -106,8 +106,11 @@
     <prefpane id="sync" label="&preferences.sync.title;" helpTopic="http://www.floatnotes.org/documentation/preferences">
         <preferences>
             <preference id="pref-sync" name="services.sync.engine.floatnotes" type="bool" />
+            <preference id="pref-dropbox" name="extensions.floatnotes.dropbox" type="string" />
 		</preferences>
         <checkbox  label="&preferences.sync.enable;" preference="pref-sync" />
+		<label value="&preferences.sync.dropbox;" style="padding-top:3px;" />
+		<textbox id="floatnotes-dropbox" size="50" maxlength="255" preference="pref-dropbox" />
     </prefpane>
     <script type="application/x-javascript">
         <![CDATA[

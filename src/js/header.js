@@ -69,4 +69,5 @@ var Util = (function() {
     return t;
 }());
 Cu.import("resource://floatnotes/Shared.js");
+Cu.import("resource://floatnotes/preferences.js");
 //!#endif

@@ -8,8 +8,15 @@ let DatabaseConnector = (function() {
     
     return function(database_file) {
     
-        var default_file = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);  
-        default_file.append("floatnotes.sqlite");
+		var default_file;
+
+		if (Preferences.dropbox) {
+			default_file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+			default_file.initWithPath(Preferences.dropbox);
+		} else {
+			default_file = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
+			default_file.append("floatnotes.sqlite");
+        }
 
         this.database_file = database_file || default_file;
         if(this.database_file in connections) {

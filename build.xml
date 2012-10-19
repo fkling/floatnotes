@@ -77,44 +77,6 @@
 		<sleep seconds="10" />
 	</target>
 
-    <target name="runtest"> 
-        <antcall target="build">
-             <param name="cpp.debug" value="1"/>
-             <param name="cpp.testrun" value="1"/>
-        </antcall>
-               
-        <antcall target="-lauch_debug_server"/>
-        
-		<prepare-cpp dest="tmp" src="${src.dir}/js"/>
-		
-		<mkdir dir="${test.dir}" />
-		<mkdir dir="${test.dir}/lib" />       
-		<apply executable="cpp" dest="${test.dir}/lib">
-			<fileset dir="tmp" />
-			<arg line="-P -C -DDEBUG" />
-			<srcfile />
-			<targetfile />
-			<identitymapper />
-		</apply>
-		
-		<delete dir="tmp"/>
-
-		<apply executable="cpp" dest="${test.dir}">
-			<fileset dir="tests" />
-			<arg line="-P -C -DDEBUG=1 -DTESTRUN=1" />
-			<srcfile />
-			<targetfile />
-			<mapper type="identity" />
-		</apply>
-
-		<!-- Updated the exec tag to use additional arguments -->
-		<exec executable="${browser}" failonerror="true">
-			<arg line="${browser.args}" />
-			<arg line="${test.dir}" />
-		</exec>
-
-	</target>
-
 	<target name="build" depends="-copy">
 		<property name="tmp.dir" value="tmp"/>	
 		<mkdir dir="${tmp.dir}" />
@@ -140,7 +102,6 @@
 		</exec>
 		<replaceregexp match="@DATE@" replace="${date}" file="${build.dir}/content/floatnotes.js" />
 		<replaceregexp match="@VERSION@" replace="${version}" file="${build.dir}/content/floatnotes.js" />
-		<delete dir="${tmp.dir}" />
 	</target>
 
 	<target name="debug">
@@ -153,6 +114,7 @@
 		<mkdir dir="${dist.dir}" />
 		<zip destfile="${dist.dir}/floatnotes-${version}.xpi" basedir="${build.dir}" excludes="**/.*" />
 		<delete dir="${build.dir}" />
+		<delete dir="${tmp.dir}" failonerror="false" />
 	</target>
 
     <target name="jslint">
@@ -165,7 +127,7 @@
 	<target name="clean">
 		<delete dir="${build.dir}" failonerror="false" />
 		<delete dir="${dist.dir}" failonerror="false" />
-		<delete dir="tmp" failonerror="false" />
+		<delete dir="${tmp.dir}" failonerror="false" />
 		<propertyfile file="mac.properties" comment="Server properties">
 			<entry key="debug_server.running" value="false" />
 		</propertyfile>

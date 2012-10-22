@@ -114,7 +114,7 @@ SQLiteDatabase.prototype.getDefaultStorageFile = function() {
  * Triggers the routines to create base database tables and indexes.
  */
 SQLiteDatabase.prototype.createTables = function() {
-    this.db_.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, protocol TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, creation_date DATETME, modification_date DATETIME)');
+    this.db_.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, protocol TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, creation_date DATETIME, modification_date DATETIME)');
     this.db_.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
     this.db_.executeSimpleSQL('CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)');
 };
@@ -226,7 +226,7 @@ SQLiteDatabase.prototype.createNoteAndGetId = function(note, callback) {
     var statement = this.db_.createStatement(sql);
     try {
         for (var param in statement.params) {
-            statement.params[param] = note[param];				
+            statement.params[param] = note[param].valueOf();
         }
         var that = this;
         statement.executeAsync({

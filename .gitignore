@@ -4,3 +4,5 @@
 .gitignore
 .externalToolBuilders
 *.swp
+_site/
+tmp/

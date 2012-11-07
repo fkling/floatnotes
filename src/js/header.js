@@ -73,4 +73,21 @@ var Util = (function() {
     return t;
 }());
 Cu['import']('resource://floatnotes/Shared.js');
+Cu['import']('resource://floatnotes/when.js'); /*global FloatNotesWhen*/
+var when = FloatNotesWhen;
+
+var sprintf = (function() {
+    "use strict";
+    var pattern = /%s/g;
+    
+    function sprintf(string) {
+        var replacements = [].slice.call(arguments, 1);
+        var counter = 0;
+        return string.replace(pattern, function() {
+            return replacements[counter++];
+        });
+    }
+    return sprintf;
+}());
+    
 //!#endif

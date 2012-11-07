@@ -1,10 +1,35 @@
 //!#include "../header.js"
+/*global LOG, Cu, Cc, Ci, Util, when, sprintf*/
 "use strict";
 
 Cu['import']("resource://floatnotes/preferences.js");
 /*global Preferences:true*/
 
 var EXPORTED_SYMBOLS = ['FloatNotesSQLiteDatabase'];
+
+// SQL statements
+var SELECT_NOTE = 'SELECT * FROM floatnotes WHERE guid = :guid';
+var SELECT_URLS = 'SELECT DISTINCT url FROM floatnotes ORDER BY url DESC';
+var SELECT_ALL = 'SELECT * FROM floatnotes ORDER BY content DESC';
+var SELECT_CONTAINS = 
+    'SELECT *, url || content AS uc FROM floatnotes WHERE %s ORDER BY content';
+var SELECT_FOR_URLS =
+    "SELECT * FROM floatnotes WHERE url = :url ORDER BY y ASC";
+var INSERT = 'INSERT INTO floatnotes (url,protocol,content,h,w,x,y,status,' +
+             'color,guid, modification_date, creation_date) VALUES ' +
+             '(:url,:protocol,:content,:h,:w,:x,:y,:status,:color,%s,' +
+             ':modification_date,:creation_date)';
+var UPDATE = 'UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, ' + 
+             'y=:y, status=:status, color=:color, url=:url, ' + 
+             'protocol=:protocol, modification_date=:modification_date ' + 
+             'WHERE guid = :guid';
+var DELETE = 'DELETE FROM floatnotes WHERE guid = :guid';
+var EXISTS = 'SELECT COUNT(*) as counter FROM floatnotes WHERE guid = :guid';
+
+// Statment constants
+var OK = 0;
+var ERROR = 1;
+var CANCELED = 2;
 
 /**
  * Provides low level methods to retrieve and store notes to a SQLite database.
@@ -58,7 +83,8 @@ SQLiteDatabase.prototype.setDatabase = function(file) {
     }
     LOG(file.path);
     this.file_ = file;
-    this.db_ = Cc["@mozilla.org/storage/service;1"].getService(Ci.mozIStorageService).openDatabase(this.file_);
+    this.db_ = Cc["@mozilla.org/storage/service;1"]
+        .getService(Ci.mozIStorageService).openDatabase(this.file_);
     this.createTables();
     LOG(file + ' loaded');
 };
@@ -104,7 +130,8 @@ SQLiteDatabase.prototype.getStorageFile = function() {
  * @return {?}
  */
 SQLiteDatabase.prototype.getDefaultStorageFile = function() {
-    var file =  Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
+    var file =  Cc["@mozilla.org/file/directory_service;1"]
+        .getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
     file.append('floatnotes.sqlite');
     return file;
 };
@@ -114,9 +141,17 @@ SQLiteDatabase.prototype.getDefaultStorageFile = function() {
  * Triggers the routines to create base database tables and indexes.
  */
 SQLiteDatabase.prototype.createTables = function() {
-    this.db_.executeSimpleSQL('CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, url TEXT, protocol TEXT, content TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, creation_date DATETIME, modification_date DATETIME)');
-    this.db_.executeSimpleSQL('CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)');
-    this.db_.executeSimpleSQL('CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)');
+    this.db_.executeSimpleSQL(
+        'CREATE TABLE IF NOT EXISTS floatnotes (id INTEGER PRIMARY KEY, ' + 
+        'url TEXT, protocol TEXT, content TEXT, x INTEGER, y INTEGER, ' + 
+        'w INTEGER, h INTEGER, color TEXT, status INTEGER, guid TEXT, ' + 
+        'creation_date DATETIME, modification_date DATETIME)');
+    this.db_.executeSimpleSQL(
+        'CREATE INDEX IF NOT EXISTS urls ON floatnotes (url)'
+    );
+    this.db_.executeSimpleSQL(
+        'CREATE INDEX IF NOT EXISTS guid ON floatnotes (guid)'
+    );
 };
 
 
@@ -130,225 +165,400 @@ SQLiteDatabase.prototype.clearTables = function() {
 };
 
 
-SQLiteDatabase.prototype.getURLs = function(callback) {
-    var statement = this.db_.createStatement("SELECT DISTINCT url FROM floatnotes ORDER BY url DESC");
+/**
+ * Retrieves a list of all URLs in the DB.
+ *
+ * @return {when.Promise}
+ */
+SQLiteDatabase.prototype.getURLs = function() {
+    var statement = this.db_.createStatement(SELECT_URLS);
     var urls = [];
+    var deferred = when.defer();
+
     statement.executeAsync({
         handleResult: function(aResultSet) {
-            for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+            for (var row = aResultSet.getNextRow(); 
+                 row; 
+                 row = aResultSet.getNextRow()) {
                 urls.push(row.getResultByName('url'));
             }
         },
-        handleCompletion: function() {
-            callback(urls);
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve(urls);
+            }
+            else {
+                deferred.reject(new Error('URLs could not be fetched'));
+            }
         }
     });
+
+    return deferred.promise;
 };
 
-SQLiteDatabase.prototype.getAllNotes = function(callback) {
-    var statement = this.db_.createStatement("SELECT * FROM floatnotes ORDER BY content DESC");
+
+/**
+ * Get all notes in the database.
+ *
+ * @return {when.Promise}
+ */
+SQLiteDatabase.prototype.getAllNotes = function() {
+    var statement = this.db_.createStatement(SELECT_ALL);
     var notes = [];
-    var that = this;
+    var self = this;
+    var deferred = when.defer();
+
     statement.executeAsync({
         handleResult: function(aResultSet) {
-            for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
-                notes.push(that.createNoteFromRow_(row));
+            for (var row = aResultSet.getNextRow();
+                 row;
+                 row = aResultSet.getNextRow()) {
+                notes.push(self.createNoteFromRow_(row));
             }
         },
-        handleCompletion: function() {
-            callback(notes);
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve(notes);
+            }
+            else {
+                deferred.reject(new Error('Could not retrieve notes'));
+            }
         }
     });
+
+    return deferred.promise;
 };
 
 
-SQLiteDatabase.prototype.getNotesContaining = function(wordList, runWhenFinished) {
-    var that = this;
+/**
+ * Gets all notes containing a words in `wordList`, either in the text or
+ * in the URL.
+ *
+ * @param {Array.<string>} word_list A list of words to search for
+ *
+ * @return {when.promise}
+ */
+SQLiteDatabase.prototype.getNotesContaining = function(word_list) {
+    var self = this;
     var ands = [];
-    for(var i = wordList.length; i--; ) {
+    for (var i = word_list.length; i--; ) {
         ands.push('uc LIKE :w' + i + " ESCAPE '~'");
     }
 
-    var statement = this.db_.createStatement("SELECT *, url || content AS uc FROM floatnotes WHERE " + ands.join(' AND ') + " ORDER BY content");
-    for (i = wordList.length; i--;) {
-        statement.params['w' + i] =  '%' + statement.escapeStringForLIKE(wordList[i], "~") + '%';
-        LOG('Include word: ' + statement.escapeStringForLIKE(wordList[i], "~"));
+    var statement = this.db_.createStatement(
+        sprintf(SELECT_CONTAINS, ands.join(' AND '))
+    );
+
+    for (i = word_list.length; i--;) {
+        statement.params['w' + i] =  
+            '%' + statement.escapeStringForLIKE(word_list[i], "~") + '%';
+        LOG(
+            sprintf(
+                'Include word: %s', 
+                statement.escapeStringForLIKE(word_list[i], "~")
+            )
+        );
     }
 
     var notes = [];
+    var deferred = when.defer();
+
     statement.executeAsync({
-        handleResult: function(aResultSet) {
-            for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
-                notes.push(that.createNoteFromRow_(row));
+        handleResult: function(result_set) {
+            for (var row = result_set.getNextRow(); 
+                 row; 
+                 row = result_set.getNextRow()) {
+                notes.push(self.createNoteFromRow_(row));
             }
         },
-        handleCompletion: function() {
-            runWhenFinished(notes);
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve(notes);
+            }
+            else {
+                deferred.reject(new Error('Could not load notes.'));
+            }
         }
     });
+
+    return deferred.promise;
 };
 
 
 
-SQLiteDatabase.prototype.getNotesForURLs = function(urls, callback) {
-    var statement = this.db_.createStatement("SELECT * FROM floatnotes WHERE url = :url ORDER BY y ASC"),
-        params = statement.newBindingParamsArray(),
-        notes = [];
-    var that = this;
+/**
+ * Retrieve all nodes for the list of URLs
+ *
+ * @param {Array.<string>} urls A list of URLs
+ *
+ * @return {when.Promise}
+ */
+SQLiteDatabase.prototype.getNotesForURLs = function(urls) {
+    var statement = this.db_.createStatement(SELECT_FOR_URLS);
+    var params = statement.newBindingParamsArray();
+    var notes = [];
+    var self = this;
+
     for (var i in urls) {
         var bp = params.newBindingParams();
         bp.bindByName('url', urls[i]);
-
         params.addParams(bp);
     }
     statement.bindParameters(params);
+
+    var deferred = when.defer();
     statement.executeAsync({
-        handleResult: function(aResultSet) {
-            for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
-                var data = that.createNoteFromRow_(row);
-                notes.push(data);
+        handleResult: function(result_set) {
+            for (var row = result_set.getNextRow();
+                 row;
+                 row = result_set.getNextRow()) {
+                notes.push(self.createNoteFromRow_(row));
             }
         },
-        handleCompletion: function() {
-            callback(notes);
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve(notes);
+            }
+            else {
+                deferred.reject(new Error('Could not load notes for URLs'));
+            }
         }
     });
+
+    return deferred.promise;
 };
 
 
-SQLiteDatabase.prototype.createNoteAndGetId = function(note, callback) {
-    var sql = "INSERT INTO floatnotes (url,protocol,content,h,w,x,y,status,color,guid, modification_date, creation_date) VALUES (:url,:protocol,:content,:h,:w,:x,:y,:status,:color,:guid, :modification_date, :creation_date)";
+/**
+ * Inserts either a newly created note or an existing, synchronized note.
+ *
+ * @param {Object} note Note data
+ * 
+ * @return {when.Promise}
+ */
+SQLiteDatabase.prototype.createNoteAndGetId = function(note) {
     LOG('Note has guid:' + note.guid);
-    if(typeof note.guid == "undefined") {
-        sql = sql.replace(':guid', 'hex(randomblob(16))');
-    }
+    var sql = sprintf(
+        INSERT, 
+        typeof note.guid === "undefined" ? ':guid' :  'hex(randomblob(16))'
+    );
     LOG('Generated statment: ' + sql);
     var statement = this.db_.createStatement(sql);
-    try {
-        for (var param in statement.params) {
-            statement.params[param] = note[param].valueOf();
-        }
-        var that = this;
-        statement.executeAsync({
-            handleCompletion: function(aReason) {
-                if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED) {
-                    return null;
-                }
+    var self = this;
+    var deferred = when.defer();
+    for (var param in statement.params) {
+        statement.params[param] = note[param].valueOf();
+    }
+    statement.executeAsync({
+        handleCompletion: function(reason) {
+            if (reason === OK) {
                 var guid = note.guid;
-                var id = that.db_.lastInsertRowID;
+                var id = self.db_.lastInsertRowID;
                 LOG('INSERTED ID: ' + id);
+                // if this is a new note, we have to fetch the auto-
+                // generated guid
                 if(!guid) {
-                    var statement = that.db_.createStatement("SELECT guid FROM floatnotes WHERE id = :id");
+                    var statement = self.db_.createStatement(
+                        "SELECT guid FROM floatnotes WHERE id = :id"
+                    );
                     statement.params.id = id;
                     statement.executeStep();
                     guid = statement.row.guid;
                 }
-                callback(id, guid);
+                deferred.resolve({id: id, guid: guid});
             }
-        });
-    }
-    finally {
-        statement.reset();
-    }
-};
-
-SQLiteDatabase.prototype.updateNote = function(note, callback) {
-    var statement = this.db_.createStatement("UPDATE floatnotes  SET content=:content, h=:h, w=:w, x=:x, y=:y, status=:status, color=:color, url=:url, protocol=:protocol, modification_date=:modification_date WHERE guid = :guid");
-    try {
-        for (var param in statement.params) {
-            statement.params[param] = note[param];
+            else {
+                deferred.reject('Could not insert note');
+            }
         }
-        var that = this;
-        statement.executeAsync({
-            handleCompletion: function(aReason) {
-                if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED) {
-                    return null;
-                }
-                callback();
-            }
-        });
-    }
-    finally {
-        statement.reset();
-    }
+    });
+
+    return deferred.Promise;
 };
 
-SQLiteDatabase.prototype.deleteNote = function(note_guid, callback) {
-    LOG('DB:DELETE note with GUID:' + note_guid);
-    var statement = this.db_.createStatement("DELETE FROM floatnotes WHERE guid = :guid");
-    try {
-        statement.params.guid = note_guid;
-        var that = this;
-        statement.executeAsync({
-            handleCompletion: function(aReason) {
-                if (aReason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED) {
-                    return null;
-                }
-                callback();
+
+/**
+ * Updates an exsting note in the DB
+ *
+ * @param {Object} note Note data
+ *
+ * @return {when.Promise}
+ */
+SQLiteDatabase.prototype.updateNote = function(note) {
+    var statement = this.db_.createStatement(UPDATE);
+    for (var param in statement.params) {
+        statement.params[param] = note[param];
+    }
+    var self = this;
+    var deferred = when.defer();
+    statement.executeAsync({
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve();
             }
-        });
-    }
-    finally {
-        statement.reset();
-    }
+            else {
+                deferred.reject('Could not upate note');
+            }
+        }
+    });
+
+    return deferred.Promise;
 };
 
+/**
+ * Deletes the note with the given ID.
+ *
+ * @param {string} guid
+ *
+ * @return {when.Promise} 
+ */
+SQLiteDatabase.prototype.deleteNote = function(guid) {
+    LOG('DB:DELETE note with GUID:' + guid);
+    var statement = this.db_.createStatement(DELETE);
+    statement.params.guid = guid;
+    
+    var self = this;
+    var deferred = when.defer();
+    statement.executeAsync({
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve();
+            }
+            else {
+                deferred.reject('Could not delete note.');
+            }
+        }
+    });
+
+    return deferred.promise;
+};
+
+
+/**
+ * Convenience function to execute a simple SQL statemnt.
+ *
+ * @param {string} statement A string containing an SQL statement
+ */
 SQLiteDatabase.prototype.executeSimpleSQL = function(statement) {
-    return this.db_.executeSimpleSQL(statement);
+    this.db_.executeSimpleSQL(statement);
 };
 
-SQLiteDatabase.prototype.noteExistsWithId = function(callback, note_guid) {
-    var statement = this.db_.createStatement("SELECT COUNT(*) as counter FROM floatnotes WHERE guid = :guid"),
+
+/**
+ * Tests whether a note with the provided ID exists.
+ *
+ * @param {string} guid
+ *
+ * @return {when.Promise}
+ */
+SQLiteDatabase.prototype.noteExistsWithId = function(guid) {
+    var statement = this.db_.createStatement(EXISTS),
         count = 0,
-        that = this;
-    statement.params.guid = note_guid;
+        self = this,
+        deferred = when.defer();
+    statement.params.guid = guid;
+
     statement.executeAsync({
-        handleResult: function(aResultSet) {
-            for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+        handleResult: function(result_set) {
+            for (var row = result_set.getNextRow(); 
+                 row; 
+                 row = result_set.getNextRow()) {
                 count = row.getResultByName('counter');
+                break;
             }
         },
-        handleCompletion: function() {
-            callback(count > 0);
+        handleCompletion: function(result) {
+            if (result === OK) {
+                deferred.resolve(count > 0);
+            }
+            else {
+                deferred.reject('Could not test existence.');
+            }
         }
-    });     
+    });
+
+    return deferred.promise;
 };
 
-SQLiteDatabase.prototype.getNote = function(callback, note_guid) {
-    LOG('Get note with GUID ' + note_guid);
-    var statement = this.db_.createStatement("SELECT * FROM floatnotes WHERE guid = :guid"),
-        note,
-        that = this;
-    statement.params.guid = note_guid;
+
+/**
+ * Gets the note with the given guid.
+ *
+ * @param {string} guid
+ *
+ * @return {when.Deferred}
+ */
+SQLiteDatabase.prototype.getNote = function(guid) {
+    LOG('Get note with GUID ' + guid);
+    var statement = this.db_.createStatement(SELECT_ALL);
+    statement.params.guid = guid;
+    var note;
+    var self = this;
+    var deferred = when.defer();
+
     statement.executeAsync({
-        handleResult: function(aResultSet) {
-            for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
-                note = that.createNoteFromRow_(row);
+        handleResult: function(results) {
+            for (var row = results.getNextRow(); 
+                 row; 
+                 row = results.getNextRow()) {
+                note = self.createNoteFromRow_(row);
             }
         },
-        handleCompletion: function() {
-            callback(note);
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve(note);
+            }
+            else {
+                deferred.reject('Could not load note.');
+            }
         }
     }); 
+
+    return deferred.promise;
 };
 
-SQLiteDatabase.prototype.getAllIds = function(callback) {
-    var statement = this.db_.createStatement("SELECT guid FROM floatnotes"),
-        ids = [],
-        that = this;
+
+/**
+ * Gets the IDs of all notes in the DB
+ *
+ * @return {when.Deferred}
+ */
+SQLiteDatabase.prototype.getAllIds = function() {
     LOG('Get all IDs');
+    var statement = this.db_.createStatement("SELECT guid FROM floatnotes");
+    var ids = [];
+    var self = this;
+    var deferred = when.defer();
+
     statement.executeAsync({
-        handleResult: function(aResultSet) {
-            for (var row = aResultSet.getNextRow(); row; row = aResultSet.getNextRow()) {
+        handleResult: function(results) {
+            for (var row = results.getNextRow(); 
+                 row; 
+                 row = results.getNextRow()) {
                 ids.push(row.getResultByName('guid')); 
             }
         },
-        handleCompletion: function() {
-            callback(ids);
+        handleCompletion: function(reason) {
+            if (reason === OK) {
+                deferred.resolve(ids);
+            }
+            else {
+                deferred.reject('Could not load IDs.');
+            }
         }
     }); 
+
+    return deferred.promise;
 };
 
+
+/**
+ * Creates a note object from the row.
+ *
+ * @param {Object} row
+ *
+ * @return {Object}
+ */
 SQLiteDatabase.prototype.createNoteFromRow_ = function(row) {
     var data = {
         x: row.getResultByName("x"),
@@ -362,14 +572,24 @@ SQLiteDatabase.prototype.createNoteFromRow_ = function(row) {
         status: row.getResultByName("status"),
         color: row.getResultByName("color"),
         guid: row.getResultByName('guid'),
-        modification_date: new Date((+row.getResultByName('modification_date'))/1000),
-        creation_date: new Date((+row.getResultByName('creation_date'))/1000)
+        modification_date: 
+            new Date((+row.getResultByName('modification_date'))/1000),
+        creation_date: 
+            new Date((+row.getResultByName('creation_date'))/1000)
     };
 
     return data;
 };
 
+
+/**
+ * Creates a backup of the DB by copying the DB file.
+ */
 SQLiteDatabase.prototype.backup = function() {
-    var new_name = this.database_file.leafName + '.' + (new Date()).getTime() + '.bak';
+    var new_name = sprintf(
+        '%s.%s.bak', 
+        this.database_file.leafName, 
+        (new Date()).getTime()
+    );
     this.database_file.copyTo(null, new_name);
 };

@@ -82,13 +82,15 @@
 		<mkdir dir="${tmp.dir}" />
 		<prepare-cpp dest="${tmp.dir}" src="${src.dir}/js"/>
 		
-		<apply executable="cpp" dest="${build.dir}/content">
-			<fileset dir="${tmp.dir}" />
-            <arg line="-P -C -DDEBUG=${cpp.debug} -DTESTRUN=${cpp.testrun}" />
-            <srcfile />
-			<targetfile />
-			<globmapper from="main.js" to="floatnotes.js" />
-            </apply>
+		<apply executable="cpp" dir="${tmp.dir}">
+      <fileset file="${tmp.dir}/main.js" />
+      <arg value="-P" /> 
+      <arg value="-C" />
+      <arg value="-DDEBUG=${cpp.debug}" />
+      <arg value="-DTESTRUN=${cpp.testrun}" />
+      <srcfile />
+      <arg value="${build.dir}/content/floatnotes.js" />
+    </apply>
         <apply executable="cpp" dest="${build.dir}/modules">
             <fileset dir="${tmp.dir}/modules" />
             <arg line="-P -C -DDEBUG=${cpp.debug} -DTESTRUN=${cpp.testrun}" />

@@ -10,6 +10,9 @@ var logger = {
         "use strict";
         this._consoleService = Cc['@mozilla.org/consoleservice;1'].getService(Ci.nsIConsoleService);
         this.log = function(msg) {
+            if (typeof msg === 'object') {
+                msg = JSON.stringify(msg);
+            }
             this._consoleService.logStringMessage('FloatNotes: ' + msg);
         };
         this.log(msg);

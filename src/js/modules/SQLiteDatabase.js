@@ -420,8 +420,7 @@ SQLiteDatabase.prototype.deleteNote = function(guid) {
     LOG('DB:DELETE note with GUID:' + guid);
     var statement = this.db_.createStatement(DELETE);
     statement.params.guid = guid;
-    
-    var self = this;
+
     var deferred = when.defer();
     statement.executeAsync({
         handleCompletion: function(reason) {
@@ -458,14 +457,13 @@ SQLiteDatabase.prototype.executeSimpleSQL = function(statement) {
 SQLiteDatabase.prototype.noteExistsWithId = function(guid) {
     var statement = this.db_.createStatement(EXISTS),
         count = 0,
-        self = this,
         deferred = when.defer();
     statement.params.guid = guid;
 
     statement.executeAsync({
         handleResult: function(result_set) {
-            for (var row = result_set.getNextRow(); 
-                 row; 
+            for (var row = result_set.getNextRow();
+                 row;
                  row = result_set.getNextRow()) {
                 count = row.getResultByName('counter');
                 break;
@@ -503,7 +501,7 @@ SQLiteDatabase.prototype.getNote = function(guid) {
     statement.executeAsync({
         handleResult: function(results) {
             for (var row = results.getNextRow();
-                 row; 
+                 row;
                  row = results.getNextRow()) {
                 note = self.createNoteFromRow_(row);
             }
@@ -516,7 +514,7 @@ SQLiteDatabase.prototype.getNote = function(guid) {
                 deferred.reject('Could not load note.');
             }
         }
-    }); 
+    });
 
     return deferred.promise;
 };
@@ -531,15 +529,14 @@ SQLiteDatabase.prototype.getAllIds = function() {
     LOG('Get all IDs');
     var statement = this.db_.createStatement("SELECT guid FROM floatnotes");
     var ids = [];
-    var self = this;
     var deferred = when.defer();
 
     statement.executeAsync({
         handleResult: function(results) {
-            for (var row = results.getNextRow(); 
-                 row; 
+            for (var row = results.getNextRow();
+                 row;
                  row = results.getNextRow()) {
-                ids.push(row.getResultByName('guid')); 
+                ids.push(row.getResultByName('guid'));
             }
         },
         handleCompletion: function(reason) {
@@ -550,7 +547,7 @@ SQLiteDatabase.prototype.getAllIds = function() {
                 deferred.reject('Could not load IDs.');
             }
         }
-    }); 
+    });
 
     return deferred.promise;
 };
@@ -576,9 +573,9 @@ SQLiteDatabase.prototype.createNoteFromRow_ = function(row) {
         status: row.getResultByName("status"),
         color: row.getResultByName("color"),
         guid: row.getResultByName('guid'),
-        modification_date: 
+        modification_date:
             new Date((+row.getResultByName('modification_date'))/1000),
-        creation_date: 
+        creation_date:
             new Date((+row.getResultByName('creation_date'))/1000)
     };
 
@@ -591,8 +588,8 @@ SQLiteDatabase.prototype.createNoteFromRow_ = function(row) {
  */
 SQLiteDatabase.prototype.backup = function() {
     var new_name = sprintf(
-        '%s.%s.bak', 
-        this.database_file.leafName, 
+        '%s.%s.bak',
+        this.database_file.leafName,
         (new Date()).getTime()
     );
     this.database_file.copyTo(null, new_name);

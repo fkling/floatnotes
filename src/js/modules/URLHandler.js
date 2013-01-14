@@ -1,236 +1,102 @@
+"use strict";
 //!#include "../header.js"
-const EXPORTED_SYMBOLS = ['URLParser', 'URLHandler'];
+/*global Cu*/
 
-Cu.import("resource://floatnotes/preferences.js");
+var EXPORTED_SYMBOLS = ['FloatNotesURLHandler'];
+
+Cu['import']("resource://floatnotes/URLParser.js");
+Cu['import']("resource://floatnotes/HTTPURLParser.js");
+Cu['import']("resource://floatnotes/FileURLParser.js");
+/*global FloatNotesURLParser, FloatNotesHTTPURLParser, FloatNotesFileURLParser*/
 
 var internal_protocols = {
-    'about:': true,
-    'chrome:': true,
-    'resource:': true
+  'about:': true,
+  'chrome:': true,
+  'resource:': true
+};
+
+
+var FloatNotesURLHandler = {
+  _parsers: {},
+
+  _isProtocolSupported: function(location) {
+    return (typeof this._parsers[location.protocol] !== 'undefined');
+  },
+
+  register: function(protocol, parser) {
+    if (protocol instanceof Array) {
+      for(var i = protocol.length;i--;) {
+        this._parsers[protocol[i]] = parser;
+      }
+    }
+    else {
+      this._parsers[protocol] = parser;
+    }
+  },
+
+  supports: function(location) {
+    return (location.protocol in this._parsers) ?
+      this._parsers[location.protocol].supports(location) :
+      false;
+  },
+
+  getNoteUrl: function(note) {
+    var url = note.url;
+    var i = url.indexOf(':');
+    if (i >= 0 && url.substring(0, i+1) in this._parsers) {
+      return url;
+    }
+    else {
+      return note.protocol + '//' + url;
+    }
+  },
+
+  isInternal: function(location) {
+    return (location.protocol in internal_protocols);
+  }
+};
+
+for(var method in FloatNotesURLParser.prototype) {
+  if (
+    FloatNotesURLParser.prototype.hasOwnProperty(method) &&
+    method !== 'constructor'
+  ) {
+    FloatNotesURLHandler[method] = (function(method) {
+      return function(location) {
+        if (this._isProtocolSupported(location)) {
+          var parser =  this._parsers[location.protocol];
+          return parser[method].call(parser, location);
+        }
+        return false;
+      };
+    }(method));
+  }
 }
 
-let URLParser = {
-    getProtocol: function(location) {
-        return location.protocol ? location.protocol : '';
-    },
-    getAllSitesUrl: function(location) {
-        return '*';
-    },
-    getPageUrl: function(location) {
-        return '';
-    },
-    getPageQueryUrl: function(location) {
-        return '';  
-    },
-    getPageAnchorUrl: function(location) {
-        return '';
-    },
-    getPageQueryAnchorUrl: function(location) {
-        return '';
-    },
-    getSiteUrl: function(location) {
-        return '';
-    },
-    getStartsWithUrls: function(location) {
-        return [];
-    },
-    getDefaultUrl: function(location) {
-        var def = Preferences.location;
-        var url = '';
-        switch(def) {
-           case  URLHandler.PAGE_QUERY_ANCHOR_URL:
-               url = this.getPageQueryAnchorUrl(location);
-                if(url) {
-                    break;
-                }
-           case  URLHandler.PAGE_ANCHOR_URL:
-               url = this.getPageAnchorUrl(location);
-                if(url) {
-                    break;
-                }
-           case URLHandler.PAGE_QUERY_URL:
-               url = this.getPageQueryUrl(location);
-                if(url) {
-                    break; 
-                }
-           case URLHandler.PAGE_URL:
-               url = this.getPageUrl(location);
-                break;
-           case URLHandler.PAGE_WILDCARD_URL:
-               var urls = this.getStartsWithUrls(location);
-                url = urls[urls.length - 1];
-                break;
-           case URLHandler.SITE_URL:
-                url = this.getSiteUrl(location);
-                break;
-           default:
-               url = this.getPageUrl(location);
-        }
-        if(!url) {
-           url = this.getPageUrl(location);
-        }
-        return url;
-    },
-    getSearchUrls: function(location) {
-        return [];
-    },
-    supports: function(location) {
-        return true;
-    }
-};
-
-let URLHandler = {
-    PAGE_URL: -2,
-    PAGE_QUERY_URL: -1,
-    PAGE_ANCHOR_URL: -5,
-    PAGE_QUERY_ANCHOR_URL: -4,
-    PAGE_WILDCARD_URL: -3,
-    SITE_URL: 0,
-    _parsers: {},
-    _isProtocolSupported: function(location) {
-        return (typeof this._parsers[location.protocol] != 'undefined');
-    },
-    register: function(protocol, parser) {
-        if(protocol instanceof Array) {
-            for(var i = protocol.length;i--;) {
-                this._parsers[protocol[i]] = parser;
-            }
-        }
-        else {
-            this._parsers[protocol] = parser;
-        }
-    },
-
-    supports: function(location) {
-        return (location.protocol in this._parsers) ? this._parsers[location.protocol].supports(location) : false;
-    },
-
-    getNoteUrl: function(note) {
-        var url = note.url,
-            i = url.indexOf(':');
-        if(i >= 0 && url.substring(0, i+1) in this._parsers) {
-            return url;
-        }
-        else {
-            return note.protocol + '//' + url;
-        }
-    },
-    isInternal: function(location) {
-        return (location.protocol in internal_protocols);
-    }
-};
-
-for(var method in URLParser) {
-    if(URLParser.hasOwnProperty(method)) {
-        URLHandler[method] = (function(method) {
-             return function(location) {
-                if(this._isProtocolSupported(location)) {
-                    var parser =  this._parsers[location.protocol];
-                    return parser[method].call(parser, location);
-                }
-                return false;
-             };
-        }(method));
-    }
-}
-
-let HTTPURLParser = {
-    __proto__: URLParser,
-    getPageUrl: function(location) {
-        var pathname =  location.pathname;
-        if(pathname.charAt(pathname.length-1) == '/') {
-            pathname = pathname.substring(0, pathname.length-1);
-        }
-        return location.host + pathname;
-    },
-    getPageQueryUrl: function(location) {
-        if(location.search) {
-            return location.host + location.pathname + location.search;
-        }
-        return '';
-    },
-    getPageAnchorUrl: function(location, force) {
-        if(location.hash && (force || Preferences.updateOnHashChange)) {
-            return location.host + location.pathname + location.hash;
-        }
-        return '';
-    },
-    getPageQueryAnchorUrl: function(location, force) {
-        if(location.hash && location.search && (force || Preferences.updateOnHashChange)) {
-            return location.host + location.pathname + location.search + location.hash;
-        }
-        return '';
-    },
-    getSiteUrl: function(location) {
-        return location.host + '*'; 
-    },
-    getStartsWithUrls: function(location) {
-        var urls = [];
-        var parts = location.pathname.split('/');
-        parts.shift();
-        var path = location.host;
-        if(parts[parts.length-1] === '') {
-            parts.pop();
-        }
-        for (var i = 0, length = parts.length; i < length; ++i) {
-            path += '/' + parts[i];
-            urls.push(path + '*');
-        }
-        return urls;
-    },
-    getSearchUrls: function(location) {
-        var urls = this.getStartsWithUrls(location);
-        urls.push(this.getAllSitesUrl(location));
-        urls.push(this.getSiteUrl(location));
-        var includePageUrl = !location.hash || !Preferences.updateOnHashChange || Preferences.includePageForHashURLs;
-        if(includePageUrl) {
-            urls.push(this.getPageUrl(location));
-        }
-        if(location.search && includePageUrl) {
-            urls.push(this.getPageQueryUrl(location));
-        }
-        if(location.hash) {
-            urls.push(this.getPageAnchorUrl(location, true));
-            urls.push(this.getPageQueryAnchorUrl(location, true));
-        }
-        return urls;
-    }
-};
-
-let FileURLParser = {
-    __proto__: URLParser,
-    getPageUrl: function(location) {
-        return location.toString();
-    },
-    getStartsWithUrls: function(location) {
-        var url = location.toString();
-        url = url.substring(0, url.lastIndexOf('/')) + '*';
-        return [url];
-    },
-    getAllSitesUrl: function(location) {
-        return '';
-    },
-    getSearchUrls: function(location) {
-        return this.getStartsWithUrls(location).concat([this.getPageUrl(location)]);
-    }
-};
 
 /* For Firefox 4 */
-
+/*
 let AboutURLParser = {
-    __proto__: URLParser,
-    getPageUrl: function(location) {
-        return location.toString();
-    },
-    getSearchUrls: function(location) {
-        return [this.getPageUrl(location)];
-    },
-    supports: function(location) {
-        return location.href === 'about:home';
-    }
+__proto__: URLParser,
+           getPageUrl: function(location) {
+             return location.toString();
+           },
+getSearchUrls: function(location) {
+                 return [this.getPageUrl(location)];
+               },
+supports: function(location) {
+            return location.href === 'about:home';
+          }
 };
+*/
 
-
-URLHandler.register(['http:', 'https:'], HTTPURLParser);
-URLHandler.register('file:', FileURLParser);
-URLHandler.register('about:', AboutURLParser);
+FloatNotesURLHandler.register(
+  ['http:', 'https:'],
+  new FloatNotesHTTPURLParser()
+);
+FloatNotesURLHandler.register(
+  'file:',
+  new FloatNotesFileURLParser()
+);
+// TODO: Properly implement about handler
+//URLHandler.register('about:', AboutURLParser);

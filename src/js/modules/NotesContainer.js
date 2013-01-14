@@ -1,114 +1,192 @@
 //!#include "../header.js"
+/*global LOG, Util*/
+
 "use strict";
 
 var EXPORTED_SYMBOLS = ["FloatNotesNotesContainer"];
 
-function NotesContainer() {
-    this.notes_ = {};
-    this.currentNotes_ = {};
+function NotesContainer(note_UI_factory) {
+  this._noteUIFactory = note_UI_factory;
+  this._notes = {};
+  this._currentNotes = [];
 }
+
+NotesContainer.createInstance = function() {
+  throw new Error('Implement this method');
+};
 
 var FloatNotesNotesContainer = NotesContainer;
 
-NotesContainer.prototype.notes_ = null;
-NotesContainer.prototype.currentNotes_ = null;
-NotesContainer.prototype.currentNotesLength_ = 0;
-NotesContainer.prototype.newNote_ = null;
+NotesContainer.prototype._notes = null;
+NotesContainer.prototype._currentNotes = [];
+NotesContainer.prototype._newNote = null;
+
+NotesContainer.prototype.setMainUI = function(mainUI) {
+  this._mainUI = mainUI;
+};
 
 NotesContainer.prototype.getLength = function() {
-    return this.currentNotesLength_;
+  return this._currentNotes.length;
 };
 
-NotesContainer.prototype.setMainUI = function(main) {
-    this.mainUI_ = main;
+NotesContainer.prototype._createNoteInstance = function(note_data) {
+  return this._noteUIFactory.createInstance(
+    note_data,
+    this,
+    this._mainUI.getCurrentDocument()
+  );
 };
 
-NotesContainer.prototype.createNote = function(noteData) {
-    this.newNote_ = new this.noteUICls_(noteData, this.mainUI_);
-    this.newNote_.attachTo(this.mainUI_.getCurrentDocument(), this.getContainer_());
-    this.newNote_.raiseToTop();
-    this.newNote_.startEdit();
+/**
+ * Creates a new note and attaches it to the document. The note is not insterted
+ * into the DB yet.
+ *
+ * @param {Object} note_data Initial note data
+ */
+NotesContainer.prototype.addNewNote = function(note_data) {
+  this._newNote = this._createNoteInstance(note_data);
+  this._newNote.attachTo(
+    this._getContainer()
+  );
+  this._newNote.raiseToTop();
+  this._newNote.startEdit();
 };
 
-NotesContainer.prototype.addNote = function(noteData) {
-    var guid = noteData.guid,
-        note = this.notes_[guid];
-    if(!note) {
-        this.notes_[guid] = note = new this.noteUICls_(noteData, this.mainUI_);
+
+/**
+ * Creates an UI for an existing note and adds it to the current document.
+ *
+ * @param {Object} note_data Note data
+ */
+NotesContainer.prototype.addNote = function(note_data) {
+  LOG('Adding note' + JSON.stringify(note_data));
+  var note = this._createNoteInstance(note_data);
+  note.attachTo(this._getContainer());
+  this._currentNotes.push(note);
+  this._notes[note.getRef()] = note;
+};
+
+
+/**
+ * Adds the given notes to the current document.
+ *
+ * @param {Object} notes_data Object of note data
+ */
+NotesContainer.prototype.addNotes = function(notes_data) {
+  for (var guid in notes_data) {
+    this.addNote(notes_data[guid]);
+  }
+};
+
+
+/**
+ * Sets the notes to be shown in the current document.
+ *
+ * If the document is not newely loaded (this method might be called on tab
+ * activation, etc), it may be that the document already contains some notes.
+ * In that case, existing notes can be reused (and get updated) and those
+ * existing in the document but missing in the provided set must be removed.
+ *
+ * @param {Object} notes_data Object of note data
+ */
+NotesContainer.prototype.setNotes = function(notes_data) {
+  var current_notes =
+    this._getNotesForDocument(this._mainUI.getCurrentDocument());
+  var to_update = {};
+  var to_add = {};
+  this._currentNotes = [];
+
+  // See which notes to update and which to add. The leftover notes must
+  // be removed.
+  for(var guid in notes_data) {
+    var note = notes_data[guid];
+
+    // Note exists, reuse note instance and update content, position, etc.
+    if (guid in current_notes) {
+      to_update[guid] = note;
+      this._currentNotes.push(current_notes[guid]);
+      // remove reference to only leave notes that should to be removed
+      delete current_notes[guid];
     }
-    note.attachTo(this.mainUI_.getCurrentDocument(), this.getContainer_());
-    if(!(guid in this.currentNotes_)) {
-        this.currentNotes_[guid] = note;
-        this.currentNotesLength_ += 1;
+    else { // new note, add to document
+      to_add[guid] = note;
     }
+  }
+
+  // Remaining notes must be removed
+  var to_remove = current_notes;
+
+  this.updateNotes(to_update);
+  this.addNotes(to_add);
+  this.detachNotes(to_remove);
 };
 
-NotesContainer.prototype.addNotes = function(noteDataArray) {
-    for(var i = noteDataArray.length; i--; ) {
-        this.addNote(noteDataArray[i]);
-    }
+
+/**
+ * @param {Object} notes_data
+ */
+NotesContainer.prototype.updateNotes = function(notes_data){
+  for (var i = 0, l = this._currentNotes.length; i < l; i++) {
+    var note = this._currentNotes[i];
+    note.update(notes_data[note.getGuid()]);
+  }
 };
 
-NotesContainer.prototype.setNotes = function(noteDataArray) {
-    LOG('notes to be added: ' + noteDataArray.map(function(n){ return n.guid; }).join(','));
-    var gids = {};
-    for(var i = noteDataArray.length; i--;) {
-        gids[noteDataArray[i].guid] = true;
+
+/**
+ * @param {Object} notes_data Notes to be removed. If not provided, all current
+ * notes are removed
+ */
+NotesContainer.prototype.detachNotes = function(notes_data){
+  if (!notes_data) { // remove all notes of the current document
+    for (var i = 0, l = this._currentNotes; i < l; i++) {
+      var note = this._currentNotes[i];
+      note.detach();
+      delete this._notes[note.getRef()];
     }
-    for(var id in this.currentNotes_) {
-        var note = this.currentNotes_[id];
-        if(this.currentNotes_.hasOwnProperty(id) && !(note.getGuid() in gids)) {
-            this.detachNote(note.getGuid());
-        }
+  }
+  else {
+    for (var guid in notes_data) {
+      this.detachNote(guid);
     }
-    this.addNotes(noteDataArray);
+  }
 };
 
-NotesContainer.prototype.updateNote = function(guid){
-    if(guid in this.currentNotes_) {
-        this.currentNotes_[guid].redraw();
-    }
-
-};
-
-NotesContainer.prototype.detachNote = function(guid){
-    var note = this.currentNotes_[guid];
-    if(note) {
-        note.detach(this.mainUI_.getCurrentDocument());
-        this.currentNotesLength_--;
-        delete this.currentNotes_[guid];
-    }
-
-};
-
-NotesContainer.prototype.detachNotes = function(noteDataArray){
-    for(var i = noteDataArray.length; i--;) {
-        this.detachNote(noteDataArray[i].guid);
-    } 
-};
-
-NotesContainer.prototype.removeNote = function(guid){
-    if(guid in this.notes_) {
-        this.notes_[guid].detach();
-        delete this.notes_[guid];
-
-        if(guid in this.currentNotes_) {
-            this.currentNotesLength_--;
-            delete this.currentNotes_[guid];
-        }
-    }
-
+/**
+ * @param {string} guid Note to be removed
+ */
+NotesContainer.prototype.detachNote = function(guid) {
+  LOG('Detach note' + guid);
+  var ref = this._getRefFor(guid);
+  LOG(ref);
+  this._notes[ref].detach();
+  delete this._notes[ref];
 };
 
 NotesContainer.prototype.persistNewNote = function(guid) {
-    AT(this.newNote_ && guid, "New note exists and has GUID");
-    AT(this.newNote_.getGuid() === guid, "GUIDs match");
-    this.notes_[guid] = this.currentNotes_[guid] = this.newNote_;
-    this.currentNotesLength_++;
-    this.newNote_ = null;
+  this._newNote.setGuid(guid);
+  this._notes[this._newNote.getRef()] = this._newNote;
+  this._currentNotes.push(this._newNote);
+  this._newNote = null;
 };
 
-NotesContainer.prototype.updateUI = function() {};
-NotesContainer.prototype.showNotes = function() {};
-NotesContainer.prototype.hideNotes = function() {};
-NotesContainer.prototype.focusNote = function() {};
+NotesContainer.prototype.saveNote = function(note_data) {
+  return this._mainUI.saveNote(note_data).then(function(result) {
+    if (result['new']) {
+      this.persistNewNote(result.noteData.guid);
+    }
+    return result;
+  }.bind(this));
+};
+
+NotesContainer.prototype.deleteNote = function(guid) {
+  return this._mainUI.deleteNote(guid).then(function() {
+    this.detachNote(guid);
+  }.bind(this));
+};
+
+NotesContainer.prototype.update = Util.Js.empty;
+NotesContainer.prototype.showNotes = Util.Js.empty;
+NotesContainer.prototype.hideNotes = Util.Js.empty;
+NotesContainer.prototype.focusNote = Util.Js.empty;
+NotesContainer.prototype.getNotesForDocument_ = Util.Js.empty;

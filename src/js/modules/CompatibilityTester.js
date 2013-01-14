@@ -3,9 +3,9 @@
 //!#include "../header.js"
 /*global Cu, Util, when*/
 Cu['import']('resource://floatnotes/URLHandler.js');
-/*global URLHandler*/
+/*global FloatNotesURLHandler*/
 
-var EXPORTED_SYMBOLS = ['FloatNotesCompatibiltyTester'];
+var EXPORTED_SYMBOLS = ['FloatNotesCompatibilityTester'];
 
 // Tests whether the page is composed of frames. Frames mess everything up.
 function has_no_frameset(document) {
@@ -13,7 +13,7 @@ function has_no_frameset(document) {
 }
 
 function is_domain_supported(document) {
-  return URLHandler.supports(document.location);
+  return FloatNotesURLHandler.supports(document.location);
 }
 
 var tests = [
@@ -21,7 +21,7 @@ var tests = [
     func: is_domain_supported,
     msg: function(document) {
       // Don't provide a message if the URL is internal to Firfox (annoying).
-      if (URLHandler.isInternal(document.location)) {
+      if (FloatNotesURLHandler.isInternal(document.location)) {
         return Util.Locale.get(
           'location.protocol_not_supported',
           [document.location.protocol]
@@ -49,7 +49,7 @@ var FloatNotesCompatibilityTester = {
       }
     }
 
-    if (msg !== null) {
+    if (msg === null) {
       deferred.resolve();
     }
     else {

@@ -1,5 +1,5 @@
 //!#include "../header.js"
-/*jshint es5:true*/
+/*global LOG, Cu*/
 "use strict";
 LOG('Sync loading...');
 var EXPORTED_SYMBOLS = [];
@@ -12,14 +12,21 @@ try {
 
     Cu['import']("resource://floatnotes/SQLiteDatabase.js");
     Cu['import']("resource://floatnotes/manager.js");
-    /*global FloatNotesSQLiteDatabase:true, FloatNotesManager:true, Utils:true, CryptoWrapper:true, Store:true, Tracker:true, Weave:true*/
+    /*global FloatNotesSQLiteDatabase, FloatNotesManager, Utils, CryptoWrapper,
+             Store, Tracker, Weave*/
     
     // These methods moved to `async.js`
     if(Utils.makeSyncCallback) {
         var Async = Utils;
     }
     else {
-        Cu['import']("resource://services-sync/async.js");
+        try {
+          Cu['import']("resource://services-common/async.js");
+        }
+        catch(e) {
+          // If not found, try old location
+          Cu['import']("resource://services-sync/async.js");
+        }
     }
     
 
@@ -30,11 +37,12 @@ try {
     var registered = false;
     var observe = true;
 
-    var fields = ['guid', 'x', 'y', 'w', 'h', 'url', 'protocol', 'content', 'color', 'status', 'modification_date', 'creation_date'];
+    var fields = ['guid', 'x', 'y', 'w', 'h', 'url', 'protocol', 'content',
+      'color', 'status', 'modification_date', 'creation_date'];
 
     function NoteRecord(URI, data) {
         CryptoWrapper.call(this, URI);
-        if(typeof data != "undefined") {
+        if (typeof data !== "undefined") {
             for(var property in data) {
                 if(data.hasOwnProperty(property)) {
                     this[property] = data[property];
@@ -227,5 +235,5 @@ try {
     }
 }
 catch(e) {
-    LOG(e);
+  Cu.reportError(e);
 }

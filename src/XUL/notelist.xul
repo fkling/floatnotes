@@ -17,7 +17,8 @@
     </commandset>
 
     <keyset>
-        <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel" />
+        <key id="key_closeWindow" key="w" command="cmd_closeWindow" 
+              modifiers="accel" />
     </keyset>
 
     <broadcasterset>
@@ -26,13 +27,24 @@
     </broadcasterset>
 
     <vbox>
-        <listbox id="searches" flex="1" onselect="searchManager.updateButtons(); search();" ondragstart="dragHandler.dragStart(event)"
-            ondragover="dragHandler.dragOver(event)"
-            ondragleave="dragHandler.dragLeave(event)"
-            ondrop="dragHandler.onDrop(event);"/>
+        <listbox id="searches" flex="1" 
+          onselect="SearchManager.updateButtons(); search();"
+          ondragstart="dragHandler.dragStart(event)"
+          ondragover="dragHandler.dragOver(event)"
+          ondragleave="dragHandler.dragLeave(event)"
+          ondrop="dragHandler.onDrop(event);"
+        />
         <hbox>
-            <button observes="searchListButtons" label="&button.edit;" oncommand="openEditDiag()" />
-            <button observes="searchListButtons" label="&button.remove;" oncommand="deleteSearch()" />
+            <button 
+              observes="searchListButtons" 
+              label="&button.edit;" 
+              oncommand="SearchManager.openEditDialog()"
+            />
+            <button 
+              observes="searchListButtons" 
+              label="&button.remove;" 
+              oncommand="SearchManager.deleteSelectedSearch()"
+            />
         </hbox>
     </vbox>
     <splitter collapse="before">
@@ -40,17 +52,52 @@
     </splitter>
     <vbox flex="3">
         <hbox pack="end" align="center">
-            <textbox flex="1" type="search" id="search" oncommand="search()" emptytext="&searchtext;"/>
-            <button style="display:none;" class="small" id='saveSearch' label="&button.save;" oncommand="saveSearch();"/>
+            <textbox 
+              flex="1" 
+              type="search" 
+              id="search" 
+              oncommand="search()" 
+              emptytext="&searchtext;"
+            />
+            <button 
+              style="display:none;" 
+              class="small" 
+              id='saveSearch'
+              label="&button.save;" 
+              oncommand="SearchManager.saveSearch();"
+            />
         </hbox>
-        <description id="searchMsg" style="font-size:0.9em;color:gray;font-style:italic;display:none;" />
+        <description 
+          id="searchMsg" 
+          style="font-size:0.9em;color:gray;font-style:italic;display:none;"
+        />
         <vbox flex="1">
-            <tree id="notes" flex="2" onselect="treeView.selectionChanged()" hidecolumnpicker="false" persist="sortDirection sortResource" sortDirection="ascending" sortResource="content">
-                <treecols>  
-                    <treecol id="content" label="&list.title;" flex="1" onclick="sort(this)" persist="width hidden"/>
-                    <splitter class="tree-splitter" />
-                    <treecol id="url" label="&list.url;" flex="1" onclick="sort(this)" persist="width hidden"/>
-                    <splitter class="tree-splitter" />
+            <tree 
+              id="notes" 
+              flex="2" 
+              onselect="treeView.selectionChanged()" 
+              hidecolumnpicker="false" 
+              persist="sortDirection sortResource" 
+              sortDirection="ascending" 
+              sortResource="content"
+            >
+              <treecols>  
+                <treecol 
+                  id="content" 
+                  label="&list.title;" 
+                  flex="1" 
+                  onclick="sort(this)" 
+                  persist="width hidden"
+                />
+                <splitter class="tree-splitter" />
+                <treecol 
+                  id="url" 
+                  label="&list.url;" 
+                  flex="1" 
+                  onclick="sort(this)" 
+                  persist="width hidden"
+                />
+                <splitter class="tree-splitter" />
                     <treecol id="creation_date" label="&list.created;" flex="1" onclick="sort(this)" persist="width hidden"/>
                     <splitter class="tree-splitter" />
                     <treecol id="modification_date" label="&list.modified;" flex="1" onclick="sort(this)" persist="width hidden"/>

@@ -20,6 +20,7 @@ var searchList = document.getElementById('searches');
 var tree = document.getElementById('notes');
 
 // Global vars
+var pref = Preferences;
 var doObserve = true;
 
 function saveData() {
@@ -119,21 +120,120 @@ var dragHandler = {
     }
 };
 
-function openEditDiag() {
-    var item = searchList.selectedItem;
-    if(item && searchList.selectedIndex > 0) {
-        window.openDialog("chrome://floatnotes/content/editSearch.xul", "Edit Search", "modal", searchList, searchManager);
-    }
-}
 
-function deleteSearch() {
-    var index = searchList.selectedIndex;
-    if(index !== null && index > 0) {
-        searchManager.delete(index);
-        searchList.selectItem(searchList.getItemAtIndex(index - 1));
-        searchList.removeItemAt(index);
+var SearchManager = {
+  searches: [
+    [Locale.get('notelist.saved_search.all'), '']
+  ].concat(pref.savedSearches),
+
+  openEditDialog: function() {
+    var item = searchList.selectedItem;
+    if (item && searchList.selectedIndex > 0) {
+      window.openDialog(
+        "chrome://floatnotes/content/editSearch.xul",
+        "Edit Search",
+        "modal",
+        searchList,
+        this
+      );
     }
-}
+  },
+
+  deleteSelectedSearch: function() {
+    var index = searchList.selectedIndex;
+    if (index != null && index > 0) {
+       this.deleteSearch(index);
+       // select the previous item (always exists)
+       searchList.selectItem(searchList.getItemAtIndex(index - 1));
+       searchList.removeItemAt(index);
+    }
+  },
+
+  getCurrentSearchKeywords: function() {
+    return searchBox.value ? searchBox.value.split(' ') : [];
+  },
+
+  saveSearch: function() {
+    var keywords = this.getCurrentSearchKeywords();
+    if (keywords.length > 0 ) {
+      var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                  .getService(Components.interfaces.nsIPromptService);
+      var check = {value: false};
+      var name = {value: ""};
+      var result = true;
+      while (!name.value && result) {
+        result = prompts.prompt(
+          null,
+          Locale.get('notelist.save_search.title'),
+          Locale.get('notelist.save_search.name'),
+          name,
+          null,
+          check
+        );
+      }
+      if (result) {
+        this.addSearch(name.value, keywords.join(' '));
+      }
+    }
+  },
+
+  buildList: function() {
+    // memorize selected index
+    var selected_index = 
+      searchList.selectedIndex > 0 ? searchList.selectedIndex : 0;
+    this.emptyList();
+    for (var i = 0, l = this.searches.length; i<l; i++) {
+      searchList.appendItem.apply(searchList, this.searches[i]);
+    }
+    searchList.selectedIndex = selected_index;
+  },
+
+  addSearch: function(name, keywords) {
+    this.searches.push([name,keywords]);
+    searchBox.value = '';
+    this._save();
+    var item = searchList.appendItem(name, keywords);
+    searchList.selectedItem = item;
+  },
+
+  emptyList: function() {
+    for (var i = searchList.itemCount -1; i >=0; i--) {
+      searchList.removeItemAt(i);
+    }
+  },
+
+  moveSearch: function(which, to) {
+    var removed = this.searches.splice(which, 1);
+    this.searches.splice(to + 1, 0, removed[0]);
+    this._save();
+  },
+
+  deleteSearch: function(index) {
+    this.searches.splice(index, 1);
+    this._save();
+  },
+
+  _save: function() {
+    pref.savedSearches = this.searches.slice(1);
+  },
+
+  update: function(index, name, keywords) {
+    this.searches[index] = [name, keywords];
+    this._save();
+    var item = searchList.getItemAtIndex(index);
+    item.label = name;
+    item.value = keywords;
+    if (item === searchList.selectedItem) {
+      search();
+    }
+  },
+
+  updateButtons: function() {
+    document.getElementById('searchListButtons')
+      .setAttribute('disabled', (searchList.selectedIndex === 0));
+  }
+};
+
 
 function loadPage() {
     if(treeView.selection.count === 1) {
@@ -200,23 +300,6 @@ function openAndReuseOneTabPerURL(url) {
 }
 
 
-function saveSearch() {
-    var keywords = search.LastSearch;
-    if(keywords) {
-        var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]  
-        .getService(Components.interfaces.nsIPromptService);  
-
-        var check = {value: false};
-        var input = {value: ""};
-        var result = true;
-        while(!input.value && result) {
-            result = prompts.prompt(null, Locale.get('notelist.save_search.title'), Locale.get('notelist.save_search.name'),input, null, check);
-        } 
-        if(result) {
-            searchManager.addSearch(input.value, keywords.join(' '));
-        }
-    }
-}
 
 function search() {
     var words = searchBox.value ? searchBox.value.split(' ') : [];
@@ -385,58 +468,10 @@ function prepareForComparison(o) {
 }
 
 
-var pref = Preferences;
 var db = new FloatNotesSQLiteDatabase();
 var manager = FloatNotesManager.getInstance();
 
 var searchManager = {
-    searches: [[Locale.get('notelist.saved_search.all'),'']].concat(pref.savedSearches),
-    buildList: function() {
-        var selectedIndex = (searchList.selectedIndex > 0) ? searchList.selectedIndex : 0;
-        this.empty();
-        for(var i = 0, l = this.searches.length;i<l;i++) {
-            searchList.appendItem(this.searches[i][0], this.searches[i][1]);
-        }
-        searchList.selectedIndex = selectedIndex;
-        this.selectedIndex = null;
-    },
-    addSearch: function(name, keywords) {
-        this.searches.push([name,keywords]);
-        searchBox.value = '';
-        this.save();
-        var item = searchList.appendItem(name, keywords);
-        searchList.selectedItem = item;
-    },
-    empty: function() {
-        for(var i = searchList.itemCount -1;i >=0;i--) {
-            searchList.removeItemAt(i);
-        }
-    },
-    move: function(which, to) {
-        var removed = this.searches.splice(which, 1);
-        this.searches.splice(to + 1, 0, removed[0]);
-        this.save();
-    },
-    delete: function(index) {
-        this.searches.splice(index, 1);
-        this.save();
-    },
-    save: function() {
-        pref.savedSearches = this.searches.slice(1);
-    },
-    update: function(index, name, keywords) {
-        this.searches[index] = [name, keywords];
-        this.save();
-        var item = searchList.getItemAtIndex(index);
-        item.label = name;
-        item.value = keywords;
-        if(item == searchList.selectedItem) {
-            search();
-        }
-    },
-    updateButtons: function() {
-        document.getElementById('searchListButtons').setAttribute('disabled', (searchList.selectedIndex === 0));
-    }
 };
 
 
@@ -512,5 +547,5 @@ var treeView = {
 
 };
 
-searchManager.buildList();
+SearchManager.buildList();
 observer.registerObserver();

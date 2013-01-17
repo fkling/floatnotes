@@ -5,6 +5,7 @@ Components.utils['import']("resource://floatnotes/manager.js");
 Components.utils['import']("resource://floatnotes/preferences.js");
 Components.utils['import']("resource://floatnotes/util-Locale.js");
 Components.utils['import']("resource://floatnotes/util-Dialog.js");
+Components.utils['import']("resource://floatnotes/util-Mozilla.js");
 Components.utils['import']("resource://floatnotes/URLHandler.js");
 Components.utils['import']("resource://floatnotes/Shared.js");
 Components.utils['import']("resource://gre/modules/PluralForm.jsm");
@@ -247,59 +248,10 @@ function loadPage() {
                 return;
             }
             Shared.focusNote = note.guid;
-            openAndReuseOneTabPerURL(url);
+            Mozilla.openAndReuseOneTabPerURL(url);
         }
     }
 }
-
-function openAndReuseOneTabPerURL(url) {
-    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Components.interfaces.nsIWindowMediator);
-    var browserEnumerator = wm.getEnumerator("navigator:browser");
-
-    // Check each browser instance for our URL
-    var found = false;
-    while (!found && browserEnumerator.hasMoreElements()) {
-        var browserWin = browserEnumerator.getNext();
-        var tabbrowser = browserWin.gBrowser;
-
-        // Check each tab of this browser instance
-        var numTabs = tabbrowser.browsers.length;
-        for (var index = 0; index < numTabs; index++) {
-            var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-            var currentURL = currentBrowser.currentURI.spec;
-            if(currentURL.charAt(currentURL.length - 1) === '/') {
-                currentURL = currentURL.substring(0, currentURL.length -1);
-            }
-            if (url === currentURL) {
-
-                // The URL is already opened. Select this tab.
-                tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
-
-                // Focus *this* browser-window
-                browserWin.focus();
-
-                found = true;
-                break;
-            }
-        }
-    }
-
-    // Our URL isn't open. Open it now.
-    if (!found) {
-        var recentWindow = wm.getMostRecentWindow("navigator:browser");
-        if (recentWindow) {
-            // Use an existing browser window
-            recentWindow.delayedOpenTab(url, null, null, null, null);
-        }
-        else {
-            // No browser windows are open, so open a new one.
-            var win = window.open(url);
-        }
-    }
-}
-
-
 
 function search() {
     var words = searchBox.value ? searchBox.value.split(' ') : [];

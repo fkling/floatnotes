@@ -1,12 +1,15 @@
-Components.utils.import("resource://floatnotes/database.js");
-Components.utils.import("resource://floatnotes/manager.js");
-Components.utils.import("resource://floatnotes/preferences.js");
-Components.utils.import("resource://floatnotes/util-Locale.js");
-Components.utils.import("resource://floatnotes/util-Dialog.js");
-Components.utils.import("resource://floatnotes/URLHandler.js");
-Components.utils.import("resource://floatnotes/Shared.js");
-Components.utils.import("resource://gre/modules/PluralForm.jsm");
+"use strict";
+/*global Components*/
+Components.utils['import']("resource://floatnotes/SQLiteDatabase.js");
+Components.utils['import']("resource://floatnotes/manager.js");
+Components.utils['import']("resource://floatnotes/preferences.js");
+Components.utils['import']("resource://floatnotes/util-Locale.js");
+Components.utils['import']("resource://floatnotes/util-Dialog.js");
+Components.utils['import']("resource://floatnotes/URLHandler.js");
+Components.utils['import']("resource://floatnotes/Shared.js");
+Components.utils['import']("resource://gre/modules/PluralForm.jsm");
 
+// DOM elements
 var textBox = document.getElementById('text');
 var colorPicker = document.getElementById('color');
 var inputBrdcast = document.getElementById('isEnabled');
@@ -16,9 +19,12 @@ var searchBox = document.getElementById('search');
 var searchList = document.getElementById('searches');
 var tree = document.getElementById('notes');
 
+// Global vars
+var doObserve = true;
+
 function saveData() {
     treeView.saveCurrentSelection();
-};
+}
 
 textBox.addEventListener('focus', function() {
     window.addEventListener('mousedown', saveData, true);
@@ -31,7 +37,7 @@ textBox.addEventListener('blur', function() {
 
 
 textBox.addEventListener('click',  function(e) {
-    e.stopPropagation();    
+    e.stopPropagation();
 }, true);
 
 
@@ -80,7 +86,7 @@ var observer = {
 var dragHandler = {
     dragStart: function dragStart(event) {
         var index = searchList.getIndexOfItem(event.target);
-        if(index > 0) { 
+        if(index > 0) {
             event.dataTransfer.setData('text/plain', index);
         }
         event.stopPropagation();
@@ -107,7 +113,7 @@ var dragHandler = {
             }
             else {
                 searchList.appendChild(source);
-            } 
+            }
             searchManager.move(sourceIndex, targetIndex);
         }
     }
@@ -130,10 +136,10 @@ function deleteSearch() {
 }
 
 function loadPage() {
-    if(treeView.selection.count == 1) {
+    if(treeView.selection.count === 1) {
         var note = treeView.data[treeView.selection.currentIndex];
         if(note) {
-            var url =  URLHandler.getNoteUrl(note);
+            var url = FloatNotesURLHandler.getNoteUrl(note);
             if(url.lastIndexOf('*') === url.length - 1) {
                 var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                                     .getService(Components.interfaces.nsIPromptService);
@@ -165,7 +171,7 @@ function openAndReuseOneTabPerURL(url) {
             if(currentURL.charAt(currentURL.length - 1) === '/') {
                 currentURL = currentURL.substring(0, currentURL.length -1);
             }
-            if (url == currentURL) {
+            if (url === currentURL) {
 
                 // The URL is already opened. Select this tab.
                 tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
@@ -228,11 +234,11 @@ function search() {
     if(search.dirty || (words.toString() !== search.LastSearch.toString())) {
         if(words.length > 0) {
             search.dirty = false;
-            db.getNotesContaining(words,function(notes) {
+            db.getNotesContaining(words).then(function(notes) {
                 treeView.data = notes;
                 if(typeof tree.boxObject.invalidate === 'function') {
                     tree.boxObject.invalidate();
-                };
+                }
                 updateCounter();
                 if(searchBox.value) {
                     saveSearchButton.style.display = 'inline';
@@ -244,7 +250,7 @@ function search() {
             });
         }
         else {
-            db.getAllNotes(function(notes) {
+            db.getAllNotes().then(function(notes) {
                 treeView.data = notes;
                 tree.view = treeView;
                 updateCounter();
@@ -275,16 +281,16 @@ function updateCounter() {
 }
 
 function saveNote(value, attr, selection) {
-    if(typeof selection === 'number' || treeView.selection.count == 1) {
+    if(typeof selection === 'number' || treeView.selection.count === 1) {
         selection = (typeof selection === 'number' ) ? selection : treeView.selection.currentIndex;
         var note = treeView.data[selection];
 
         if(typeof note !== 'undefined' && value !== note[attr]) {
             note[attr] = value
             observer.doObserve = false;
-            manager.saveNote(note, function(id, guid, n){
+            manager.saveNote(note).then(function(result){
                 observer.doObserve=true;
-                note.modification_date = n.modification_date;
+                note.modification_date = result.noteData.modification_date;
                 tree.boxObject.invalidateRow(selection);
             });
         }
@@ -295,9 +301,9 @@ function deleteNote() {
     var selection = treeView.selection;
     if(selection && selection.count >=1) {
         doObserve = false;
-        if(selection.count == 1) {
+        if(selection.count === 1) {
             if(Dialog.confirmDeletion(1)) {
-                manager.deleteNote(treeView.data[selection.currentIndex], function() {
+                manager.deleteNote(treeView.data[selection.currentIndex].guid).then(function() {
                     doObserve = true;
                 });
                 search();
@@ -313,7 +319,7 @@ function deleteNote() {
                     tree.view.selection.getRangeAt(t,start,end);
                     for (var v = start.value; v <= end.value; v++){
                         doObserve = false;
-                        manager.deleteNote(data[v], function() {
+                        manager.deleteNote(data[v].guid).then(function() {
                             doObserve = true;
                         });
                     }
@@ -327,7 +333,7 @@ function deleteNote() {
 
 function clear() {
     if(treeView.selection) {
-        treeView.selection.clearSelection();     
+        treeView.selection.clearSelection();
     }
     inputBrdcast.setAttribute('disabled', true);
     textBox.value="";
@@ -336,11 +342,11 @@ function clear() {
 
 function sort(column) {
 	var columnName;
-	var order = tree.getAttribute("sortDirection") == "ascending" ? 1 : -1;
+	var order = tree.getAttribute("sortDirection") === "ascending" ? 1 : -1;
 	//if the column is passed and it's already sorted by that column, reverse sort
 	if (column) {
 		columnName = column.id;
-		if (tree.getAttribute("sortResource") == columnName) {
+		if (tree.getAttribute("sortResource") === columnName) {
 			order *= -1;
 		}
 	} else {
@@ -359,7 +365,7 @@ function sort(column) {
 	}
 	treeView.data = treeView.data.sort(columnSort);
 	//setting these will make the sort option persist
-	tree.setAttribute("sortDirection", order == 1 ? "ascending" : "descending");
+	tree.setAttribute("sortDirection", order === 1 ? "ascending" : "descending");
 	tree.setAttribute("sortResource", columnName);
 	tree.view = treeView;
 	//set the appropriate attributes to show to indicator
@@ -367,21 +373,21 @@ function sort(column) {
 	for (var i = 0; i < cols.length; i++) {
 		cols[i].removeAttribute("sortDirection");
 	}
-	document.getElementById(columnName).setAttribute("sortDirection", order == 1 ? "ascending" : "descending");
+	document.getElementById(columnName).setAttribute("sortDirection", order === 1 ? "ascending" : "descending");
 }
 
 //prepares an object for easy comparison against another. for strings, lowercases them
 function prepareForComparison(o) {
-	if (typeof o == "string") {
+	if (typeof o === "string") {
 		return o.toLowerCase();
 	}
 	return o;
 }
 
 
-var db = new DatabaseConnector();
-var manager = new FloatNotesManager(db);
 var pref = Preferences;
+var db = new FloatNotesSQLiteDatabase();
+var manager = FloatNotesManager.getInstance();
 
 var searchManager = {
     searches: [[Locale.get('notelist.saved_search.all'),'']].concat(pref.savedSearches),
@@ -443,31 +449,31 @@ var treeView = {
     data: [],
     get rowCount() {
         return this.data.length;
-    },  
-    getCellText : function(row,column){ 
-        if (column.id == "content") return getTitle(this.data[row].content);  
-        if (column.id == "url") return this.data[row].url;
-        if (column.id == "modification_date") return this.data[row].modification_date.toLocaleString();
-        if (column.id == "creation_date") return this.data[row].creation_date.toLocaleString();
-    },  
-    setTree: function(treebox){ this.treebox = treebox; },  
-    isContainer: function(row){ return false; },  
-    isSeparator: function(row){ return false; },  
-    isSorted: function(){ return false; },  
-    getLevel: function(row){ return 0; },  
+    },
+    getCellText : function(row,column){
+        if (column.id === "content") return getTitle(this.data[row].content);
+        if (column.id === "url") return this.data[row].url;
+        if (column.id === "modification_date") return this.data[row].modification_date.toLocaleString();
+        if (column.id === "creation_date") return this.data[row].creation_date.toLocaleString();
+    },
+    setTree: function(treebox){ this.treebox = treebox; },
+    isContainer: function(row){ return false; },
+    isSeparator: function(row){ return false; },
+    isSorted: function(){ return false; },
+    getLevel: function(row){ return 0; },
     getImageSrc: function(row,column){
-        if (column.id == "content") {
+        if (column.id === "content") {
             var note = this.data[row];
-            var url =  URLHandler.getNoteUrl(note);
+            var url = FloatNotesURLHandler.getNoteUrl(note);
             if(url.charAt(url.length - 1) === '*') {
                 url = url.substring(0, url.length);
             }
             return faviconService.getFaviconImageForPage(ioService.newURI(url, null, null)).spec;
         }
-        return null; 
-    },  
-    getRowProperties: function(row,props){},  
-    getCellProperties: function(row,col,props){},  
+        return null;
+    },
+    getRowProperties: function(row,props){},
+    getCellProperties: function(row,col,props){},
     getColumnProperties: function(colid,col,props){},
     selectionChanged: function() {
         var count = this.selection.count;
@@ -478,7 +484,7 @@ var treeView = {
             colorPicker.value = "";
 
         }
-        else if(count == 1) {
+        else if(count === 1) {
             var index = this.selection.currentIndex;
             note = this.data[index];
             inputBrdcast.setAttribute('disabled', false);
@@ -497,7 +503,7 @@ var treeView = {
 
     },
     saveCurrentSelection: function() {
-        if(this.selection && this.selection.count == 1) {
+        if(this.selection && this.selection.count === 1) {
             var index = this.selection.currentIndex;
             saveNote(textBox.value, 'content', index);
             saveNote(colorPicker.color, 'color', index);

@@ -28,7 +28,7 @@
 
     <vbox>
         <listbox id="searches" flex="1" 
-          onselect="SearchManager.updateButtons(); search();"
+          onselect="SearchManager.updateButtons(); NoteManager.search();"
           ondragstart="dragHandler.dragStart(event)"
           ondragover="dragHandler.dragOver(event)"
           ondragleave="dragHandler.dragLeave(event)"
@@ -56,7 +56,7 @@
               flex="1" 
               type="search" 
               id="search" 
-              oncommand="search()" 
+              oncommand="NoteManager.search()" 
               emptytext="&searchtext;"
             />
             <button 
@@ -67,15 +67,24 @@
               oncommand="SearchManager.saveSearch();"
             />
         </hbox>
-        <description 
-          id="searchMsg" 
-          style="font-size:0.9em;color:gray;font-style:italic;display:none;"
-        />
+        <hbox pack="end">
+            <description 
+              flex="1"
+              id="searchMsg" 
+              style="font-size:0.9em;color:gray;font-style:italic;display:none;"
+            />
+              <description 
+                id="counter" 
+                value="" 
+                pack="right" 
+                style="font-size:0.9em;color:gray;font-style:italic;margin-right:5px;"
+              />
+            </hbox>
         <vbox flex="1">
             <tree 
               id="notes" 
               flex="2" 
-              onselect="treeView.selectionChanged()" 
+              onselect="TreeView.selectionChanged()" 
               hidecolumnpicker="false" 
               persist="sortDirection sortResource" 
               sortDirection="ascending" 
@@ -86,7 +95,7 @@
                   id="content" 
                   label="&list.title;" 
                   flex="1" 
-                  onclick="sort(this)" 
+                  onclick="NoteManager.sortNotesBy(this)" 
                   persist="width hidden"
                 />
                 <splitter class="tree-splitter" />
@@ -94,19 +103,28 @@
                   id="url" 
                   label="&list.url;" 
                   flex="1" 
-                  onclick="sort(this)" 
+                  onclick="NoteManager.sortNotesBy(this)" 
                   persist="width hidden"
                 />
                 <splitter class="tree-splitter" />
-                    <treecol id="creation_date" label="&list.created;" flex="1" onclick="sort(this)" persist="width hidden"/>
-                    <splitter class="tree-splitter" />
-                    <treecol id="modification_date" label="&list.modified;" flex="1" onclick="sort(this)" persist="width hidden"/>
-                </treecols>  
-                <treechildren ondblclick="loadPage()"/>
+                <treecol 
+                  id="creation_date" 
+                  label="&list.created;" 
+                  flex="1" 
+                  onclick="NoteManager.sortNotesBy(this)" 
+                  persist="width hidden"
+                />
+                <splitter class="tree-splitter" />
+                <treecol 
+                  id="modification_date" 
+                  label="&list.modified;" 
+                  flex="1" 
+                  onclick="NoteManager.sortNotesBy(this)" 
+                  persist="width hidden"
+                />
+              </treecols>  
+              <treechildren ondblclick="NoteManager.loadPage()"/>
             </tree>
-            <hbox pack="end">
-                <label id="counter" value="" pack="right" style="color:gray;font-style:italic;"/>
-            </hbox>
         </vbox>
         <splitter />
         <grid>
@@ -115,18 +133,27 @@
                 <column flex="1"/>
             </columns>
             <rows>
-                <textbox flex="1" id="text" multiline="true"
-                    observes="isEnabled"
-                    style="height:100px"/>
+                <textbox 
+                  flex="1" 
+                  id="text" 
+                  multiline="true"
+                  style="height:100px"
+                  onchange="NoteManager.saveSelectedNote()"
+                />
                 <row align="center">
                     <label control="color" value="&color;"/>
                     <hbox flex="1">
                         <colorpicker id="color" 
                             type="button" 
                             observes="isEnabled"
-                            onselect="saveNote(this.color, 'color')" />
+                            onchange="NoteManager.saveSelectedNote()" />
                         <spacer flex="1" />
-                        <button id="delete" label="&button.remove;" observes="isEnabled" oncommand="deleteNote()" />
+                        <button 
+                          id="delete" 
+                          label="&button.remove;" 
+                          observes="isEnabled" 
+                          oncommand="NoteManager.deleteSelectedNotes()"
+                        />
                     </hbox>   
                 </row>
             </rows>

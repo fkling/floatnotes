@@ -1,4 +1,5 @@
 "use strict";
+/*jshint browser:true*/
 /*global Components*/
 Components.utils['import']("resource://floatnotes/SQLiteDatabase.js");
 Components.utils['import']("resource://floatnotes/manager.js");
@@ -8,7 +9,10 @@ Components.utils['import']("resource://floatnotes/util-Dialog.js");
 Components.utils['import']("resource://floatnotes/util-Mozilla.js");
 Components.utils['import']("resource://floatnotes/URLHandler.js");
 Components.utils['import']("resource://floatnotes/Shared.js");
+Components.utils['import']("resource://floatnotes/when.js");
 Components.utils['import']("resource://gre/modules/PluralForm.jsm");
+/*global FloatNotesSQLiteDatabase, FloatNotesManager, Preferences, Locale,
+  Dialog, Mozilla, FloatNotesURLHandler, Shared, PluralForm, FloatNotesWhen*/
 
 // DOM elements
 var textBox = document.getElementById('text');
@@ -18,33 +22,32 @@ var deleteButton = document.getElementById('delete');
 var saveSearchButton = document.getElementById('saveSearch');
 var searchBox = document.getElementById('search');
 var searchList = document.getElementById('searches');
+var searchMsg = document.getElementById('searchMsg');
 var tree = document.getElementById('notes');
 
 // Global vars
 var pref = Preferences;
-var doObserve = true;
+var PromptService =
+  Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+  .getService(Components.interfaces.nsIPromptService);
 
-function saveData() {
-    treeView.saveCurrentSelection();
-}
+var db = new FloatNotesSQLiteDatabase();
+var manager = FloatNotesManager.getInstance();
 
-textBox.addEventListener('focus', function() {
-    window.addEventListener('mousedown', saveData, true);
+var faviconService =
+  Components.classes["@mozilla.org/browser/favicon-service;1"]
+    .getService(Components.interfaces.nsIFaviconService);
+var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+                  .getService(Components.interfaces.nsIIOService);
+
+
+window.addEventListener('mousedown', function handler() {
+  NoteManager.saveSelectedNote();
 }, true);
 
-textBox.addEventListener('blur', function() {
-    window.removeEventListener('mousedown', saveData, true);
-    saveData();
-}, false);
-
-
-textBox.addEventListener('click',  function(e) {
-    e.stopPropagation();
-}, true);
-
-
-window.addEventListener('unload', function() {
-    treeView.saveCurrentSelection();
+window.addEventListener('unload', function handler() {
+  window.removeEventListener('unload', handler, true);
+  NoteManager.saveSelectedNote();
 }, true);
 
 
@@ -52,37 +55,35 @@ var observer = {
     doObserve: true,
     registerObserver: function() {
         var obsService = Components.classes["@mozilla.org/observer-service;1"]
-        .getService(Components.interfaces.nsIObserverService);
+          .getService(Components.interfaces.nsIObserverService);
         obsService.addObserver(this, 'floatnotes-note-update', false);
         obsService.addObserver(this, 'floatnotes-note-delete', false);
-        obsService.addObserver(this, 'floatnotes-note-urlchange', false);
         obsService.addObserver(this, 'floatnotes-note-add', false);
-        var that = this;
-        function remove() {
-            that.removeObserver();
-        }
-        window.addEventListener('unload',remove , true);
-        this._removeUnloadListener = function() { window.removeEventListener('unload', remove, true);};
+
+        window.addEventListener('unload', function handler() {
+          obsService.removeObserver(this, 'floatnotes-note-update', false);
+          obsService.removeObserver(this, 'floatnotes-note-delete', false);
+          obsService.removeObserver(this, 'floatnotes-note-add', false);
+          window.removeEventListener('unload', handler, true);
+          obsService = null;
+        }.bind(this), true);
     },
 
-    removeObserver: function() {
-        this._removeUnloadListener();
-        var obsService = Components.classes["@mozilla.org/observer-service;1"]
-                        .getService(Components.interfaces.nsIObserverService);
-        obsService.removeObserver(this, 'floatnotes-note-update');
-        obsService.removeObserver(this, 'floatnotes-note-delete');
-        obsService.removeObserver(this, 'floatnotes-note-urlchange');
-        obsService.removeObserver(this, 'floatnotes-note-add');
-    },
-
-    observe: function(subject, topic, data) {
+    observe: function(subject, topic, guid) {
         if(this.doObserve) {
-            search.dirty = true;
-            search();
+          switch (topic) {
+            case 'floatnotes-note-update':
+              NoteManager.updateNoteWithGUID(guid);
+              break;
+            case 'floatnotes-note-delete':
+              NoteManager.removeNoteWithGUID(guid);
+              break;
+            case 'floatnotes-note-add':
+              break;
+          }
         }
     }
-}
-
+};
 
 
 var dragHandler = {
@@ -105,6 +106,7 @@ var dragHandler = {
     },
 
     onDrop: function onDrop(event) {
+        event.target.style.borderBottom = "";
         var sourceIndex = +event.dataTransfer.getData("text/plain");
         var targetIndex = searchList.getIndexOfItem(event.target);
         if(targetIndex >= 0 && sourceIndex !== targetIndex) {
@@ -116,7 +118,7 @@ var dragHandler = {
             else {
                 searchList.appendChild(source);
             }
-            searchManager.move(sourceIndex, targetIndex);
+            SearchManager.moveSearch(sourceIndex, targetIndex);
         }
     }
 };
@@ -154,16 +156,24 @@ var SearchManager = {
     return searchBox.value ? searchBox.value.split(' ') : [];
   },
 
+  getSearchKeywords: function() {
+    var selectedSearch = searchList.selectedItem;
+    var words = [];
+    if(selectedSearch && selectedSearch.value) {
+        words.push.apply(words, selectedSearch.value.split(' '));
+    }
+    words.push.apply(words, this.getCurrentSearchKeywords());
+    return words;
+  },
+
   saveSearch: function() {
-    var keywords = this.getCurrentSearchKeywords();
+    var keywords = this.getSearchKeywords();
     if (keywords.length > 0 ) {
-      var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-                  .getService(Components.interfaces.nsIPromptService);
       var check = {value: false};
       var name = {value: ""};
       var result = true;
       while (!name.value && result) {
-        result = prompts.prompt(
+        result = PromptService.prompt(
           null,
           Locale.get('notelist.save_search.title'),
           Locale.get('notelist.save_search.name'),
@@ -180,7 +190,7 @@ var SearchManager = {
 
   buildList: function() {
     // memorize selected index
-    var selected_index = 
+    var selected_index =
       searchList.selectedIndex > 0 ? searchList.selectedIndex : 0;
     this.emptyList();
     for (var i = 0, l = this.searches.length; i<l; i++) {
@@ -225,7 +235,7 @@ var SearchManager = {
     item.label = name;
     item.value = keywords;
     if (item === searchList.selectedItem) {
-      search();
+      NoteManager.search();
     }
   },
 
@@ -236,68 +246,345 @@ var SearchManager = {
 };
 
 
-function loadPage() {
-    if(treeView.selection.count === 1) {
-        var note = treeView.data[treeView.selection.currentIndex];
-        if(note) {
-            var url = FloatNotesURLHandler.getNoteUrl(note);
-            if(url.lastIndexOf('*') === url.length - 1) {
-                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-                                    .getService(Components.interfaces.nsIPromptService);
-                promptService.alert(window, '',Locale.get('notelist.notify_multiple_pages'));
-                return;
-            }
-            Shared.focusNote = note.guid;
-            Mozilla.openAndReuseOneTabPerURL(url);
-        }
-    }
-}
+var NoteManager = {
+  _notes: {},
+  _notesSorted: [],
+  _lastKeywords: [],
+  _dirty: true,
 
-function search() {
-    var words = searchBox.value ? searchBox.value.split(' ') : [];
-    var selectedSearch = searchList.selectedItem;
-    var searchMsg = document.getElementById('searchMsg');
-    if(selectedSearch && selectedSearch.value) {
-        words = selectedSearch.value.split(' ').concat(words);
-        searchMsg.value = Locale.get('notelist.search_msg', [words.join(' ')]);
-        searchMsg.style.display = 'block';
+  getNoteAtIndex: function(i) {
+    return this._notesSorted[i];
+  },
+
+  getNumberOfNotes: function() {
+    return this._notesSorted.length;
+  },
+
+  setDirty: function(dirty) {
+    this._dirty = dirty;
+  },
+
+  loadPageForSelectedNote: function() {
+    if (this.hasSingleSelection()) {
+      var note = this.getSelectedNote();
+      if (note) {
+        var url = FloatNotesURLHandler.getNoteUrl(note);
+        // we cannot load wild card URLs
+        if (url.lastIndexOf('*') === url.length - 1) {
+          PromptService.alert(
+            window,
+            '',
+            Locale.get('notelist.notify_multiple_pages')
+          );
+          return;
+        }
+        Shared.focusNote = note.guid;
+        Mozilla.openAndReuseOneTabPerURL(url);
+      }
+    }
+  },
+
+  getSelectedNote: function() {
+    return TreeView.data[TreeView.selection.currentIndex];
+  },
+
+  hasSingleSelection: function() {
+    return TreeView.selection.count === 1;
+  },
+
+  search: function() {
+    var words = SearchManager.getSearchKeywords();
+    if (words.length > 0) {
+      searchMsg.value = Locale.get('notelist.search_msg', [words.join(' ')]);
+      searchMsg.style.display = 'block';
     }
     else {
-        searchMsg.style.display = 'none';
+      searchMsg.style.display = 'none';
     }
-    clear();
-    if(search.dirty || (words.toString() !== search.LastSearch.toString())) {
-        if(words.length > 0) {
-            search.dirty = false;
-            db.getNotesContaining(words).then(function(notes) {
-                treeView.data = notes;
-                if(typeof tree.boxObject.invalidate === 'function') {
-                    tree.boxObject.invalidate();
-                }
-                updateCounter();
-                if(searchBox.value) {
-                    saveSearchButton.style.display = 'inline';
-                }
-                else {
-                    saveSearchButton.style.display = 'none';
-                }
-                sort();
-            });
-        }
-        else {
-            db.getAllNotes().then(function(notes) {
-                treeView.data = notes;
-                tree.view = treeView;
-                updateCounter();
-                document.getElementById('saveSearch').style.display = 'none';
-                sort();
-            });
-        }
-        search.LastSearch = words;
+    this.clearSelection();
+    if (this._dirty || (words.toString() !== this._lastKeywords.toString())) {
+      this._lastKeywords = words;
+      if (words.length > 0) {
+        this._dirty = false;
+        db.getNotesContaining(words).then(function(notes) {
+          this.setData(notes);
+          if (searchBox.value) {
+            saveSearchButton.style.display = 'inline';
+          }
+          else {
+            saveSearchButton.style.display = 'none';
+          }
+        }.bind(this));
+      }
+      else {
+        db.getAllNotes().then(function(notes) {
+          this.setData(notes);
+          document.getElementById('saveSearch').style.display = 'none';
+        }.bind(this));
+      }
     }
-}
-search.LastSearch = [];
-search.dirty = true;
+  },
+
+  _updateTree: function(start_index, end_index) {
+    if (!TreeView.treebox) {
+      tree.view = TreeView;
+    }
+
+    if (arguments.length === 2) {
+      TreeView.treebox.invalidateRange(start_index, end_index);
+    }
+    else if (arguments.length === 1) {
+      TreeView.treebox.invalidateRange(start_index, start_index);
+    }
+    else {
+      TreeView.treebox.invalidate();
+    }
+  },
+
+  setData: function(notes) {
+    var num_notes = this._notesSorted.length
+    this._notesSorted.length = 0;
+    this._notesSorted.push.apply(this._notesSorted, notes);
+
+    // clear _notes
+    for (var id in this._notes) {
+      delete this._notes[id];
+    }
+
+    for (var i = 0, l = notes.length; i < l; i++) {
+      this._notes[notes[i].guid] = notes[i];
+    }
+
+    if (TreeView.treebox) {
+      TreeView.treebox.rowCountChanged(0, this._notesSorted.length - num_notes);
+    }
+    this.sortNotesBy();
+    this.updateNoteCounter();
+  },
+
+  updateNoteCounter: function() {
+    var str = TreeView.rowCount;
+    str += ' ' + PluralForm.get(str, Locale.get('indicatorNote'));
+    document.getElementById('counter').value = str;
+  },
+
+  _getSelectedNotes: function() {
+    var selection = tree.view.selection;
+    var ranges = selection.getRangeCount();
+    var start = {};
+    var end = {};
+    var notes = [];
+
+    for (var i = 0; i < ranges; i++) {
+      selection.getRangeAt(i, start, end);
+      for (var j = start.value; j <= end.value; j++) {
+        notes.push(this._notesSorted[j]);
+      }
+    }
+
+    return notes;
+  },
+
+  _setSelectedNotes: function(notes) {
+    var index;
+    var selection = tree.view.selection;
+    var add = false;
+    for (var i = 0, l = notes.length; i < l; i++) {
+      if ((index = this._notesSorted.indexOf(notes[i])) > -1) {
+        selection.rangedSelect(index, index, add);
+        add = true;
+      }
+    }
+  },
+
+  clearSelection: function() {
+    if(TreeView.selection) {
+        TreeView.selection.clearSelection();
+    }
+    inputBrdcast.setAttribute('disabled', true);
+    textBox.value="";
+    colorPicker.color = "";
+  },
+
+  saveSelectedNote: function() {
+    var notes = this._getSelectedNotes();
+    if (notes.length === 1) {
+      var note = notes[0];
+      var update = false;
+      var new_color = colorPicker.color;
+      var new_text = textBox.value;
+
+      if (new_color !== note.color) {
+        note.color = new_color;
+        update = true;
+      }
+      if (new_text !== note.content) {
+        note.content = new_text;
+        update = true;
+      }
+      if (update) {
+        observer.doObserve = false;
+        manager.saveNote(note).then(function(result){
+          observer.doObserve = true;
+          note.modification_date = result.noteData.modification_date;
+          TreeView.treebox.invalidateRow(this._notesSorted.indexOf(note));
+        }.bind(this));
+      }
+    }
+  },
+
+  updateNoteWithGUID: function(guid) {
+    if (guid in this._notes) {
+      var old_note = this._notes[guid];
+      manager.getNote(guid).then(function(note) {
+        // doube check
+        if (guid in this._notes) {
+          this._notes[guid] = note;
+          var index = this._notesSorted.indexOf(old_note);
+          this._notesSorted[index] = note;
+          TreeView.treebox.invalidateRow(index);
+          if (
+            tree.view.selection.isSelected(index) &&
+            tree.view.selection.count === 1) {
+              this.updateForm();
+          }
+        }
+      }.bind(this));
+    }
+  },
+
+  deleteSelectedNotes: function() {
+    var selection = tree.view.selection;
+    if (selection.count > 0 && Dialog.confirmDeletion(selection.count)) {
+      observer.doObserve = false;
+      var notes = this._getSelectedNotes();
+      var deferrds = [];
+      for (var i = 0, l = notes.length; i < l; i++) {
+        var note = notes[i];
+        deferrds.push(manager.deleteNote(note.guid).then(function(note) {
+          this._removeNote(note);
+        }.bind(this, note)));
+      }
+      FloatNotesWhen.all(deferrds, function() {
+        observer.doObserve = true;
+        this.updateNoteCounter();
+      }.bind(this));
+    }
+  },
+
+  removeNoteWithGUID: function(guid) {
+    if (guid in this._notes) {
+      this._removeNote(this._notes[guid]);
+    }
+  },
+
+  _removeNote: function(note) {
+    var index = this._notesSorted.indexOf(note);
+    if (index > -1) {
+      this._notesSorted.splice(index, 1);
+      TreeView.treebox.rowCountChanged(index, -1);
+      tree.view.selection.adjustSelection(index, -1);
+      this.updateForm();
+    }
+  },
+
+  updateForm: function() {
+    var selection = tree.view.selection;
+    // Multiple notes can be deleted, but only one can be edited
+    switch (selection.count) {
+      case 0:
+        textBox.value = "";
+        textBox.disabled = true;
+        colorPicker.color = "";
+        inputBrdcast.setAttribute('disabled', true);
+        deleteButton.disabled = true;
+        break;
+      case 1:
+        var note = this._getSelectedNotes()[0];
+        textBox.value = note.content;
+        textBox.disabled = false;
+        colorPicker.color = note.color;
+        inputBrdcast.setAttribute('disabled', false);
+        deleteButton.disabled = false;
+        break;
+      default:
+        textBox.value = "";
+        textBox.disabled = true;
+        colorPicker.color = "";
+        inputBrdcast.setAttribute('disabled', true);
+        deleteButton.disabled = false;
+    }
+  },
+
+  _normalize: function(value) {
+    if (typeof value === "string") {
+      return value.toLowerCase();
+    }
+    return value;
+  },
+
+  _getSortFunctionFor: function(column_name, direction) {
+    return function(a, b) {
+      var value_a = this._normalize(a[column_name]);
+      var value_b = this._normalize(b[column_name]);
+      if (value_a > value_b) {
+        return 1 * direction;
+      }
+      if (value_a < value_b) {
+        return -1 * direction;
+      }
+      //tie breaker: name ascending is the second level sort
+      if (column_name != "url") {
+        var url_a = this._normalize(a[column_name]);
+        var url_b = this._normalize(b[column_name]);
+        if (url_a > url_b) {
+          return 1;
+        }
+        if (url_a < url_b) {
+          return -1;
+        }
+      }
+      return 0;
+    }.bind(this);
+  },
+
+  sortNotesBy: function(column) {
+    var column_name;
+    var direction = tree.getAttribute("sortDirection") === "ascending" ? 1 : -1;
+    var selected_notes = this._getSelectedNotes();
+
+    if (column) {
+      column_name = column.id;
+      if (tree.getAttribute("sortResource") === column_name) {
+        direction *= -1;
+      }
+    }
+    else {
+      column_name = tree.getAttribute("sortResource");
+    }
+
+    this._notesSorted.sort(
+      this._getSortFunctionFor(column_name, direction)
+    );
+    //setting these will make the sort option persist
+    tree.setAttribute(
+      'sortDirection',
+      direction === 1 ? "ascending" : "descending"
+    );
+    tree.setAttribute("sortResource", column_name);
+    //set the appropriate attributes to show to indicator
+    var cols = tree.getElementsByTagName("treecol");
+    for (var i = 0; i < cols.length; i++) {
+      cols[i].removeAttribute("sortDirection");
+    }
+    document.getElementById(column_name).setAttribute(
+      "sortDirection",
+      direction === 1 ? "ascending" : "descending"
+    );
+    this._setSelectedNotes(selected_notes);
+    this._updateTree();
+  }
+};
 
 function getTitle(text) {
     var index = text.indexOf("\n");
@@ -309,195 +596,62 @@ function getTitle(text) {
     }
 }
 
-function updateCounter() {
-    var str = treeView.rowCount;
-    str += ' ' + PluralForm.get(str, Locale.get('indicatorNote'));
-    document.getElementById('counter').value = str;
-}
 
-function saveNote(value, attr, selection) {
-    if(typeof selection === 'number' || treeView.selection.count === 1) {
-        selection = (typeof selection === 'number' ) ? selection : treeView.selection.currentIndex;
-        var note = treeView.data[selection];
 
-        if(typeof note !== 'undefined' && value !== note[attr]) {
-            note[attr] = value
-            observer.doObserve = false;
-            manager.saveNote(note).then(function(result){
-                observer.doObserve=true;
-                note.modification_date = result.noteData.modification_date;
-                tree.boxObject.invalidateRow(selection);
-            });
-        }
+var TreeView = {
+  getCellText : function(row, column){
+    var note = NoteManager.getNoteAtIndex(row);
+    var value;
+    if (column.id === "content") {
+      value = getTitle(note.content);
     }
-}
-
-function deleteNote() {
-    var selection = treeView.selection;
-    if(selection && selection.count >=1) {
-        doObserve = false;
-        if(selection.count === 1) {
-            if(Dialog.confirmDeletion(1)) {
-                manager.deleteNote(treeView.data[selection.currentIndex].guid).then(function() {
-                    doObserve = true;
-                });
-                search();
-            }
-        }
-        else {
-            if(Dialog.confirmDeletion(2)) {
-                var start = {};
-                var end =  {};
-                var numRanges = tree.view.selection.getRangeCount();
-                var data = treeView.data;
-                for (var t = 0; t < numRanges; t++){
-                    tree.view.selection.getRangeAt(t,start,end);
-                    for (var v = start.value; v <= end.value; v++){
-                        doObserve = false;
-                        manager.deleteNote(data[v].guid).then(function() {
-                            doObserve = true;
-                        });
-                    }
-                }
-                search();
-            }
-        }
+    else if (column.id === "url") {
+      value = note.url;
     }
-}
-
-
-function clear() {
-    if(treeView.selection) {
-        treeView.selection.clearSelection();
+    else if (column.id === "modification_date") {
+      value = note.modification_date.toLocaleString();
     }
-    inputBrdcast.setAttribute('disabled', true);
-    textBox.value="";
-    colorPicker.color = "";
-}
-
-function sort(column) {
-	var columnName;
-	var order = tree.getAttribute("sortDirection") === "ascending" ? 1 : -1;
-	//if the column is passed and it's already sorted by that column, reverse sort
-	if (column) {
-		columnName = column.id;
-		if (tree.getAttribute("sortResource") === columnName) {
-			order *= -1;
-		}
-	} else {
-		columnName = tree.getAttribute("sortResource");
-	}
-
-	function columnSort(a, b) {
-		if (prepareForComparison(a[columnName]) > prepareForComparison(b[columnName])) return 1 * order;
-		if (prepareForComparison(a[columnName]) < prepareForComparison(b[columnName])) return -1 * order;
-		//tie breaker: name ascending is the second level sort
-		if (columnName != "url") {
-			if (prepareForComparison(a["url"]) > prepareForComparison(b["url"])) return 1;
-			if (prepareForComparison(a["url"]) < prepareForComparison(b["url"])) return -1;
-		}
-		return 0;
-	}
-	treeView.data = treeView.data.sort(columnSort);
-	//setting these will make the sort option persist
-	tree.setAttribute("sortDirection", order === 1 ? "ascending" : "descending");
-	tree.setAttribute("sortResource", columnName);
-	tree.view = treeView;
-	//set the appropriate attributes to show to indicator
-	var cols = tree.getElementsByTagName("treecol");
-	for (var i = 0; i < cols.length; i++) {
-		cols[i].removeAttribute("sortDirection");
-	}
-	document.getElementById(columnName).setAttribute("sortDirection", order === 1 ? "ascending" : "descending");
-}
-
-//prepares an object for easy comparison against another. for strings, lowercases them
-function prepareForComparison(o) {
-	if (typeof o === "string") {
-		return o.toLowerCase();
-	}
-	return o;
-}
-
-
-var db = new FloatNotesSQLiteDatabase();
-var manager = FloatNotesManager.getInstance();
-
-var searchManager = {
-};
-
-
-var faviconService = Components.classes["@mozilla.org/browser/favicon-service;1"]
-                     .getService(Components.interfaces.nsIFaviconService);
-var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                  .getService(Components.interfaces.nsIIOService);
-
-var treeView = {
-    data: [],
-    get rowCount() {
-        return this.data.length;
+    else if (column.id === "creation_date") {
+      value = note.creation_date.toLocaleString();
+    }
+    return value;
     },
-    getCellText : function(row,column){
-        if (column.id === "content") return getTitle(this.data[row].content);
-        if (column.id === "url") return this.data[row].url;
-        if (column.id === "modification_date") return this.data[row].modification_date.toLocaleString();
-        if (column.id === "creation_date") return this.data[row].creation_date.toLocaleString();
-    },
-    setTree: function(treebox){ this.treebox = treebox; },
-    isContainer: function(row){ return false; },
-    isSeparator: function(row){ return false; },
-    isSorted: function(){ return false; },
-    getLevel: function(row){ return 0; },
-    getImageSrc: function(row,column){
-        if (column.id === "content") {
-            var note = this.data[row];
-            var url = FloatNotesURLHandler.getNoteUrl(note);
-            if(url.charAt(url.length - 1) === '*') {
-                url = url.substring(0, url.length);
-            }
-            return faviconService.getFaviconImageForPage(ioService.newURI(url, null, null)).spec;
-        }
+  setTree: function(treebox){ this.treebox = treebox; },
+  isContainer: function(row){ return false; },
+  isSeparator: function(row){ return false; },
+  isSorted: function(){ return true; },
+  getLevel: function(row){ return 0; },
+  getImageSrc: function(row, column){
+    var note = NoteManager.getNoteAtIndex(row);
+    if (column.id === "content") {
+      var url = FloatNotesURLHandler.getNoteUrl(note);
+      if(url.charAt(url.length - 1) === '*') {
+          url = url.substring(0, url.length);
+      }
+      try {
+        // Some URLs appear to be invalid, e.g. file: URLs
+        return faviconService.getFaviconImageForPage(
+          ioService.newURI(url, null, null)
+        ).spec;
+      }
+      catch(e) {
         return null;
-    },
-    getRowProperties: function(row,props){},
-    getCellProperties: function(row,col,props){},
-    getColumnProperties: function(colid,col,props){},
-    selectionChanged: function() {
-        var count = this.selection.count;
-        var note;
-        if(count === 0) {
-            inputBrdcast.setAttribute('disabled', true);
-            textBox.value = "";
-            colorPicker.value = "";
-
-        }
-        else if(count === 1) {
-            var index = this.selection.currentIndex;
-            note = this.data[index];
-            inputBrdcast.setAttribute('disabled', false);
-            textBox.disabled = false;
-            textBox.value = note.content;
-            colorPicker.color = note.color;
-        }
-        else {
-            textBox.value = "";
-            colorPicker.color = "";
-            inputBrdcast.setAttribute('disabled', true);
-            deleteButton.disabled = false;
-        }
-    },
-    cycleHeader: function(col) {
-
-    },
-    saveCurrentSelection: function() {
-        if(this.selection && this.selection.count === 1) {
-            var index = this.selection.currentIndex;
-            saveNote(textBox.value, 'content', index);
-            saveNote(colorPicker.color, 'color', index);
-        }
+      }
     }
-
+    return null;
+  },
+  getRowProperties: function(row,props){},
+  getCellProperties: function(row,col,props){},
+  getColumnProperties: function(colid,col,props){},
+  selectionChanged: function() {
+    NoteManager.updateForm();
+  },
+  cycleHeader: function(col) { },
 };
+
+Object.defineProperty(TreeView, 'rowCount', {
+  get: function() { return NoteManager.getNumberOfNotes(); }
+});
 
 SearchManager.buildList();
 observer.registerObserver();

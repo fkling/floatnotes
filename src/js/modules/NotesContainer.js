@@ -156,9 +156,7 @@ NotesContainer.prototype.detachNotes = function(notes_data){
  * @param {string} guid Note to be removed
  */
 NotesContainer.prototype.detachNote = function(guid) {
-  LOG('Detach note' + guid);
   var ref = this._getRefFor(guid);
-  LOG(ref);
   this._notes[ref].detach();
   delete this._notes[ref];
 };

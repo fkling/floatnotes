@@ -187,44 +187,13 @@ var Js = {
        result[i] = array[i][prop];
      }
      return result;
-   }
+   },
+
+  addEventListener: function(element, event, handler, phase) {
+    element.addEventListener(event, handler, phase);
+    return function removeHandler() {
+      element.removeEventListener(event, handler, phase);
+      element = handler = null;
+    };
+  }
 };
-
-(function() {
-  var eventListeners = {};
-
-  Js.addEventListener = function(element, event, func, phase, context, args) {
-    var listeners = eventListeners[event] || (eventListeners[event] = []),
-    orig_func = func;
-    phase = !!phase;
-
-    if(context) {
-      func = Js.bind.apply(Js, [func, context].concat(args || []));
-    }
-
-    listeners.push({
-      element: element,
-      func: func,
-      orig_func: orig_func,
-      context: context,
-      phase: phase
-    });
-    element.addEventListener(event, func, phase);
-  };
-
-  Js.removeEventListener = function(element, event, func, phase, context) {
-    var listeners = eventListeners[event] || [];
-
-    for(var i = listeners.length; i--; ) {
-      var listener = listeners[0];
-      if (listener.element === element && 
-          listener.orig_func === func && 
-          (!context || listener.context === context) &&
-          (typeof phase === 'undefined' || listener.phase === phase)) {
-        element.removeEventListener(event, listener.func, listener.phase);
-        listeners.splice(i, 1);
-        break;
-      }
-    }
-  };
-}());

@@ -22,15 +22,13 @@ var FloatNotesMediator = (function() {
           break;
 
           case 'floatnotes-note-delete':
-            current_main_ui.getNoteContainer().removeNote(guid);
-            manager.release(guid);
+            current_main_ui.getNoteContainer().detachNote(guid);
           break;
 
           case 'floatnotes-note-urlchange':
             // detach the note, "fallthrough" will add
             // the note again if needed
             current_main_ui.getNoteContainer().detachNote(guid);
-            manager.release(guid);
 
           case 'floatnotes-note-add':
             var locations = FloatNotesURLHandler.getSearchUrls(

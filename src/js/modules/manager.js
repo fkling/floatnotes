@@ -133,13 +133,11 @@ FloatNotesManager.prototype.createNote = function(location, x, y) {
  * @return {when.Promise}
 */
 FloatNotesManager.prototype.deleteNote = function(guid) {
-  var self = this;
-
-  return this._db.deleteNote(guid, function() {
-    self._observerService.notifyObservers(
+  return this._db.deleteNote(guid).then(function() {
+    this._observerService.notifyObservers(
       null,
       'floatnotes-note-delete',
       guid
     );
-  });
+  }.bind(this));
 };

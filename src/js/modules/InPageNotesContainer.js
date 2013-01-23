@@ -15,9 +15,10 @@ var EXPORTED_SYMBOLS = ["FloatNotesInPageNotesContainer"];
 // Some helper functions
 var getRefFrom = function getNoteFrom(element) {
     var note_node = element;
-    while (note_node && !note_node.classList.contains('floatnotes-note')) {
-      note_node = note_node.parentNode;
-      if (!note_node.classList) LOG(note_node.toString());
+    while (note_node &&
+      note_node.classList &&
+      !note_node.classList.contains('floatnotes-note')) {
+        note_node = note_node.parentNode;
     }
     return note_node.getAttribute('data-ref');
 };
@@ -69,15 +70,21 @@ Util.Js.inherits(InPageNotesContainer, FloatNotesNotesContainer);
 InPageNotesContainer.prototype._containerID = 'floatnotes-container';
 InPageNotesContainer.prototype._indicator = null;
 
-
-InPageNotesContainer.prototype._getContainer = function() {
-  var document = this._mainUI.getCurrentDocument(),
-  container = document.getElementById(this._containerID);
+InPageNotesContainer.prototype._getContainer = function(document) {
+  document = document || this.getCurrentDocument();
+  var container = document.getElementById(this._containerID);
+  var self = this;
 
   if (!container) {
     container = this._createContainer(document);
     container.id = this._containerID;
     document.body.parentNode.appendChild(container);
+    document.defaultView.addEventListener('unload', function handler() {
+      LOG('Unload detected');
+      self._detach(this.document);
+      this.removeEventListener('unload', handler, true);
+      self = container = null;
+   }, true);
   }
   return container;
 };
@@ -142,7 +149,7 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   }, true);
 
   container.addEventListener('mouseover', function(event) {
-    if (!(moving || resizing || options_open)) {
+    if (!(moving || resizing || options_open || isIndicator(event.target))) {
       event.stopPropagation();
       var note = self._notes[getRefFrom(event.target)] || self._newNote;
       note.mouseenter();
@@ -150,7 +157,7 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   }, false);
 
   container.addEventListener('mouseout', function(event) {
-    if (!(moving || resizing || options_open)) {
+    if (!(moving || resizing || options_open || isIndicator(event.target))) {
       event.stopPropagation();
       var note = self._notes[getRefFrom(event.target)] || self._newNote;
       note.mouseleave();
@@ -204,6 +211,14 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   return container;
 };
 
+InPageNotesContainer.prototype._detach = function(document) {
+  var notes = this._getNotesForDocument(document);
+  for (var guid in notes) {
+    notes[guid].detach();
+  }
+  Util.Dom.detach(this._getContainer(document));
+};
+
 InPageNotesContainer.prototype._getNotesForDocument = function(document) {
   var container = document.getElementById(this._containerID);
   var notes = {};
@@ -232,8 +247,8 @@ InPageNotesContainer.prototype._getRefFor = function(guid) {
     }
   }
 
-  var notes_on_page = 
-    this._getNotesForDocument(this._mainUI.getCurrentDocument());
+  var notes_on_page =
+    this._getNotesForDocument(this.getCurrentDocument());
   if (guid in notes_on_page) {
     return notes_on_page[guid].getRef();
   }

@@ -80,42 +80,50 @@ MainUI.prototype._registerEventHandlers = function() {
   "use strict";
   LOG('Register event handlers');
 
-  var window_activated_handler = this._onWindowActivated.bind(this);
-  var page_load_handler = this._onPageLoad.bind(this);
-  var tab_select_handler = this._onTabSelect.bind(this);
-  var hash_change_handler = this._onHashChange.bind(this);
-  var update_context_handler = this._updateContext.bind(this);
-  var update_contextmenu_handler = this._updateContextMenu.bind(this);
-
   // attach load handler
-  window.addEventListener('activate', window_activated_handler, true);
-  gBrowser.addEventListener('pageshow', page_load_handler, true);
-  gBrowser.tabContainer.addEventListener(
-    'TabSelect',
-    tab_select_handler,
-    false
-  );
-  gBrowser.addEventListener('hashchange', hash_change_handler, true);
-  window.addEventListener('contextmenu', update_context_handler, true);
-  window.addEventListener('contextmenu', update_contextmenu_handler, false);
+  var event_handlers = [
+    Util.Js.addEventListener(
+      window,
+      'activate',
+      this._onWindowActivated.bind(this),
+      true
+    ),
+    Util.Js.addEventListener(
+      gBrowser,
+      'pageshow',
+      this._onPageLoad.bind(this),
+      true
+    ),
+    Util.Js.addEventListener(
+      gBrowser.tabContainer,
+      'TabSelect',
+      this._onTabSelect.bind(this),
+      false
+    ),
+    Util.Js.addEventListener(
+      gBrowser,
+      'hashchange',
+      this._onHashChange.bind(this),
+      true
+    ),
+    Util.Js.addEventListener(
+      window,
+      'contextmenu',
+      this._updateContext.bind(this),
+      true
+    ),
+    Util.Js.addEventListener(
+      window,
+      'contextmenu',
+      this._updateContextMenu.bind(this),
+      true
+    )
+  ];
 
   // Bind logic to remove event handlers when the window closes
-  window.addEventListener('unload', function remove_handlers() {
-    window.removeEventListener('activate', window_activated_handler, true);
-    gBrowser.removeEventListener('pageshow', page_load_handler, true);
-    gBrowser.tabContainer.removeEventListener(
-      'TabSelect',
-      tab_select_handler,
-      false
-    );
-    gBrowser.removeEventListener('hashchange', hash_change_handler, true);
-    window.removeEventListener('contextmenu', update_context_handler, true);
-    window.removeEventListener(
-      'contextmenu',
-      update_contextmenu_handler,
-      false
-    );
-    window.removeEventListener('unload', remove_handlers, false);
+  window.addEventListener('unload', function handler() {
+    event_handlers.forEach(function(remove) { remove(); });
+    window.removeEventListener('unload', handler, false);
   }, false);
 };
 

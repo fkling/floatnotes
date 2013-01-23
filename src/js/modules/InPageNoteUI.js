@@ -155,22 +155,22 @@ InPageNoteUI.prototype._attachIframeEventHandlers = function(elements) {
   var event_handlers = [];
   // Propagate events
   event_handlers.push(Util.Js.addEventListener(
-    elements.content, 
-    'dblclick', 
+    elements.content,
+    'dblclick',
     fire.bind(null, 'dblclick'),
     true
   ));
 
   event_handlers.push(Util.Js.addEventListener(
-    elements.content, 
-    'mousedown', 
+    elements.content,
+    'mousedown',
     fire.bind(null, 'mousedown'),
     true
   ));
 
   event_handlers.push(Util.Js.addEventListener(
-    elements.content, 
-    'mouseup', 
+    elements.content,
+    'mouseup',
     fire.bind(null, 'mouseup'),
     true
   ));

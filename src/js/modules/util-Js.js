@@ -190,6 +190,7 @@ var Js = {
    },
 
   addEventListener: function(element, event, handler, phase) {
+    phase = phase === true || false;
     element.addEventListener(event, handler, phase);
     return function removeHandler() {
       element.removeEventListener(event, handler, phase);

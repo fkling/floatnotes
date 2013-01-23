@@ -29,11 +29,15 @@ NotesContainer.prototype.getLength = function() {
   return this._currentNotes.length;
 };
 
+NotesContainer.prototype.getCurrentDocument = function() {
+  return this._mainUI.getCurrentDocument();
+};
+
 NotesContainer.prototype._createNoteInstance = function(note_data) {
   return this._noteUIFactory.createInstance(
     note_data,
     this,
-    this._mainUI.getCurrentDocument()
+    this.getCurrentDocument()
   );
 };
 
@@ -91,7 +95,7 @@ NotesContainer.prototype.addNotes = function(notes_data) {
  */
 NotesContainer.prototype.setNotes = function(notes_data) {
   var current_notes =
-    this._getNotesForDocument(this._mainUI.getCurrentDocument());
+    this._getNotesForDocument(this.getCurrentDocument());
   var to_update = {};
   var to_add = {};
   this._currentNotes = [];

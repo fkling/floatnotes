@@ -236,9 +236,6 @@ MainUI.prototype.loadNotes = function() {
             this._noteContainer.focusNote(Shared.focusNote);
             Shared.focusNote = null;
           }
-          this._attachScrollHandlerTo(current_document);
-          // TODO: Needed?
-          this._noteContainer.update();
         }.bind(this)
       );
     }.bind(this),
@@ -299,26 +296,6 @@ MainUI.prototype._updateBroadcaster = function() {
   }
 };
 
-MainUI.prototype._attachScrollHandlerTo = function(doc) {
-  "use strict";
-  this._removeScrollHandler(doc);
-
-  // TODO: Needed?
-  var handler = Util.Js.debounce(
-    Util.Js.bind(this._noteContainer.update, this._noteContainer),
-    Preferences.scrolltimer
-  );
-
-  doc.addEventListener('scroll', handler, false);
-
-  this._removeScrollHandler = function() {
-    doc.removeEventListener('scroll', handler, false);
-    this._removeScrollHandler = Util.Js.empty;
-  };
-};
-
-MainUI.prototype._removeScrollHandler = Util.Js.empty;
-
 MainUI.prototype.addNote = function() {
   "use strict";
   var note = this._notesManager.createNote(
@@ -370,8 +347,6 @@ MainUI.prototype.toggleNotes = function() {
   var domain = this.getCurrentDocument().location;
   if (this._notesHiddenFor(domain)) {
     this._noteContainer.showNotes(); LOG('Nodes shown.');
-    // TODO: Needed?
-    this._noteContainer.update();
   }
   else {
     this._noteContainer.hideNotes(); LOG('Nodes hidden.');

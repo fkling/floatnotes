@@ -29,6 +29,10 @@ NotesContainer.prototype.getLength = function() {
   return this._currentNotes.length;
 };
 
+NotesContainer.prototype.getNotes = function() {
+  return this._currentNotes;
+};
+
 NotesContainer.prototype.getCurrentDocument = function() {
   return this._mainUI.getCurrentDocument();
 };
@@ -187,7 +191,6 @@ NotesContainer.prototype.deleteNote = function(guid) {
   }.bind(this));
 };
 
-NotesContainer.prototype.update = Util.Js.empty;
 NotesContainer.prototype.showNotes = Util.Js.empty;
 NotesContainer.prototype.hideNotes = Util.Js.empty;
 NotesContainer.prototype.focusNote = Util.Js.empty;

@@ -60,7 +60,7 @@ var isResizeHandler = function isResizeHandler(element) {
 // Class
 function InPageNotesContainer() {
   FloatNotesNotesContainer.call(this, FloatNotesInPageNoteUI);
-  this._indicator = new FloatNotesInPageIndicator();
+  this._indicator = new FloatNotesInPageIndicator(this);
 }
 
 var FloatNotesInPageNotesContainer = InPageNotesContainer;
@@ -256,11 +256,17 @@ InPageNotesContainer.prototype._getRefFor = function(guid) {
 
 InPageNotesContainer.prototype.setNotes = function(notes) {
   this.__super__.prototype.setNotes.call(this, notes);
-  this._indicator.setView(this);
-  this._indicator.attachTo(
-    this._mainUI.getCurrentDocument(),
-    this._getContainer()
-  );
+  this._indicator.attachTo(this._getContainer());
+};
+
+InPageNotesContainer.prototype.addNote = function() {
+  this.__super__.prototype.addNote.apply(this, arguments);
+  this._indicator.invalidate();
+};
+
+InPageNotesContainer.prototype.detachNote = function() {
+  this.__super__.prototype.detachNote.apply(this, arguments);
+  this._indicator.invalidate();
 };
 
 InPageNotesContainer.prototype.showNotes = function() {
@@ -271,17 +277,8 @@ InPageNotesContainer.prototype.hideNotes = function() {
     Util.Css.css(this._getContainer(), 'display', 'none');
 };
 
-InPageNotesContainer.prototype.update = function(){
-    LOG('UI updates');
-    this._indicator.redraw();
-    this._indicator.updateAndShow(
-      this._mainUI.getCurrentDocument(),
-      this._currentNotes
-    );
-};
-
-InPageNotesContainer.prototype.focusNote = function(noteId) {
-    var note = this._notes[noteId];
+InPageNotesContainer.prototype.focusNote = function(guid) {
+    var note = this._notes[this._getRefFor(guid)];
     if (note) {
         note.getElementNode().scrollIntoView(true);
     }

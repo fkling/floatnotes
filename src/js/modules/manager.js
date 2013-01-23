@@ -32,7 +32,6 @@ FloatNotesManager.prototype.getNote = function(guid) {
 */
 FloatNotesManager.prototype.getNotesFor =  function(location) {
   LOG('Get notes for ' + location);
-  LOG(Object.keys(FloatNotesURLHandler));
   return  this._db.getNotesForURLs(
     FloatNotesURLHandler.getSearchUrls(location)
   );

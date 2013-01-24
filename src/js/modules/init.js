@@ -93,7 +93,7 @@ var Init = {
 
         db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN protocol TEXT');
         db.executeSimpleSQL('UPDATE floatnotes SET protocol="http:"');
-      case Util.Platform.versionLessThan(from, "0.8"):
+      case Util.Platform.versionLessThan(from, "0.8pre1"):
         db.backup("0.7");
         db.executeSimpleSQL(
           'UPDATE floatnotes SET creation_date=creation_date/1000,' +

@@ -1,5 +1,5 @@
 //!#include "header.js"
-/*global LOG, Cu, Util */
+/*global LOG, Cu, Util, LOG*/
 //!#include "MainUI.js"
 /*global MainUI */
 
@@ -19,13 +19,11 @@ var Loader = {
         notify: function() {
           LOG('Floatnotes is loading...');
           Cu['import']('resource://floatnotes/init.js'); /*global Init:true*/
-          Init.init(function(firstrun) {
-            self.createFloatNotesView(firstrun);
-          });
+          Init.init().then(self.createFloatNotesView.bind(self));
         }
       };
       timer.initWithCallback(observer, 100, timer.TYPE_ONE_SHOT);
-    });
+    }, false);
 
     try {
       LOG('Import sync...');
@@ -62,6 +60,7 @@ var Loader = {
 
   installButton: function(toolbarId, id, afterId) {
     "use strict";
+    LOG('INSTALL BUTTON');
     if (!document.getElementById(id)) {
       var toolbar = document.getElementById(toolbarId);
 

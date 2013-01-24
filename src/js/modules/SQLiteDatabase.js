@@ -561,25 +561,23 @@ SQLiteDatabase.prototype.getAllIds = function() {
  * @return {Object}
  */
 SQLiteDatabase.prototype.createNoteFromRow_ = function(row) {
-    var data = {
-        x: row.getResultByName("x"),
-        y: row.getResultByName("y"),
-        id: row.getResultByName("id"),
-        url: row.getResultByName("url"),
-        protocol: row.getResultByName("protocol"),
-        content: row.getResultByName("content"),
-        w: row.getResultByName("w"),
-        h: row.getResultByName("h"),
-        status: row.getResultByName("status"),
-        color: row.getResultByName("color"),
-        guid: row.getResultByName('guid'),
-        modification_date:
-            new Date((+row.getResultByName('modification_date'))/1000),
-        creation_date:
-            new Date((+row.getResultByName('creation_date'))/1000)
-    };
+  var data = {
+    x: row.getResultByName("x"),
+    y: row.getResultByName("y"),
+    id: row.getResultByName("id"),
+    url: row.getResultByName("url"),
+    protocol: row.getResultByName("protocol"),
+    content: row.getResultByName("content"),
+    w: row.getResultByName("w"),
+    h: row.getResultByName("h"),
+    status: row.getResultByName("status"),
+    color: row.getResultByName("color"),
+    guid: row.getResultByName('guid'),
+    modification_date: new Date(+row.getResultByName('modification_date')),
+    creation_date: new Date(+row.getResultByName('creation_date'))
+  };
 
-    return data;
+  return data;
 };
 
 
@@ -589,8 +587,8 @@ SQLiteDatabase.prototype.createNoteFromRow_ = function(row) {
 SQLiteDatabase.prototype.backup = function() {
     var new_name = sprintf(
         '%s.%s.bak',
-        this.database_file.leafName,
+        this.file_.leafName,
         (new Date()).getTime()
     );
-    this.database_file.copyTo(null, new_name);
+    this.file_.copyTo(null, new_name);
 };

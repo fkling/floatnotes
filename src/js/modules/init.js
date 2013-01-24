@@ -66,9 +66,10 @@ var Init = {
 
     switch(true) {
       case Util.Platform.versionLessThan(from, "0.6"):
-        // Insert code if version is different here => upgrade
+        db.backup(from);
         db.executeSimpleSQL('UPDATE floatnotes SET color="#FCFACF"');
       case Util.Platform.versionLessThan(from, "0.7"):
+        db.backup("0.6");
         // Change column collapse to status
         db.executeSimpleSQL('ALTER TABLE floatnotes ADD COLUMN status INTEGER');
         db.executeSimpleSQL('UPDATE floatnotes SET status=32 WHERE collapse=1');
@@ -93,19 +94,14 @@ var Init = {
         db.executeSimpleSQL('Alter TABLE floatnotes ADD COLUMN protocol TEXT');
         db.executeSimpleSQL('UPDATE floatnotes SET protocol="http:"');
       case Util.Platform.versionLessThan(from, "0.8"):
-        LOG('FOO')
+        db.backup("0.7");
         db.executeSimpleSQL(
           'UPDATE floatnotes SET creation_date=creation_date/1000,' +
           'modification_date=modification_date/1000'
         );
-        LOG('BAR')
         upgraded = true;
     }
     Preferences.version = to;
-
-    if(upgraded) {
-        db.backup();
-    }
     return upgraded;
   }
 };

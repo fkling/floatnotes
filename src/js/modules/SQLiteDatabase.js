@@ -584,11 +584,15 @@ SQLiteDatabase.prototype.createNoteFromRow_ = function(row) {
 /**
  * Creates a backup of the DB by copying the DB file.
  */
-SQLiteDatabase.prototype.backup = function() {
+SQLiteDatabase.prototype.backup = function(version) {
+    var time = new Date();
     var new_name = sprintf(
-        '%s.%s.bak',
+        '%s_%s_%s_%s_%s.bak',
         this.file_.leafName,
-        (new Date()).getTime()
+        version,
+        time.getFullYear(),
+        time.getMonth() + 1,
+        time.getDate()
     );
     this.file_.copyTo(null, new_name);
 };

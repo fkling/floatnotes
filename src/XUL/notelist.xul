@@ -123,7 +123,7 @@
                   persist="width hidden"
                 />
               </treecols>  
-              <treechildren ondblclick="NoteManager.loadPage()"/>
+              <treechildren ondblclick="NoteManager.loadPageForSelectedNote()"/>
             </tree>
         </vbox>
         <splitter />

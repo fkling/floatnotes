@@ -285,7 +285,7 @@ var NoteManager = {
   },
 
   getSelectedNote: function() {
-    return TreeView.data[TreeView.selection.currentIndex];
+    return this._notesSorted[TreeView.selection.currentIndex];
   },
 
   hasSingleSelection: function() {

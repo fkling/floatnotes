@@ -1,0 +1,9 @@
+{
+  "unused": false,
+  "strict": true,
+  "curly": true,
+  "undef": true,
+  "globalstrict": true,
+  "eqnull": true,
+  "loopfunc": true
+}

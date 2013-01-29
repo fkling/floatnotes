@@ -7,9 +7,14 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     xmlns:html="http://www.w3.org/1999/xhtml" style="" buttons="accept,cancel,help" ondialoghelp="openHelp()">
 
-    <script  type="application/javascript" src="chrome://browser/content/utilityOverlay.js"/>
 
-    <prefpane id="note" label="&preferences.note.title;" selected="true" helpTopic="http://www.floatnotes.org/documentation/preferences">
+    <prefpane 
+      id="note" 
+      label="&preferences.note.title;" 
+      selected="true" 
+      helpTopic="http://www.floatnotes.org/documentation/preferences"
+      image="chrome://floatnotes/content/glyphicons_039_notes.png"
+    >
 		<preferences>
 			<preference id="pref-width" name="extensions.floatnotes.width" type="int" />
 			<preference id="pref-height" name="extensions.floatnotes.height" type="int" />
@@ -47,8 +52,13 @@
                 <label value="&preferences.note.font-size.unit;" />
             </hbox>
     </prefpane>
-    <prefpane id="location" label="&preferences.location.title;" helpTopic="http://www.floatnotes.org/documentation/preferences">
-        <preferences>
+    <prefpane 
+      id="location" 
+      label="&preferences.location.title;" 
+      helpTopic="http://www.floatnotes.org/documentation/preferences"
+      image="chrome://floatnotes/content/glyphicons_060_compass.png"
+    >
+    <preferences>
 			<preference id="pref-location" name="extensions.floatnotes.location" type="int" />
 			<preference id="pref-updateHash" name="extensions.floatnotes.updateOnHashChange" type="bool" />
 			<preference id="pref-includePageHash" name="extensions.floatnotes.includePageForHashURLs" type="bool" />
@@ -67,7 +77,12 @@
         <checkbox id="location-enableHash" preference="pref-updateHash" label="&preferences.location.updateHash;" oncommand="enableHashUrls()"/>
         <checkbox id="location-includePageHash" preference="pref-includePageHash" style="margin-left:15px" label="&preferences.location.includePageHash;" />
     </prefpane>
-    <prefpane id="view" label="&preferences.view.title;" helpTopic="http://www.floatnotes.org/documentation/preferences">
+    <prefpane 
+      id="view" 
+      label="&preferences.view.title;" 
+      helpTopic="http://www.floatnotes.org/documentation/preferences"
+      image="chrome://floatnotes/content/glyphicons_051_eye_open.png"
+    >
         <preferences>
             <preference id="pref-indicator" name="extensions.floatnotes.showIndicator" type="bool" />
             <preference id="pref-fadeout" name="extensions.floatnotes.fadeOutAfter" type="int" />
@@ -93,7 +108,12 @@
 
     </prefpane>
 
-    <prefpane id="notifications" label="&preferences.notifications.title;" helpTopic="http://www.floatnotes.org/documentation/preferences">
+    <prefpane 
+      id="notifications" 
+      label="&preferences.notifications.title;" 
+      helpTopic="http://www.floatnotes.org/documentation/preferences"
+      image="chrome://floatnotes/content/glyphicons_196_circle_exclamation_mark.png"
+    >
         <preferences>
             <preference id="pref-note_delete" name="extensions.floatnotes.confirmDelete" type="bool" />
 			<preference id="pref-site_not_supported" name="extensions.floatnotes.showSiteNotSupported" type="bool" />
@@ -103,14 +123,24 @@
         <checkbox label="&preferences.notifications.site_not_supported;" preference="pref-site_not_supported" />
 	</prefpane>
 
-    <prefpane id="sync" label="&preferences.sync.title;" helpTopic="http://www.floatnotes.org/documentation/preferences">
+    <prefpane 
+      id="sync" 
+      label="&preferences.sync.title;" 
+      helpTopic="http://www.floatnotes.org/documentation/preferences"
+      image="chrome://floatnotes/content/glyphicons_081_refresh.png"
+    >
         <preferences>
             <preference id="pref-sync" name="services.sync.engine.floatnotes" type="bool" />
 		</preferences>
         <checkbox  label="&preferences.sync.enable;" preference="pref-sync" />
     </prefpane>
 
-    <prefpane id="storage" label="&preferences.storage.title;" helpTopic="http://www.floatnotes.org/documentation/preferences">
+    <prefpane 
+      id="storage" 
+      label="&preferences.storage.title;" 
+      helpTopic="http://www.floatnotes.org/documentation/preferences"
+      image="chrome://floatnotes/content/glyphicons_144_folder_open.png"
+    >
         <preferences>
             <preference id="dbDir" name="extensions.floatnotes.dbDir" type="string" />
             <preference id="dbLocation" name="extensions.floatnotes.dbLocation" type="int" />
@@ -125,5 +155,6 @@
         </radiogroup>
     </prefpane>
 
+  <script  type="application/javascript" src="chrome://browser/content/utilityOverlay.js"/>
 	<script type="application/javascript" src="chrome://floatnotes/content/preferences.js" />
 </prefwindow>

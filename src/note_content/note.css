@@ -1,0 +1,119 @@
+html, body {
+  font-family: Arial, sans-serif !important;
+  text-align:left !important;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  -moz-box-sizing: border-box !important;
+}
+
+
+
+.content {
+  -moz-box-sizing: border-box;
+  position: absolute;
+  top: 0px;
+  left:0px;
+  bottom: 0;
+  right: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+textarea {
+  font-family: Arial, sans-serif !important;
+  font-size: inherit;
+  width: 100% !important;
+  height: 100% !important;
+  -moz-box-sizing: border-box !important;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index:1;
+  padding: 0;
+  margin: 0;
+  border: none !important;
+  outline: none !important;
+  resize: none !important;
+  background-color: inherit !important;
+  display: none;
+  color: inherit;
+}
+
+.note {
+  color: black;
+  position: absolute;
+  margin: 10px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.note.dark {
+  color: white !important;
+}
+
+.note.over:not(.edit) {
+  margin-left: 0px;
+}
+
+.note.over:not(.edit) .menu {
+  display: block;
+}
+
+.note.over .content {
+  margin-left: 30px;
+}
+
+.note .floatnotes-menuspacer {
+    position: absolute !important;
+    top:-10px !important;
+    left:-40px !important;
+    height: 100px !important;
+    display: none;
+    width:40px !important;
+    margin-right: -1px !important;
+}
+
+.note .menu {
+    width: 20px;
+    position: absolute;
+    display: none;
+    margin-left: 5px;
+}
+
+.menu-item {
+    color: #555;
+    display: block;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+}
+
+.menu-item i:before {
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.note.dark i:before {
+  color: white;
+}
+
+.menu-item:hover {
+    opacity: 1;
+}
+
+.note.dark .menu-item {
+    color: white;
+}
+
+.note.edit textarea {
+  display: block;
+}
+
+.note.edit .content {
+  display: none;
+}

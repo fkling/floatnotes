@@ -96,39 +96,6 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   var resizing = false;
   var options_open = false;
 
-  // Handle the click event on each note
-  container.addEventListener('click', function(event) {
-    LOG('click');
-    var target = event.target;
-    if (!isIndicator(target)) {
-      // must be a note then
-      var ref = getRefFrom(target);
-      var note = self._notes[ref] || self._newNote;
-      if (isFixButton(target)) {
-        event.stopPropagation();
-        event.preventDefault();
-        note.toggleFix(event);
-      }
-      else if (isDeleteButton(target)) {
-        note.del();
-      }
-      else if (isEditButton(target)) {
-        self._mainUI.openEditPopup(note, target, function(color, url) {
-          note.setUrl(url || note.getUrl());
-          note.setColor(color || note.getColor());
-          note.save();
-          note.update();
-          options_open = false;
-          note.mouseleave();
-        });
-        options_open = true;
-      }
-      else if (isNote(target) || isContent(target)) {
-        note.unminimizeAndSave();
-      }
-    }
-  }, true);
-
   container.addEventListener('dblclick', function(event) {
     var note;
     var target = event.target;
@@ -136,15 +103,6 @@ InPageNotesContainer.prototype._createContainer = function(document) {
       event.stopPropagation();
       note = self._notes[getRefFrom(target)] || self._newNote;
       note.minimizeAndSave();
-    }
-    else if (isContent(target) || target.nodeName !== 'A') {
-      event.stopPropagation();
-      note = self._notes[getRefFrom(target)] || self._newNote;
-      if (!note.isValid()) {
-        Util.Dialog.showTamperDetectionAlert();
-        return;
-      }
-      note.startEdit();
     }
   }, true);
 
@@ -192,13 +150,15 @@ InPageNotesContainer.prototype._createContainer = function(document) {
 
   container.addEventListener('mouseup', function() {
     LOG('mouseup');
-    moving = resizing = false;
-    Util.Css.removeClass(container, 'moving');
-    Util.Css.removeClass(container, 'overlay');
-    Util.Css.css(container, {
-      width: 0,
-      height: 0
-    });
+    if (moving || resizing) {
+      moving = resizing = false;
+      Util.Css.removeClass(container, 'moving');
+      Util.Css.removeClass(container, 'overlay');
+      Util.Css.css(container, {
+        width: 0,
+        height: 0
+      });
+    }
   }, true);
 
   container.addEventListener('contextmenu', function(event) {
@@ -209,6 +169,10 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   }, true);
 
   return container;
+};
+
+InPageNotesContainer.prototype.openEditPopup = function(note, element, cb) {
+  this._mainUI.openEditPopup(note, element, cb);
 };
 
 InPageNotesContainer.prototype._detach = function(document) {

@@ -17,7 +17,6 @@
     z-index: 99999;
 }
 
-
 #floatnotes-container.overlay {
     width: 100%;
     height: 100%;
@@ -25,8 +24,6 @@
 
 .floatnotes-note {
     border: 1px solid #555 !important;
-    font-family: Arial, sans-serif !important;
-    text-align:left !important;
     min-height: 80px !important;
     min-width: 60px !important;
     -moz-box-shadow: 0px 0px 5px #888 !important;
@@ -34,13 +31,6 @@
     box-shadow: 0px 0px 5px #888 !important;
     border-radius: 5px !important;
     position: absolute !important;
-    color: black !important;
-}
-
-.floatnotes-note * {
-    padding:0 !important;
-    margin:0 !important;
-    font-family: Arial, sans-serif !important;
 }
 
 .floatnotes-note.small {
@@ -58,26 +48,29 @@
     padding: 0px !important;
 }
 
+.floatnotes-note.small > * {
+    display:none !important;
+}
+
+.floatnotes-note.edit {
+    border-color: red !important;
+    border-width: 2px !important;
+}
+
 .floatnotes-note.fixed {
     position: fixed !important;
     border-width: 2px !important;
 }
 
-.floatnotes-note.small > * {
-    display:none !important;
-
+.floatnotes-note.over:not(.edit) {
+  margin-left: -20px;
 }
 
-.floatnotes-note.note-edit {
-    border-color: red !important;
-    border-width: 2px !important;
-}
-
-.floatnotes-note .floatnotes-drag{
+.floatnotes-note .floatnotes-drag {
     height: 20px !important;
     cursor: move !important;
-    margin-top:-18px !important;
-    margin-left: -1px !important;
+    top: -18px !important;
+    left: -1px !important;
     border: 1px solid #555 !important;
     border-bottom: none !important;
     width: 100% !important;
@@ -89,19 +82,8 @@
     text-align: right !important;
     vertical-align: middle !important;
     background-color: inherit !important;
+    position: absolute;
 }
-
-.floatnotes-note.note-edit .floatnotes-drag {
-    border-color: red !important;
-    border-width: 2px !important;
-    margin-left: -2px !important;
-}
-
-.floatnotes-note.fixed .floatnotes-drag {
-    border-width: 2px !important;
-    margin-left: -2px !important;
-}
-
 
 .floatnotes-note .floatnotes-drag-handler {
     background-color: #222 !important;
@@ -116,87 +98,19 @@
     border-radius: 5px;
 }
 
-.floatnotes-note.dark .floatnotes-drag  .floatnotes-drag-handler {
-   background-color: white !important;
-}
-
-.floatnotes-note .floatnotes-menuspacer {
-    position: absolute !important;
-    top:-10px !important;
-    left:-40px !important;
-    height: 100px !important;
-    display: none;
-    width:40px !important;
-    margin-right: -1px !important;
-}
-
-.floatnotes-note.fixed .floatnotes-menuspacer {
-    /*margin-right:-2px;*/
-}
-
-.floatnotes-note .floatnotes-menu {
-    width: 20px !important;
-    float:right !important;
-    border: 1px solid #555 !important;
-    border-right: none !important;
-    -moz-border-radius: 5px 0px 0px 5px !important;
-    border-radius: 5px 0px 0px 5px !important;
-    padding-left: 3px !important;
-    padding-right: 3px !important;
-}
-
-.floatnotes-note.fixed .floatnotes-menu {
+.floatnotes-note.edit .floatnotes-drag {
+    border-color: red !important;
     border-width: 2px !important;
+    margin-left: -1px !important;
 }
 
-.floatnotes-note.note-edit .floatnotes-menuspacer {
-   display: none !important; 
+.floatnotes-note.fixed .floatnotes-drag {
+    border-width: 2px !important;
+    margin-left: -1px !important;
 }
 
-
-.floatnotes-note .floatnotes-menu-entry {
-    color: #555 !important;
-    background-repeat: no-repeat;
-	display: block !important;
-    cursor: pointer !important;
-    width: 20px !important;
-    height: 20px !important;
-    margin: 5px 0px !important;
-    font-size: 25px;
-    line-height: 25px;
-    opacity: 0.6;
-}
-
-.floatnotes-note.dark .floatnotes-menu-entry {
-    color: white !important;    
-}
-
-.floatnotes-note .floatnotes-menu-entry:hover {
-    opacity: 1;
-}
-
-.floatnotes-note .floatnotes-togglefix {
-    background-image: url('chrome://floatnotes/skin/pin_off.png') !important;
-}
-
-.floatnotes-note .floatnotes-togglefix:hover {
-    background-image: url('chrome://floatnotes/skin/pin_off_hover.png') !important;
-}
-
-.floatnotes-note .floatnotes-edit {
-    background-image: url('chrome://floatnotes/skin/settings1_small.png') !important;
-}
-
-.floatnotes-note .floatnotes-edit:hover {
-    background-image: url('chrome://floatnotes/skin/settings1_small_hover.png') !important;
-}
-
-.floatnotes-note .floatnotes-delete {
-    /*background-image: url('chrome://floatnotes/skin/delete_small.png') !important;*/
-}
-
-.floatnotes-note .floatnotes-delete:hover {
-    /*background-image: url('chrome://floatnotes/skin/delete_small_hover.png') !important;*/
+.floatnotes-note.dark .floatnotes-drag .floatnotes-drag-handler {
+   background-color: white !important;
 }
 
 .floatnotes-note .floatnotes-resize {
@@ -210,47 +124,27 @@
     background-image: url('chrome://floatnotes/skin/resize.png') !important;
 }
 
-.floatnotes-note iframe {
-	padding: 5px !important;
-    overflow:auto !important;
-    position:absolute !important;
-    top: 0 !important;
-    /*bottom: 0 !important;*/
-    left:0 !important;
-    /*right:0 !important;*/
-    z-index:-1 !important;
-    -moz-box-sizing: border-box !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    height: 100% !important;
-    -moz-border-radius: 5px !important;
-    border-radius: 5px !important;
-    background-color: inherit !important;
-    border: none !important;
-    outline: none !important;
+.floatnotes-note .floatnotes-frame,
+.floatnotes-note .iframe-fix {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  border: none !important;
 }
 
 .floatnotes-note .iframe-fix {
-    top: 0 !important;
-    left: 0 !important;
-    position: absolute;
-    -moz-box-sizing: border-box !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    height: 100% !important;
-    display:none;
+  display: none !important;
 }
 
+.floatnotes-note.ifix .iframe-fix {
+  display: block !important;
+  z-index: 10 !important;
+}
+
+
 #floatnotes-container.moving .iframe-fix {
-    display: block;
-} 
-
-/* ------ Note content style ---- */
-
-
-
-
-
+  display: block !important;
+}
 
 /*  ----- Indicator styles ----- */
 

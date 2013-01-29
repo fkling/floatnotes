@@ -1,6 +1,7 @@
 resource floatnotes modules/ 
 
 content floatnotes content/
+content floatnotes_note note_content/ contentaccessible=yes
 
 overlay chrome://browser/content/browser.xul chrome://floatnotes/content/floatnotes.xul
 

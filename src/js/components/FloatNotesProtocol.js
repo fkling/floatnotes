@@ -11,8 +11,9 @@ FloatnotesAboutHandler.prototype = {
     defaultPort: -1,
     protocolFlags: ph.URI_LOADABLE_BY_ANYONE,
     newChannel : function(aURI) {
+        var path = "chrome://floatnotes_note/content/note.html";
         var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-        var channel = ios.newChannel("chrome://floatnotes/content/note.html", null, null);
+        var channel = ios.newChannel(path, null, null);
         channel.originalURI = aURI;
         channel.owner = null;
         return channel;

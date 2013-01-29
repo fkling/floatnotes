@@ -12,10 +12,7 @@
 
 	<property name="dist.dir" location="dist" />
 	<property name="debug.dir" location="debug" />
-	<property name="test.dir" location="${build.dir}/test" />
 	
-	<loadproperties srcfile="mac.properties" />
-
 	<property name="cpp.debug" value="0" />
 	<property name="cpp.testrun" value="0" />
 
@@ -39,8 +36,11 @@
 	</target>
 
 	<target name="-copy" depends="-init">
-        <copy todir="${build.dir}" file="LICENSE" />
-        <copy todir="${build.dir}/content">
+    <copy todir="${build.dir}" file="LICENSE" />
+    <copy todir="${build.dir}/note_content">
+			<fileset dir="${src.dir}/note_content" />
+		</copy>	
+    <copy todir="${build.dir}/content">
 			<fileset dir="${src.dir}/XUL" />
 		</copy>	
 		<copy todir="${build.dir}/defaults/preferences">
@@ -63,18 +63,6 @@
 		<copy todir="${build.dir}" filtering="true">
 			<fileset dir="META" />
 		</copy>
-	</target>
-
-	<target name="-lauch_debug_server" unless="${debug_server.running}">
-        <echo>Start test server...</echo>
-        <propertyfile file="mac.properties" comment="Server properties">
-			<entry key="debug_server.running" value="true" />
-		</propertyfile>
-		<exec executable="${debug_server}" spawn="yes">
-			<arg line="${debug_server.args}" />
-        </exec>
-        <echo> Wait for test server to come up...</echo>
-		<sleep seconds="10" />
 	</target>
 
 	<target name="build" depends="-copy">

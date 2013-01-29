@@ -1,6 +1,5 @@
 //!#include "../header.js"
-/*global Util*/
-
+/*global Util, LOG, Cu*/
 "use strict";
 
 Cu['import']('resource://floatnotes/preferences.js');
@@ -40,131 +39,136 @@ InPageNoteUI.prototype.getElementNode = function() {
 };
 
 InPageNoteUI.prototype._attachTo = function(container) {
+  this._containerElementNode = container;
   if (this._document) {
     if (this._domElements === null) {
       this._domElements = this._createDomElements(this._document);
       this._elementNode = this._domElements.container;
     }
     container.appendChild(this._elementNode);
-    if (this._domElements.content_frame.src !== 'floatnotes:blank') {
-      this._domElements.content_frame.src = 'floatnotes:blank';
+    if (this._domElements.frame.src !== 'floatnotes:blank') {
+      this._domElements.frame.src = 'floatnotes:blank';
     }
   }
 };
 
 InPageNoteUI.prototype._createDomElements = function(doc) {
-  var container;
-  var drag;
-  var resize;
-  var content_frame;
-  var content;
-  var text;
-  var ifix;
-  var fixer;
-  var edit;
-  var del;
-  var menuspacer;
-  var menu;
+  // Main container, added to web page. Contains drag handler, resize handler
+  // and inner container
+  var outer_container = doc.createElement('div');
+  outer_container.className = 'floatnotes-note';
 
-  container = doc.createElement('div');
-  container.className = 'floatnotes-note';
+  // iframe
+  var frame = doc.createElement('iframe');
+  frame.className = 'floatnotes-frame';
 
-  drag = doc.createElement('div');
+  // Inner container, contains the note text, menu and textarea
+  var inner_container = doc.createElement('div');
+  inner_container.className = 'note';
+
+  // Drag handler
+  var drag = doc.createElement('div');
   drag.className = 'floatnotes-drag';
   drag.innerHTML = '<div class="floatnotes-drag-handler"></div>';
 
-  menuspacer = doc.createElement('div');
-  menuspacer.className = 'floatnotes-menuspacer';
-
-  menu = doc.createElement('div');
-  menu.className = 'floatnotes-menu';
-
-  fixer = doc.createElement('span');
-  fixer.className = 'floatnotes-togglefix floatnotes-menu-entry';
-  fixer.title = Util.Locale.get('note.menu.pin');
-
-  edit = doc.createElement('span');
-  edit.className = 'floatnotes-edit floatnotes-menu-entry';
-  edit.title = Util.Locale.get('note.menu.edit');
-
-  del = doc.createElement('span');
-  del.className = 'floatnotes-delete floatnotes-menu-entry';
-  del.title = Util.Locale.get('note.menu.delete');
-  del.innerHTML = '&#x2717;';
-
-  content_frame = doc.createElement('iframe');
-  content_frame.className = 'floatnotes-content';
-  content_frame.src = 'floatnotes:blank';
-
-  content = doc.createElement('div');
-  content.className = 'floatnotes-content';
-
-  resize = doc.createElement('div');
+  // Resize handler
+  var resize = doc.createElement('div');
   resize.className = 'floatnotes-resize';
 
-  text = doc.createElement('textarea');
-  text.className = 'floatnotes-text';
-  text.style.cssText = 'display: none;';
+  // Menu
+  var menu = doc.createElement('div');
+  menu.className = 'menu';
+
+  var pin_menu_item = doc.createElement('span');
+  pin_menu_item.className = 'menu-item pushpin glyphicons';
+  pin_menu_item.title = Util.Locale.get('note.menu.pin');
+  pin_menu_item.appendChild(doc.createElement('i'));
+
+  var edit_menu_item = doc.createElement('span');
+  edit_menu_item.className = 'menu-item cogwheel glyphicons';
+  edit_menu_item.title = Util.Locale.get('note.menu.edit');
+  edit_menu_item.appendChild(doc.createElement('i'));
+
+  var delete_menu_item = doc.createElement('span');
+  delete_menu_item.className = 'menu-item remove_2 glyphicons';
+  delete_menu_item.title = Util.Locale.get('note.menu.delete');
+  delete_menu_item.appendChild(doc.createElement('i'));
+
+  // Contains the note text
+  var content = doc.createElement('div');
+  content.className = 'content';
+
+  // Textarea
+  var text = doc.createElement('textarea');
   text.rows = 1;
   text.cols = 1;
 
-  ifix = doc.createElement('div');
-  ifix.className = 'iframe-fix';
+  // While dragging, this element overlays the iframe to prevent the event
+  // from breaking
+  var iframe_fix = doc.createElement('div');
+  iframe_fix.className = 'iframe-fix';
 
   // Combine elements
 
-  menu.appendChild(fixer);
-  menu.appendChild(edit);
-  menu.appendChild(del);
+  menu.appendChild(pin_menu_item);
+  menu.appendChild(edit_menu_item);
+  menu.appendChild(delete_menu_item);
 
-  menuspacer.appendChild(menu);
+  inner_container.appendChild(menu);
+  inner_container.appendChild(content);
+  inner_container.appendChild(text);
 
-  container.appendChild(drag);
-  container.appendChild(menuspacer);
-  container.appendChild(content_frame);
-  container.appendChild(ifix);
-  container.appendChild(resize);
+  outer_container.appendChild(drag);
+  outer_container.appendChild(frame);
+  outer_container.appendChild(iframe_fix);
+  outer_container.appendChild(resize);
 
  var domElements = {
-    container: container,
+    container: outer_container,
     drag: drag,
     resize: resize,
-    content_frame: content_frame,
-    content: content,
-    text: text,
-    fixer: fixer,
-    ifix: ifix,
-    edit: edit,
-    del: del,
+    iframe_fix: iframe_fix,
+    inner_container: inner_container,
+    frame: frame,
     menu: menu,
-    menuspacer: menuspacer
+    pin_menu_item: pin_menu_item,
+    edit_menu_item: edit_menu_item,
+    delete_menu_item: delete_menu_item,
+    content: content,
+    text: text
   };
 
-  this._attachIframeEventHandlers(domElements);
+  this._attachEventHandlers(domElements);
 
   return domElements;
 };
 
-InPageNoteUI.prototype._attachIframeEventHandlers = function(elements) {
+InPageNoteUI.prototype._attachEventHandlers = function(elements) {
   var fireEvent = Util.Dom.fireEvent;
-  var frame = elements.content_frame;
+  var frame = elements.frame;
   var fire = function(event) {
     fireEvent(frame.ownerDocument, frame, event);
   };
   
   var event_handlers = [];
-  // Propagate events
+  // Handle and propagate events
   event_handlers.push(Util.Js.addEventListener(
     elements.content,
     'dblclick',
-    fire.bind(null, 'dblclick'),
+    function() {
+      if (!this.isValid()) {
+        Util.Dialog.showTamperDetectionAlert();
+        return;
+      }
+      this.startEdit();
+    }.bind(this),
     true
   ));
 
   event_handlers.push(Util.Js.addEventListener(
     elements.content,
     'mousedown',
-    fire.bind(null, 'mousedown'),
+    this.raiseToTop.bind(this),
     true
   ));
 
@@ -182,10 +186,12 @@ InPageNoteUI.prototype._attachIframeEventHandlers = function(elements) {
     function(e) {
       if (e.target.nodeName === 'A') {
         e.preventDefault();
-        frame.ownerDocument.defaultView.location = e.target.href;
+        fireEvent(frame.ownerDocument, e.target, e);
       }
-      fire('click');
-    },
+      else {
+        this.unminimizeAndSave();
+      }
+    }.bind(this),
     true
   ));
 
@@ -198,28 +204,61 @@ InPageNoteUI.prototype._attachIframeEventHandlers = function(elements) {
     false
   ));
 
-  elements.content_frame.addEventListener('load', function handler(e) {
+  event_handlers.push(Util.Js.addEventListener(
+    elements.pin_menu_item,
+    'click',
+    this.toggleFix.bind(this),
+    false
+  ));
+
+  event_handlers.push(Util.Js.addEventListener(
+    elements.delete_menu_item,
+    'click',
+    this.del.bind(this),
+    false
+  ));
+
+  event_handlers.push(Util.Js.addEventListener(
+    elements.edit_menu_item,
+    'click',
+    function(event) {
+      this._editPopupOpen = true;
+      this._container.openEditPopup(this, event.target, function(color, url) {
+        this._editPopupOpen = false;
+        if (url) {
+          this.setUrl(url);
+        }
+        if (color) {
+          this.setColor(color);
+        }
+        this.save();
+        this.update();
+        this.mouseleave();
+      }.bind(this));
+    }.bind(this),
+    false
+  ));
+
+  var self = this;
+
+  frame.addEventListener('load', function handler(e) {
     e.preventDefault();
     e.stopPropagation();
     if (this.src !== 'floatnotes:blank') {
       Util.Dialog.showTamperDetectionAlert();
       return;
     }
-    var body = this.contentDocument.body;
-    body.appendChild(elements.content);
-    body.appendChild(elements.text);
+    this.contentDocument.body.appendChild(elements.inner_container);
     this.contentDocument.addEventListener('contextmenu', function(e) {
       e.stopPropagation();
       fire('contextmenu');
     }, true);
-    if (elements.text.style.display === 'block') {
-      elements.text.focus();
-    }
-    this.removeEventListener('load', handler, false);
+    // If the texarea is visible, this will give it focus
+    elements.text.focus();
   }, false);
 
   // cleanup
-  this._removeIframeEventHandlers = function() {
+  this._removeEventHandlers = function() {
     event_handlers.forEach(function(remove) { remove();});
     elements = frame = event_handlers = fire = null;
   };
@@ -231,7 +270,7 @@ InPageNoteUI.prototype._detach = function() {
     this._document = null;
     this._container = null;
     // remove all iframe event handlers
-    this._removeIframeEventHandlers();
+    this._removeEventHandlers();
   }
 };
 
@@ -254,22 +293,22 @@ InPageNoteUI.prototype.startEdit = function() {
   var textarea = this._domElements.text;
   var window = Util.Mozilla.getRecentWindow();
 
-  // hide redndered text
-  Util.Css.hide(this._domElements.content);
+
+  // set note state
+  Util.Css.addClass(this._elementNode, 'edit');
+  Util.Css.addClass(this._domElements.inner_container, 'edit');
+  this.setStatus(FloatNotesNoteUI.STATUS.EDITING);
+  // since menu is hidden we have to adjust the size of the note again
+  this._elementNode.style.width = this._noteData.w + 'px';
 
   // update texarea with note text and focus it
   textarea.value = this._noteData.content;
-  Util.Css.show(textarea);
   textarea.focus();
-
-  // set note state
-  Util.Css.addClass(this._elementNode, 'note-edit');
-  this.setStatus(FloatNotesNoteUI.STATUS.EDITING);
 
   // listen for edit end
   var event_handlers = [
     Util.Js.addEventListener(window, 'keydown', this.endEdit.bind(this), true),
-    Util.Js.addEventListener(window, 'click', this.endEdit.bind(this), false),
+    Util.Js.addEventListener(window, 'click', this.endEdit.bind(this), false)
   ];
   this._removeEditHandlers = function() {
     event_handlers.forEach(function(remove) { remove(); });
@@ -313,13 +352,9 @@ LOG('end edit');
   if (finish) {
     this._removeEditHandlers();
 
-    Util.Css.show(this._domElements.content);
-    Util.Css.hide(this._domElements.text);
-
-    Util.Css.removeClass(this._elementNode, 'note-edit');
-    if (this.hasStatus(FloatNotesNoteUI.STATUS.EDITING)) {
-      this.unsetStatus(FloatNotesNoteUI.STATUS.EDITING);
-    }
+    Util.Css.removeClass(this._elementNode, 'edit');
+    Util.Css.removeClass(this._domElements.inner_container, 'edit');
+    this.unsetStatus(FloatNotesNoteUI.STATUS.EDITING);
     Util.Mozilla.notifyObserver('floatnotes-note-edit', false);
 
     // if the node was new and no text was entered, remove it
@@ -333,19 +368,20 @@ InPageNoteUI.prototype.startMove = function(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  var x = this._noteData.x - e.pageX,
-  y = this._noteData.y - e.pageY;
-
+  var x = this._noteData.x - e.pageX;
+  var y = this._noteData.y - e.pageY;
+  var opacity = this._elementNode.style.opacity || 1;
+  
   this._elementNode.style.opacity = Preferences.draggingTransparency;
-
   this.setStatus(FloatNotesNoteUI.STATUS.DRAGGING);
+  Util.Css.addClass(this._elementNode, 'ifix');
 
   var window = Util.Mozilla.getRecentWindow();
   var event_handlers = [
     Util.Js.addEventListener(
       window,
       'mouseup',
-      this.endMove.bind(this, this._elementNode.style.opacity || 1),
+      this.endMove.bind(this, opacity),
       true
     ),
     Util.Js.addEventListener(
@@ -406,6 +442,8 @@ InPageNoteUI.prototype.endMove = function(opacity, e) {
 
   this.setStatus(FloatNotesNoteUI.STATUS.NEEDS_SAVE);
   this.unsetStatus(FloatNotesNoteUI.STATUS.DRAGGING);
+  Util.Css.removeClass(this._elementNode, 'ifix');
+
   this._elementNode.style.opacity = opacity;
   this._noteData.x = parseInt(this._elementNode.style.left, 10);
   this._noteData.y = parseInt(this._elementNode.style.top, 10);
@@ -422,19 +460,21 @@ InPageNoteUI.prototype.startResize = function(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  var width = this._noteData.w - e.pageX,
-  height = this._noteData.h - e.pageY;
+  var width = this._noteData.w - e.pageX;
+  var height = this._noteData.h - e.pageY;
+  var opacity = this._elementNode.style.opacity || 1;
 
   this._elementNode.style.opacity = Preferences.draggingTransparency;
 
   this.setStatus(FloatNotesNoteUI.STATUS.RESIZE);
 
+  Util.Css.addClass(this._elementNode, 'ifix');
   var window = this.getWindow();
   var event_handlers = [
     Util.Js.addEventListener(
       window,
       'mouseup',
-      this.endResize.bind(this, this._elementNode.style.opacity || 1),
+      this.endResize.bind(this, opacity),
       true
     ),
     Util.Js.addEventListener(
@@ -443,7 +483,7 @@ InPageNoteUI.prototype.startResize = function(e) {
       this.onResize.bind(
         this,
         this.getWindow(),
-        width,
+        width + 20, // add 20 because of hovering over the note
         height,
         this._noteData.x,
         this._noteData.y,
@@ -497,10 +537,12 @@ InPageNoteUI.prototype.endResize = function(opacity, e) {
 
   this.setStatus(FloatNotesNoteUI.STATUS.NEEDS_SAVE);
   this.unsetStatus(FloatNotesNoteUI.STATUS.RESIZING);
+  Util.Css.removeClass(this._elementNode, 'ifix');
 
   style.opacity = opacity;
-  this._noteData.w = style.width = Math.max(parseInt(style.width, 10) , 60);
-  this._noteData.h = style.height = Math.max(parseInt(style.height, 10), 80);
+  // -20 px to compensate hovering
+  this._noteData.w = Math.max(parseInt(style.width, 10) - 20, 60);
+  this._noteData.h = Math.max(parseInt(style.height, 10), 80);
   this.save();
 
   this._removeResizeHandlers();
@@ -558,17 +600,29 @@ InPageNoteUI.prototype.mouseenter = function() {
   if (this.hasStatus(FloatNotesNoteUI.STATUS.MINIMIZED)) {
     this.unminimize();
   }
+  Util.Css.addClass(this._elementNode, 'over');
+  Util.Css.addClass(this._domElements.inner_container, 'over');
+  if (!this.hasStatus(FloatNotesNoteUI.STATUS.EDITING)) {
+    this._elementNode.style.width = (this._noteData.w + 20) + 'px';
+  }
 
-  Util.Css.show(elements.drag, elements.resize, elements.menuspacer);
+  Util.Css.show(elements.drag, elements.resize);
 };
 
 InPageNoteUI.prototype.mouseleave = function() {
-  var elements = this._domElements;
+  if (!this._editPopupOpen) {
+    var elements = this._domElements;
 
-  Util.Css.hide(elements.drag, elements.resize, elements.menuspacer);
+    Util.Css.hide(elements.drag, elements.resize);
+    Util.Css.removeClass(this._elementNode, 'over');
+    Util.Css.removeClass(this._domElements.inner_container, 'over');
+    if (!this.hasStatus(FloatNotesNoteUI.STATUS.EDITING)) {
+      this._elementNode.style.width = this._noteData.w + 'px';
+    }
 
-  if (this.hasStatus(FloatNotesNoteUI.STATUS.MINIMIZED)) {
-    this.minimize();
+    if (this.hasStatus(FloatNotesNoteUI.STATUS.MINIMIZED)) {
+      this.minimize();
+    }
   }
 };
 
@@ -577,8 +631,6 @@ InPageNoteUI.prototype.raiseToTop  = function() {
   maxz = +element.style.zIndex,
   siblings = element.parentNode.childNodes,
   t, sibling;
-
-  AT(element, 'Element does exist');
 
   for (var i = siblings.length; i--;) {
     t = 0;
@@ -602,11 +654,9 @@ InPageNoteUI.prototype._updateDOMElements = function() {
     'width:' + this._noteData.w + 'px',
     'height:' + this._noteData.h + 'px',
     'z-index:' + ZINDEX,
-    'opacity:' + Preferences.transparency,
-    'font-size:' + Preferences.fontSize + 'px'
+    'opacity:' + Preferences.transparency
   ].join(';');
-  elements.content.style.fontSize = Preferences.fontSize + 'px';
-  elements.text.style.fontSize = Preferences.fontSize + 'px';
+  elements.inner_container.style.fontSize = Preferences.fontSize + 'px';
   elements.content.innerHTML =
     this._markdownParser.makeHtml(this._noteData.content);
   elements.content.title = Util.Locale.get(
@@ -616,8 +666,7 @@ InPageNoteUI.prototype._updateDOMElements = function() {
   elements.menu.style.backgroundColor = this._noteData.color;
 
   var darkColor = Util.Css.isDarkColor(this._noteData.color);
-  Util.Css.toggleClass(elements.content, 'dark', darkColor);
-  Util.Css.toggleClass(elements.text, 'dark', darkColor);
+  Util.Css.toggleClass(elements.inner_container, 'dark', darkColor);
   Util.Css.toggleClass(elements.container, 'dark', darkColor);
 
   // set meta data
@@ -629,7 +678,7 @@ InPageNoteUI.prototype._updateDOMElements = function() {
 
 InPageNoteUI.prototype.isValid = function() {
   if (this._domElements) {
-    return this._domElements.content_frame.src === 'floatnotes:blank';
+    return this._domElements.frame.src === 'floatnotes:blank';
   }
   return false;
 };

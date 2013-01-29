@@ -1,5 +1,5 @@
 //!#include "../header.js"
-/*global Util, LOG*/
+/*global Util, LOG, Cu*/
 "use strict";
 
 Cu['import']("resource://floatnotes/preferences.js");
@@ -74,7 +74,7 @@ Indicator.prototype.buildList = function(notes) {
   if (this._invalid || this._lastCount !== notes.length) {
     LOG(notes.length + ' notes ' + this._label);
     notes.sort(function(a, b) {
-      return a.getNoteData().x - b.getNoteData().x;
+      return a.getNoteData().y - b.getNoteData().y;
     });
 
     var list = this._domElements.list;

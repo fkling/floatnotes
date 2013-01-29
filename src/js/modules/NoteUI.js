@@ -217,12 +217,16 @@ NoteUI.prototype.setNewPosition_ = function(pos) {
 
 
 NoteUI.prototype.setStatus = function(status) {
-  this._noteData.status |= status;
+  if (!this.hasStatus(status)) {
+    this._noteData.status |= status;
+  }
 };
 
 
 NoteUI.prototype.unsetStatus = function(status) {
-  this._noteData.status &= ~status;
+  if (this.hasStatus(status)) {
+    this._noteData.status &= ~status;
+  }
 };
 
 

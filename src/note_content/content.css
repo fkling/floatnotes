@@ -1,0 +1,131 @@
+
+/* reset all styles */
+.content * {
+  color: inherit;
+  font-family: inherit !important;
+  font-size: 1em !important;
+  font-weight: bold !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  letter-spacing: 0px !important;
+  line-height: 1em !important;
+  text-align: left !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+  padding-left: 0px !important;
+  padding-top: 0px !important;
+  padding-right: 0px !important;
+  padding-bottom: 0px !important;
+  margin-left: 0px !important;
+  margin-top: 0px !important;
+  margin-right: 0px !important;
+  margin-bottom: 0px !important;
+  background: none !important;
+  background-color: transparent !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  vertical-align: baseline !important;
+}
+
+.content h1 {
+  font-size: 1.4em !important;
+}
+
+.content h2 {
+  font-size: 1.1em !important;
+}
+
+.content h1,  .content h2 {
+margin: 0.5em 0 !important;
+        font-weight: bold !important;
+        font-style: bold !important;
+}
+
+.content p {
+margin: 1em 0px !important;
+}
+
+.content p:first-child {
+  margin-top: 0px !important;
+}
+
+.content a {
+color: blue !important;
+       text-decoration: underline !important;
+}
+
+.content pre {   
+color: #111 !important;
+padding: 5px !important;
+border: 1px dotted #555 !important;
+        background-color: #eee !important;
+margin: 5px !important;
+}
+
+.content p > code {   
+color: #111 !important;
+border: 1px dotted #555 !important;
+        background-color: #eee !important;
+}
+
+.content em {
+  font-style: italic !important;
+}
+
+
+.content strong{   
+  font-weight: bold !important;
+  font-style: bold !important;
+}
+
+.content del {
+  text-decoration: line-through !important;
+}
+
+.content sub {
+  vertical-align: sub !important;
+  font-size: 0.7em !important;
+}
+
+.content sup {
+  vertical-align: super !important;
+  font-size: 0.7em !important;
+}
+
+.content ul,  .content ol {
+  padding-left:30px !important;
+margin: 1em 0px !important
+}
+
+.content ul li{   
+  list-style-type: square !important;
+  list-style-position: outside !important;
+  list-style-image: none !important;
+}
+
+.content table {
+  border-collapse: separate !important;
+  border-spacing: 2px !important;
+  border-width: 1px !important;
+  border-color: gray !important;
+  border-style: groove !important;
+}
+
+.content table td,
+  .content table th {
+    border-width: 2px !important;
+    border-color: gray !important;
+    border-style: groove !important;
+    vertical-align: middle !important;
+padding: 0.4em !important;
+  }
+
+.content table th {
+  font-weight: bold !important;
+  text-align: center !important;
+}
+.content table td {
+  text-align: right !important;
+}

@@ -5,5 +5,8 @@
   "undef": true,
   "globalstrict": true,
   "eqnull": true,
-  "loopfunc": true
+  "loopfunc": true,
+  "predef": [
+    "Components"
+  ]
 }

@@ -1,9 +1,8 @@
-/*global Components*/
 "use strict";
 Components.utils['import']("resource://floatnotes/URLHandler.js");
 Components.utils['import']("resource://floatnotes/util-Mozilla.js");
 Components.utils['import']("resource://floatnotes/manager.js");
-/*global URLHandler, Mozilla, FloatNotesManager*/
+/*global URLHandler, Mozilla, FloatNotesManager, FloatNotesURLHandler*/
 
 var EXPORTED_SYMBOLS = ["FloatNotesMediator"];
 
@@ -19,11 +18,16 @@ var FloatNotesMediator = (function() {
       if(current_main_ui && observe_changes) {
         switch(topic) {
           case 'floatnotes-note-update':
-          break;
+            manager.getNote(guid).then(function(note_data) {
+              var data = {};
+              data[guid] = note_data;
+              current_main_ui.getNoteContainer().updateNotes(data);
+            });
+            break;
 
           case 'floatnotes-note-delete':
             current_main_ui.getNoteContainer().detachNote(guid);
-          break;
+            break;
 
           case 'floatnotes-note-urlchange':
             // detach the note, "fallthrough" will add
@@ -35,11 +39,11 @@ var FloatNotesMediator = (function() {
               current_main_ui.getCurrentDocument().location
             );
 
-            var note = manager.getNote(guid);
-            if (locations.indexOf(note.url) > -1) {
-              current_main_ui.getNoteContainer().addNote(note);
-              manager.retainNote(guid);
-            }
+            manager.getNote(guid).then(function(note_data) {
+              if (locations.indexOf(note_data.url) > -1) {
+                current_main_ui.getNoteContainer().addNote(note_data);
+              }
+            });
         }
       }
     }};

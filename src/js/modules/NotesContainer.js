@@ -136,7 +136,10 @@ NotesContainer.prototype.setNotes = function(notes_data) {
 NotesContainer.prototype.updateNotes = function(notes_data){
   for (var i = 0, l = this._currentNotes.length; i < l; i++) {
     var note = this._currentNotes[i];
-    note.update(notes_data[note.getGuid()]);
+    var guid = note.getGuid();
+    if (guid in notes_data) {
+      note.update(notes_data[note.getGuid()]);
+    }
   }
 };
 

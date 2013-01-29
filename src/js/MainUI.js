@@ -19,6 +19,7 @@ function MainUI(note_manager, note_container) {
   // Note manager loads and saves notes from and to the DB
   this._notesManager = note_manager;
   this._status = {};
+  this._notSupportedURLs = {};
 
   this._locationListBuilder = new FloatNotesLocationListBuilder(
     document.getElementById('floatnotes-edit-location-list')
@@ -220,6 +221,7 @@ MainUI.prototype.loadNotes = function() {
   FloatNotesCompatibilityTester.isCompatibleWith(current_document)
     .then(function() {
       LOG('Document is compatible... load notes');
+      this._documentIncompatible = false;
       var URL = current_document.location;
       this._notesManager.getNotesFor(current_document.location).then(
         function(notes) {
@@ -241,6 +243,16 @@ MainUI.prototype.loadNotes = function() {
     }.bind(this),
     function(msg) {
       LOG('Document not compatible: ' + msg);
+      this._documentIncompatible = true;
+      var location = current_document.location;
+      var URL = location.protocol + '//' + location.host + location.pathname;
+      if (
+        current_document.location.href === 'about:newtab' ||
+        URL in this._notSupportedURLs
+      ) {
+        return;
+      }
+      this._notSupportedURLs[URL] = true;
       this._showNotification(msg);
     }.bind(this)
    );
@@ -397,7 +409,8 @@ MainUI.prototype._updateContextMenu = function() {
   this._menuEntryElements.newNote.hidden =
     this._contextNote ||
     editNoteBroadcaster.hidden ||
-    this._broadcastElements.toggleNote.hidden;
+    this._broadcastElements.toggleNote.hidden ||
+    this._documentIncompatible;
   this._menuEntryElements.hideNotes.hidden =
     editNoteBroadcaster.hidden ||
     this._noteContainer.getLength() === 0 ||

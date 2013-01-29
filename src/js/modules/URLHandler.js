@@ -7,7 +7,9 @@ var EXPORTED_SYMBOLS = ['FloatNotesURLHandler'];
 Cu['import']("resource://floatnotes/URLParser.js");
 Cu['import']("resource://floatnotes/HTTPURLParser.js");
 Cu['import']("resource://floatnotes/FileURLParser.js");
-/*global FloatNotesURLParser, FloatNotesHTTPURLParser, FloatNotesFileURLParser*/
+Cu['import']("resource://floatnotes/AboutURLParser.js");
+/*global FloatNotesURLParser, FloatNotesHTTPURLParser, FloatNotesFileURLParser,
+  FloatNotesAboutURLParser */
 
 var internal_protocols = {
   'about:': true,
@@ -76,27 +78,11 @@ for(var method in FloatNotesURLParser.prototype) {
 
 /* For Firefox 4 */
 /*
-let AboutURLParser = {
-__proto__: URLParser,
-           getPageUrl: function(location) {
-             return location.toString();
-           },
-getSearchUrls: function(location) {
-                 return [this.getPageUrl(location)];
-               },
-supports: function(location) {
-            return location.href === 'about:home';
-          }
-};
 */
 
 FloatNotesURLHandler.register(
   ['http:', 'https:'],
   new FloatNotesHTTPURLParser()
 );
-FloatNotesURLHandler.register(
-  'file:',
-  new FloatNotesFileURLParser()
-);
-// TODO: Properly implement about handler
-//URLHandler.register('about:', AboutURLParser);
+FloatNotesURLHandler.register('file:', new FloatNotesFileURLParser());
+FloatNotesURLHandler.register('about:', new FloatNotesAboutURLParser());

@@ -117,7 +117,7 @@ MainUI.prototype._registerEventHandlers = function() {
       window,
       'contextmenu',
       this._updateContextMenu.bind(this),
-      true
+      false
     )
   ];
 

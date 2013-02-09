@@ -40,6 +40,8 @@ var faviconService =
 var ioService = Components.classes["@mozilla.org/network/io-service;1"]
                   .getService(Components.interfaces.nsIIOService);
 
+var tree_focused = false;
+
 
 window.addEventListener('mousedown', function handler() {
   NoteManager.saveSelectedNote();
@@ -49,6 +51,21 @@ window.addEventListener('unload', function handler() {
   window.removeEventListener('unload', handler, true);
   NoteManager.saveSelectedNote();
 }, true);
+
+window.addEventListener('keyup', function(e) {
+  if (tree_focused && 
+    (e.keyCode === e.DOM_VK_BACK_SPACE || e.keyCode === DOM_VK_DELETE)) {
+      NoteManager.deleteSelectedNotes();
+  }
+});
+
+tree.addEventListener('focus', function () {
+  tree_focused = true;
+});
+
+tree.addEventListener('blur', function () {
+  tree_focused = false;
+});
 
 
 var observer = {
@@ -342,7 +359,7 @@ var NoteManager = {
   },
 
   setData: function(notes) {
-    var num_notes = this._notesSorted.length
+    var num_notes = this._notesSorted.length;
     this._notesSorted.length = 0;
     this._notesSorted.push.apply(this._notesSorted, notes);
 
@@ -646,7 +663,7 @@ var TreeView = {
   selectionChanged: function() {
     NoteManager.updateForm();
   },
-  cycleHeader: function(col) { },
+  cycleHeader: function() { }
 };
 
 Object.defineProperty(TreeView, 'rowCount', {

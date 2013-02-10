@@ -427,8 +427,8 @@ InPageNoteUI.prototype.onMove = function(
   e.stopPropagation();
   e.preventDefault();
 
-  var x = Math.max(startX + e.pageX, 0),
-  y = Math.max(startY + e.pageY, 0);
+  var x = Math.max(startX + e.pageX, 0);
+  var y = Math.max(startY + e.pageY, 0);
 
   if (fix) {
     if (y + height > window.innerHeight) {
@@ -441,7 +441,9 @@ InPageNoteUI.prototype.onMove = function(
 
   style.left = x + 'px';
   style.top = y + 'px';
-  Util.Dom.scrollWindow(e, window);
+  if (!fix) {
+    Util.Dom.scrollWindow(e, window);
+  }
 };
 
 
@@ -535,7 +537,9 @@ InPageNoteUI.prototype.onResize = function(
 
   style.width = width + 'px';
   style.height = height + 'px';
-  Util.Dom.scrollWindow(e, window);
+  if(!fix) {
+    Util.Dom.scrollWindow(e, window);
+  }
 };
 
 InPageNoteUI.prototype.endResize = function(opacity, e) {

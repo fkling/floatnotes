@@ -23,14 +23,12 @@
 }
 
 .floatnotes-note {
-    border: 1px solid #555 !important;
-    min-height: 80px !important;
-    min-width: 60px !important;
-    -moz-box-shadow: 0px 0px 5px #888 !important;
-    -moz-border-radius: 5px !important;
-    box-shadow: 0px 0px 5px #888 !important;
-    border-radius: 5px !important;
-    position: absolute !important;
+  border: none !important;
+  position: absolute !important;
+  -moz-border-radius: 5px !important;
+  border-radius: 5px !important;
+  min-height: 130px !important;
+  min-width: 60px !important;
 }
 
 .floatnotes-note.small {
@@ -46,34 +44,31 @@
     -moz-box-shadow: none !important;
     box-shadow: none !important;
     padding: 0px !important;
+    border: 1px solid #555 !important;
+    margin-left: 5px !important;
+    margin-top: -12px !important;
 }
 
 .floatnotes-note.small > * {
     display:none !important;
 }
 
-.floatnotes-note.edit {
-    border-color: red !important;
-    border-width: 2px !important;
-}
-
 .floatnotes-note.fixed {
     position: fixed !important;
-    border-width: 2px !important;
 }
 
 .floatnotes-note.over:not(.edit) {
-  margin-left: -20px;
+  margin-left: -22px;
 }
 
 .floatnotes-note .floatnotes-drag {
     height: 20px !important;
     cursor: move !important;
-    top: -18px !important;
-    left: -1px !important;
+    top: -12px !important;
+    left: 5px !important;
+    right: 5px !important;
     border: 1px solid #555 !important;
     border-bottom: none !important;
-    width: 100% !important;
     display: none;
     -moz-box-shadow: 0px -3px 2px #CCC !important;
     -moz-border-radius: 5px 5px 0px 0px;
@@ -81,8 +76,12 @@
     border-radius: 5px 5px 0px 0px;
     text-align: right !important;
     vertical-align: middle !important;
-    background-color: inherit !important;
-    position: absolute;
+    position: absolute !important;
+    z-index: 100 !important;
+}
+
+.floatnotes-note.over:not(.edit) .floatnotes-drag {
+  left: 27px !important;
 }
 
 .floatnotes-note .floatnotes-drag-handler {
@@ -101,12 +100,10 @@
 .floatnotes-note.edit .floatnotes-drag {
     border-color: red !important;
     border-width: 2px !important;
-    margin-left: -1px !important;
 }
 
 .floatnotes-note.fixed .floatnotes-drag {
     border-width: 2px !important;
-    margin-left: -1px !important;
 }
 
 .floatnotes-note.dark .floatnotes-drag .floatnotes-drag-handler {
@@ -114,14 +111,19 @@
 }
 
 .floatnotes-note .floatnotes-resize {
-    bottom: 0px !important;
-    right: 0px !important;
+    bottom: 6px !important;
+    right: 6px !important;
     width: 16px !important;
     height: 16px !important;
     position: absolute !important;
     cursor: se-resize !important;
     display: none;
     background-image: url('chrome://floatnotes/skin/resize.png') !important;
+    z-index: 100 !important;
+}
+
+.floatnotes-note.dark .floatnotes-resize {
+  background-image: url('chrome://floatnotes/skin/resize_white.png') !important;
 }
 
 .floatnotes-note .floatnotes-frame,
@@ -130,6 +132,7 @@
   height: 100% !important;
   position: absolute !important;
   border: none !important;
+  overflow: hidden !important;
 }
 
 .floatnotes-note .iframe-fix {

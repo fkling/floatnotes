@@ -11,6 +11,8 @@ var EXPORTED_SYMBOLS = ['FloatNotesInPageNoteUI'];
 
 var ZINDEX = 100000;
 
+var NOTE_OFFSET = 22;
+
 
 function InPageNoteUI() {
   this.__super__.apply(this, arguments);
@@ -289,10 +291,12 @@ InPageNoteUI.prototype._update = function() {
 InPageNoteUI.prototype.minimize = function() {
   LOG('Note minimized');
   Util.Css.addClass(this._elementNode, 'small');
+  Util.Css.css(this._elementNode, 'backgroundColor', this._noteData.color);
 };
 
 InPageNoteUI.prototype.unminimize = function() {
   Util.Css.removeClass(this._elementNode, 'small');
+  Util.Css.css(this._elementNode, 'backgroundColor', 'transparent');
 };
 
 InPageNoteUI.prototype.startEdit = function() {
@@ -489,7 +493,7 @@ InPageNoteUI.prototype.startResize = function(e) {
       this.onResize.bind(
         this,
         this.getWindow(),
-        width + 20, // add 20 because of hovering over the note
+        width + NOTE_OFFSET, // add NOTE_OFFSET because of hovering over the note
         height,
         this._noteData.x,
         this._noteData.y,
@@ -517,8 +521,8 @@ InPageNoteUI.prototype.onResize = function(
   e.stopPropagation();
   e.preventDefault();
 
-  var width = Math.max(startWidth + e.pageX, 0),
-  height = Math.max(startHeight + e.pageY, 0);
+  var width = Math.max(startWidth + e.pageX, 0, 60 + NOTE_OFFSET);
+  var height = Math.max(startHeight + e.pageY, 0);
 
   if (fix) {
     if (y + height > window.innerHeight) {
@@ -546,8 +550,8 @@ InPageNoteUI.prototype.endResize = function(opacity, e) {
   Util.Css.removeClass(this._elementNode, 'ifix');
 
   style.opacity = opacity;
-  // -20 px to compensate hovering
-  this._noteData.w = Math.max(parseInt(style.width, 10) - 20, 60);
+  // -NOTE_OFFSET to compensate hovering
+  this._noteData.w = Math.max(parseInt(style.width, 10) - NOTE_OFFSET, 60);
   this._noteData.h = Math.max(parseInt(style.height, 10), 80);
   this.save();
 
@@ -574,10 +578,12 @@ InPageNoteUI.prototype.save = function() {
 
 InPageNoteUI.prototype.fix = function() {
   Util.Css.addClass(this._elementNode, 'fixed');
+  Util.Css.addClass(this._domElements.inner_container, 'fixed');
 };
 
 InPageNoteUI.prototype.unfix = function() {
   Util.Css.removeClass(this._elementNode, 'fixed');
+  Util.Css.removeClass(this._domElements.inner_container, 'fixed');
 };
 
 InPageNoteUI.prototype.calculateNewPosition_ = function() {
@@ -609,7 +615,7 @@ InPageNoteUI.prototype.mouseenter = function() {
   Util.Css.addClass(this._elementNode, 'over');
   Util.Css.addClass(this._domElements.inner_container, 'over');
   if (!this.hasStatus(FloatNotesNoteUI.STATUS.EDITING)) {
-    this._elementNode.style.width = (this._noteData.w + 20) + 'px';
+    this._elementNode.style.width = (this._noteData.w + NOTE_OFFSET) + 'px';
   }
 
   Util.Css.show(elements.drag, elements.resize);
@@ -654,7 +660,6 @@ InPageNoteUI.prototype._updateDOMElements = function() {
   var elements = this._domElements;
   elements.container.setAttribute('rel', (this._noteData.guid || 'new'));
   elements.container.style.cssText = [
-    'background-color:' + this._noteData.color,
     'left:' + this._noteData.x + 'px',
     'top:' + this._noteData.y + 'px',
     'width:' + this._noteData.w + 'px',
@@ -662,7 +667,10 @@ InPageNoteUI.prototype._updateDOMElements = function() {
     'z-index:' + ZINDEX,
     'opacity:' + Preferences.transparency
   ].join(';');
-  elements.inner_container.style.fontSize = Preferences.fontSize + 'px';
+  Util.Css.css(elements.inner_container, {
+    fontSize: Preferences.fontSize + 'px',
+    backgroundColor: this._noteData.color
+  });
   elements.content.innerHTML =
     this._markdownParser.makeHtml(this._noteData.content);
   elements.content.title = Util.Locale.get(
@@ -670,6 +678,7 @@ InPageNoteUI.prototype._updateDOMElements = function() {
     [this._noteData.modification_date.toLocaleString()]
   );
   elements.menu.style.backgroundColor = this._noteData.color;
+  elements.drag.style.backgroundColor = this._noteData.color;
 
   var darkColor = Util.Css.isDarkColor(this._noteData.color);
   Util.Css.toggleClass(elements.inner_container, 'dark', darkColor);

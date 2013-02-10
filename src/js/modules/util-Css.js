@@ -100,7 +100,7 @@ var Css = (function() {
                 else {
                     var style = node.style;
                     for(var prop in property) {
-                        style[prop] = property[value];
+                        style[prop] = property[prop];
                     }
                 }
             }

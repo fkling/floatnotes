@@ -186,7 +186,13 @@ InPageNoteUI.prototype._attachEventHandlers = function(elements) {
     function(e) {
       if (e.target.nodeName === 'A') {
         e.preventDefault();
-        fireEvent(frame.ownerDocument, e.target, e);
+        if (e.ctrlKey || e.metaKey) {
+          // open in new tab
+          Util.Mozilla.openAndReuseOneTabPerURL(e.target.href);
+        }
+        else {
+          frame.ownerDocument.defaultView.location = e.target.href;
+        }
       }
       else {
         this.unminimizeAndSave();

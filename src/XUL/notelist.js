@@ -54,18 +54,18 @@ window.addEventListener('unload', function handler() {
 
 window.addEventListener('keyup', function(e) {
   if (tree_focused && 
-    (e.keyCode === e.DOM_VK_BACK_SPACE || e.keyCode === DOM_VK_DELETE)) {
+    (e.keyCode === e.DOM_VK_BACK_SPACE || e.keyCode === e.DOM_VK_DELETE)) {
       NoteManager.deleteSelectedNotes();
   }
-});
+}, false);
 
 tree.addEventListener('focus', function () {
   tree_focused = true;
-});
+}, false);
 
 tree.addEventListener('blur', function () {
   tree_focused = false;
-});
+}, false);
 
 
 var observer = {

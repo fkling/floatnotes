@@ -87,7 +87,7 @@ try {
         itemExists: (function() {
             var scb = Async.makeSyncCallback();
             return function(id) {
-                _db.noteExistsWithId(scb, id);
+                _db.noteExistsWithId(id).then(scb);
                 return Async.waitForSyncCallback(scb);
             };
         }()),
@@ -96,7 +96,7 @@ try {
             var scb = Async.makeSyncCallback();
             return function(id, uri) {
                 LOG('Create record for: ' + id);
-                _db.getNote(scb, id);
+                _db.getNote(id).then(scb);
                 var data = Async.waitForSyncCallback(scb);
                 var record = new NoteRecord(uri, data);
                 LOG('This is what we get: ' + data);
@@ -112,7 +112,7 @@ try {
         getAllIDs: (function() {
             var scb = Async.makeSyncCallback();
             return function() {
-                _db.getAllIds(scb);
+                _db.getAllIds().then(scb);
                 var IDs = Async.waitForSyncCallback(scb);
                 LOG('Number of notes ' + IDs.length);
                 var obj = {};
@@ -126,7 +126,7 @@ try {
         create: function(record) {
             LOG('Sync: New note ' + record.id);
             observe = false;
-            _manager.addNote(record.note_data, function() {
+            _manager.addNote(record.note_data).then(function() {
                 observe = true;               
             });
         },
@@ -134,7 +134,7 @@ try {
         update: function(record) {
             LOG('Sync: Update note ' + record.id);
             observe = false;
-            _manager.updateNote(record.note_data, function() {
+            _manager.updateNote(record.note_data).then(function() {
                 observe = true;               
             });
         },
@@ -142,7 +142,7 @@ try {
         remove: function(record) {
             LOG('Sync: Delete note ' + record.id);
             observe = false;
-            _manager.deleteNote({guid: record.id}, function() {
+            _manager.deleteNote(record.id).then(function() {
                 observe = true;               
             });
         },
@@ -189,10 +189,10 @@ try {
                 break;
                 case "floatnotes-note-add":
                     score = 100;
+                case "floatnotes-note-delete":
+                    score = 50;
                 case "floatnotes-note-update":
                     score = 25;
-                case "floatnotes-note-delete":
-                    score = 100;
                     this.onChange(data, score);
                 break;
             }

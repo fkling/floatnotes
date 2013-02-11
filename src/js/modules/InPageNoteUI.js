@@ -10,8 +10,9 @@ Cu['import']('resource://floatnotes/NoteUI.js');
 var EXPORTED_SYMBOLS = ['FloatNotesInPageNoteUI'];
 
 var ZINDEX = 100000;
-
 var NOTE_OFFSET = 22;
+var MIN_NOTE_WIDTH = 120;
+var MIN_NOTE_HEIGHT = 120;
 
 
 function InPageNoteUI() {
@@ -523,8 +524,8 @@ InPageNoteUI.prototype.onResize = function(
   e.stopPropagation();
   e.preventDefault();
 
-  var width = Math.max(startWidth + e.pageX, 0, 60 + NOTE_OFFSET);
-  var height = Math.max(startHeight + e.pageY, 0);
+  var width = Math.max(startWidth + e.pageX, MIN_NOTE_WIDTH + NOTE_OFFSET);
+  var height = Math.max(startHeight + e.pageY, MIN_NOTE_HEIGHT);
 
   if (fix) {
     if (y + height > window.innerHeight) {

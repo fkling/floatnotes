@@ -34,6 +34,14 @@
 <!ENTITY preferences.notifications.note_deletion "Confirmar antes de eliminar notas" >
 <!ENTITY preferences.notifications.site_not_supported "Mostrar advertencia cuando el sitio no sea soportado" >
 
+<!ENTITY preferences.storage.title "Almacenamiento" >
+<!ENTITY preferences.storage.default_location "Ubicación por defecto (carpeta de perfil)" >
+<!ENTITY preferences.storage.custom_location "Ubicación personalizada" >
+<!ENTITY preferences.storage.choose "Elegir..." >
+<!ENTITY preferences.storage.file_exists_message "La nueva ubicación ya existe. ¿Qué quieres hacer?" >
+<!ENTITY preferences.storage.overwrite "Sobreescribir el archivo existente" >
+<!ENTITY preferences.storage.merge "Combinar las notas" >
+<!ENTITY preferences.storage.abort "Cancelar (mantener la ubicación actual)" >
 
 <!ENTITY preferences.sync.title "Sync" >
 <!ENTITY preferences.sync.enable "Habilitar sincronización (requiere Firefox Sync)" >

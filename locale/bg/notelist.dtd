@@ -1,0 +1,18 @@
+<!ENTITY manager.title "FloatNotes Управление" >
+
+<!ENTITY button.edit "Редактирай" >
+<!ENTITY button.remove "Изтрий" >
+<!ENTITY button.save "Запази" >
+
+<!ENTITY searchtext "Въведете текст, за да намерите бележки и/или изберете запазено търсене вляво..." >
+
+<!ENTITY list.title "Заглавие" >
+<!ENTITY list.url "Адрес/URL" >
+<!ENTITY list.created "Създадена" >
+<!ENTITY list.modified "Променена" >
+
+<!ENTITY color "Цвят:" >
+
+<!ENTITY editsearch.title "Промени търсенето" >
+<!ENTITY editsearch.name "Име:" >
+<!ENTITY editsearch.keywords "Ключови думи:" >

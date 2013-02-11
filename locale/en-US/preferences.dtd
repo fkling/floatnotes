@@ -41,7 +41,7 @@
 <!ENTITY preferences.storage.file_exists_message "The new target location does already exist. What do you want to do?" >
 <!ENTITY preferences.storage.overwrite "Overwrite existing file" >
 <!ENTITY preferences.storage.merge "Merge notes" >
-<!ENTITY preferences.storage.merge "Abort (keep current location)" >
+<!ENTITY preferences.storage.abort "Abort (keep current location)" >
 
 <!ENTITY preferences.sync.title "Sync" >
 <!ENTITY preferences.sync.enable "Enable synchronisation (requires Firefox Sync)" >

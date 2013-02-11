@@ -1,0 +1,11 @@
+<!ENTITY floatnotes.new "Създай бележка..." >
+<!ENTITY floatnotes.edit "Редактирай бележката" >
+<!ENTITY floatnotes.delete "Изтрий бележката" >
+<!ENTITY floatnotes.hide "Скрий бележките" >
+<!ENTITY floatnotes "FloatNotes" >
+<!ENTITY floatnotes.notelist "Управление на бележките..." >
+<!ENTITY floatnotes.preferences "Настройки..." >
+<!ENTITY floatnotes.reload "Презареди бележките" >
+
+<!ENTITY edit_popup.color "Цвят:" >
+<!ENTITY edit_popup.location "Адрес" >

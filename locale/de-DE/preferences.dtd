@@ -32,8 +32,16 @@
 
 <!ENTITY preferences.notifications.title "Benachrichtigungen" >
 <!ENTITY preferences.notifications.note_deletion "Löschen von Notizen bestätigen" >
-<!ENTITY preferences.notifications.site_not_supported "Zeige Warnung wenn Webseiten nicht unterstüzt werden" >
+<!ENTITY preferences.notifications.site_not_supported "Zeige Warnung wenn Webseite nicht unterstüzt wird" >
 
+<!ENTITY preferences.storage.title "Speicherort" >
+<!ENTITY preferences.storage.default_location "Standart Ort (Profil Ordner)" >
+<!ENTITY preferences.storage.custom_location "Anderer Ort" >
+<!ENTITY preferences.storage.choose "Auswählen..." >
+<!ENTITY preferences.storage.file_exists_message "Der ausgewählte Ort existiert bereits. Was möchten Sie tun?" >
+<!ENTITY preferences.storage.overwrite "Datei überschreiben" >
+<!ENTITY preferences.storage.merge "Notizen zusammenführen" >
+<!ENTITY preferences.storage.abort "Abbrechen (derzeitigen Ort beibehalten)" >
 
 <!ENTITY preferences.sync.title "Sync" >
 <!ENTITY preferences.sync.enable "Synchronisation aktivieren (braucht Firefox Sync)" >

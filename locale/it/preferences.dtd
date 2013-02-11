@@ -34,5 +34,14 @@
 <!ENTITY preferences.notifications.note_deletion "Conferma prima eliminare le note" >
 <!ENTITY preferences.notifications.site_not_supported "Mostra avviso quando il sito non è supportato" >
 
+<!ENTITY preferences.storage.title "Salvataggio" >
+<!ENTITY preferences.storage.default_location "Percorso di default (cartella profilo)" >
+<!ENTITY preferences.storage.custom_location "Percorso personalizzato" >
+<!ENTITY preferences.storage.choose "Scegli..." >
+<!ENTITY preferences.storage.file_exists_message "Il nuovo percorso esiste di già. Cosa vuoi fare?" >
+<!ENTITY preferences.storage.overwrite "Sovrascrivi il file esistente" >
+<!ENTITY preferences.storage.merge "Unisci note" >
+<!ENTITY preferences.storage.abort "Annulla ( mantieni il percorso corrente)" >
+
 <!ENTITY preferences.sync.title "Sync" >
 <!ENTITY preferences.sync.enable "Abilita sincronizzazione (richiede Firefox Sync)" >

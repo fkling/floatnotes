@@ -1,0 +1,47 @@
+<!ENTITY preferences.title "Floatnotes Настройки" >
+
+<!ENTITY preferences.note.title "Бележки" >
+<!ENTITY preferences.note.default_val "Начални настройки" >
+<!ENTITY preferences.note.width "Ширина:" >
+<!ENTITY preferences.note.height "Височина:" >
+<!ENTITY preferences.note.color "Цвят:" >
+<!ENTITY preferences.note.font-size.text "Размер на текста:" >
+<!ENTITY preferences.note.font-size.unit "px" >
+
+<!ENTITY preferences.location.title "Адрес" >
+<!ENTITY preferences.location.default_loc "Начален адрес" >
+<!ENTITY preferences.location.query "... включително параметрите, напр.: www.example.com/page?s=query" >
+<!ENTITY preferences.location.hash "... включително връзката, напр.: www.example.com/page#anchor" >
+<!ENTITY preferences.location.query_hash "... с параметрите и връзката, напр.: www.example.com/page?s=query#anchor" >
+<!ENTITY preferences.location.page "Настоящата страница, напр.: www.example.com/page" >
+<!ENTITY preferences.location.wild_page "Настоящата страница и тези под нея, напр.: Страници започващи с www.example.com/page" >
+<!ENTITY preferences.location.website "Целият уеб-сайт, напр.: Страници започващи с www.example.com" >
+<!ENTITY preferences.location.updateHash "Подновяване на бележките, когато връзката се променя" >
+<!ENTITY preferences.location.includePageHash "Показвай бележките от страницата (включително параметрите)" >
+
+<!ENTITY preferences.view.title "Изглед" >
+<!ENTITY preferences.view.show_indicator "Показване на индикатори за бележките, които са извън настоящия екран" >
+<!ENTITY preferences.view.indicator_timeout "Скриване след:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = не скривай)" >
+<!ENTITY preferences.view.indicator_timeout_unit "секунди" >
+<!ENTITY preferences.view.show_toolbar_button "Показване на бутон в лентата с инструменти" >
+<!ENTITY preferences.view.show_menu "Подменю в менюто 'Инструменти'" >
+<!ENTITY preferences.view.show_context_delete "Показване на 'Изтрий бележката' в контекстното меню" >
+<!ENTITY preferences.view.show_context_locations "Показване на 'Промени адреса' в контекстното меню" >
+<!ENTITY preferences.view.show_context_hide "Показване на 'Скрий бележките' в контекстното меню" >
+
+<!ENTITY preferences.notifications.title "Съобщения" >
+<!ENTITY preferences.notifications.note_deletion "Потвърждаване при изтриването на бележки" >
+<!ENTITY preferences.notifications.site_not_supported "Показване на предупреждение, ако уеб-сайтът не се поддържа" >
+
+<!ENTITY preferences.storage.title "База данни" >
+<!ENTITY preferences.storage.default_location "По подразбиране (в профилната директория)" >
+<!ENTITY preferences.storage.custom_location "По избор" >
+<!ENTITY preferences.storage.choose "Изберете..." >
+<!ENTITY preferences.storage.file_exists_message "Избраната база данни вече съществува. Какво желаете да направите?" >
+<!ENTITY preferences.storage.overwrite "Презапиши съществуващия файл" >
+<!ENTITY preferences.storage.merge "Обединяване на бележките" >
+<!ENTITY preferences.storage.abort "Откажи (запази сегашната база данни)" >
+
+<!ENTITY preferences.sync.title "Синхронизация" >
+<!ENTITY preferences.sync.enable "Включване на синхронизацията (изисква Firefox Sync)" >

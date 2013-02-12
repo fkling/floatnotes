@@ -92,6 +92,10 @@ function Dec2Hex(d) {
 
 var Css = (function() {
     var util = {
+        // Generates the CSS named used in the plugin
+        name: function(name) {
+            return name + '@U@';
+        },
         css: function(node, property, value) {
             if(arguments.length === 2) {
                 if(typeof property === 'string') {
@@ -141,10 +145,7 @@ var Css = (function() {
             }
         },
         hasClass: function(node, cls) {
-            if(node && node.className) {
-                return (' ' + node.className + ' ').indexOf(' ' + cls + ' ') > -1;
-            }
-            return false;
+            return node && node.classList && node.classList.contains(cls);
         },
         toggleClass: function(node, cls, add) {
             if(node && (add || typeof add === 'undefined' && !Css.hasClass(node, cls))) {
@@ -181,14 +182,6 @@ var Css = (function() {
         isDarkColor: function(rgb) {
             var values = rgb.match(/\w{2}/g);
             return (parseInt(values[0], 16) + parseInt(values[1], 16) + parseInt(values[2], 16)) / 3 <= 128; 
-        },
-        getComplementaryColor: function(rgb) {
-            var values = rgb.match(/\w{2}/g);
-            hsv = RGB2HSV({r: parseInt(values[0], 16), g: parseInt(values[1], 16), b: parseInt(values[2], 16)});
-
-            hsv.hue = HueShift(hsv.hue, 180.0);
-            var rgb_ = HSV2RGB(hsv);
-            return ['#', Dec2Hex(rgb_.r), Dec2Hex(rgb_.g), Dec2Hex(rgb_.b)].join('');
         }
     };
     return util;

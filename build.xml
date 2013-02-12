@@ -16,6 +16,17 @@
 	<property name="cpp.debug" value="0" />
 	<property name="cpp.testrun" value="0" />
 
+  <scriptdef name="generateguid" language="javascript">
+    <attribute name="property" />
+    <![CDATA[
+      importClass( java.util.UUID );
+
+      project.setProperty( attributes.get( "property" ), UUID.randomUUID() );
+    ]]>
+  </scriptdef>
+
+  <generateguid property="guid" />
+
 	<macrodef name="prepare-cpp">
 		<attribute name="dest" />
 		<attribute name="src" />
@@ -53,15 +64,22 @@
 			<fileset dir="lib" />
 		</copy>
 		<copy todir="${build.dir}/components">
-            <fileset dir="${src.dir}/js/components" />
+      <fileset dir="${src.dir}/js/components" />
 		</copy>
 		<copy todir="${build.dir}/skin">
 			<fileset dir="${src.dir}/css" />
+      <filterset>
+        <filter token="U" value="${guid}" />
+      </filterset>
+		</copy>
+		<copy todir="${build.dir}/skin">
 			<fileset dir="images" />
 		</copy>
-		<filter token="VERSION" value="${version}" />
 		<copy todir="${build.dir}" filtering="true">
 			<fileset dir="META" />
+      <filterset>
+        <filter token="VERSION" value="${version}" />
+      </filterset>
 		</copy>
 	</target>
 
@@ -92,6 +110,7 @@
 		</exec>
 		<replaceregexp match="@DATE@" replace="${date}" file="${build.dir}/content/floatnotes.js" />
 		<replaceregexp match="@VERSION@" replace="${version}" file="${build.dir}/content/floatnotes.js" />
+		<replaceregexp match="@U@" replace="${guid}" file="${build.dir}/modules/util-Css.js" />
 	</target>
 
 	<target name="debug">

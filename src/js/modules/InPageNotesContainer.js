@@ -12,48 +12,31 @@ Cu['import']("resource://floatnotes/InPageIndicator.js");
 
 var EXPORTED_SYMBOLS = ["FloatNotesInPageNotesContainer"];
 
+var NOTE_CLASS_NAME = Util.Css.name('note');
+var DRAG_CLASS_NAME = Util.Css.name('drag');
+var DRAG_HANDLER_CLASS_NAME = Util.Css.name('drag-handler');
+var RESIZE_CLASS_NAME = Util.Css.name('resize');
+
 // Some helper functions
 var getRefFrom = function getNoteFrom(element) {
     var note_node = element;
-    while (note_node &&
-      note_node.classList &&
-      !note_node.classList.contains('floatnotes-note')) {
+    while (note_node && !Util.Css.hasClass(note_node, NOTE_CLASS_NAME)) {
         note_node = note_node.parentNode;
     }
     return note_node.getAttribute('data-ref');
 };
 
 var isIndicator = function isIndicator(element) {
-  return Util.Css.isOrIsContained(element, 'floatnotes-indicator');
-};
-
-var isFixButton = function isFixButton(element) {
-  return element.classList.contains('floatnotes-togglefix');
-};
-
-var isDeleteButton = function isDeleteButton(element) {
-  return element.classList.contains('floatnotes-delete');
-};
-
-var isEditButton = function isEditButton(element) {
-  return element.classList.contains('floatnotes-edit');
-};
-
-var isNote = function isNote(element) {
-  return element.classList.contains('floatnotes-note');
-};
-
-var isContent = function isContent(element) {
-  return Util.Css.isOrIsContained(element, 'floatnotes-content');
+  return Util.Css.isOrIsContained(element, 'indicator');
 };
 
 var isDragHandler = function isDragHandler(element) {
-  return element.classList.contains('floatnotes-drag-handler') ||
-    element.classList.contains('floatnotes-drag');
+  return Util.Css.hasClass(element, DRAG_CLASS_NAME) || 
+    Util.Css.hasClass(element, DRAG_HANDLER_CLASS_NAME);
 };
 
 var isResizeHandler = function isResizeHandler(element) {
-    return element.classList.contains('floatnotes-resize');
+    return Util.Css.hasClass(element, RESIZE_CLASS_NAME);
 };
 
 
@@ -67,7 +50,7 @@ var FloatNotesInPageNotesContainer = InPageNotesContainer;
 
 Util.Js.inherits(InPageNotesContainer, FloatNotesNotesContainer);
 
-InPageNotesContainer.prototype._containerID = 'floatnotes-container';
+InPageNotesContainer.prototype._containerID = Util.Css.name('floatnotes-container');
 InPageNotesContainer.prototype._indicator = null;
 
 InPageNotesContainer.prototype._getContainer = function(document) {
@@ -190,7 +173,7 @@ InPageNotesContainer.prototype._getNotesForDocument = function(document) {
     return notes;
   }
 
-  var note_elements = container.querySelectorAll('.floatnotes-note');
+  var note_elements = container.querySelectorAll('.' + NOTE_CLASS_NAME);
 
   if (note_elements.length === 0) {
     return notes;

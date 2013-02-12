@@ -50,9 +50,9 @@ Indicator.prototype.attachTo = function(container) {
   if (indicator) {
     this._domElements.indicator = indicator;
     this._domElements.label =
-      indicator.getElementsByClassName('floatnotes-indicator-label')[0];
+      indicator.getElementsByClassName(Util.Css.name('indicator-label'))[0];
     this._domElements.list =
-      indicator.getElementsByClassName('floatnotes-indicator-container')[0];
+      indicator.getElementsByClassName(Util.Css.name('indicator-container'))[0];
   }
   else {
     this._createDOMElements(container);
@@ -82,7 +82,7 @@ Indicator.prototype.buildList = function(notes) {
     Util.Dom.removeChildren(list);
     for(var i = 0, length = notes.length; i < length; i++) {
       var div = document.createElement('div');
-      div.className = "floatnotes-indicator-text";
+      div.className = Util.Css.name('indicator-text');
       div.setAttribute('data-guid', notes[i].getGuid());
       div.appendChild(document.createTextNode(notes[i].getTitle()));
       list.appendChild(div);
@@ -109,13 +109,13 @@ Indicator.prototype._createDOMElements = function(container) {
   var self = this;
 
   var indicator = document.createElement('div');
-  indicator.className = "floatnotes-indicator " + this._id;
+  indicator.className = Util.Css.name('indicator') + ' ' + this._id;
 
   var label = document.createElement('div');
-  label.className = "floatnotes-indicator-label";
+  label.className = Util.Css.name('indicator-label');
 
   var list = document.createElement('div');
-  list.className = "floatnotes-indicator-container";
+  list.className = Util.Css.name('indicator-container');
   list.appendChild(document.createTextNode("Loading..."));
 
   Util.Css.hide(list);
@@ -138,7 +138,7 @@ Indicator.prototype._createDOMElements = function(container) {
   }, true);
 
   indicator.addEventListener('click', function(e) {
-    if(e.target.className === 'floatnotes-indicator-text') {
+    if(e.target.className === Util.Css.name('indicator-text')) {
       self.hideList();
       self._notesContainer.focusNote(e.target.getAttribute('data-guid'));
     }
@@ -146,7 +146,7 @@ Indicator.prototype._createDOMElements = function(container) {
 
   indicator.appendChild(label);
   indicator.appendChild(list);
-  if (this._id === 'floatnotes-below') {
+  if (this._id === Util.Css.name('below')) {
     indicator.appendChild(label);
   }
     
@@ -169,14 +169,14 @@ Indicator.prototype.redraw = function() {
 
 function IndicatorProxy(notes_container) {
   this._timer = Util.Mozilla.getTimer();
-  this._above = new Indicator('floatnotes-above', this, notes_container);
+  this._above = new Indicator(Util.Css.name('above'), this, notes_container);
   this._above.setLabel(Util.Locale.get('aboveIndicatorString'));
-  this._below = new Indicator('floatnotes-below', this, notes_container);
+  this._below = new Indicator(Util.Css.name('below'), this, notes_container);
   this._below.setLabel(Util.Locale.get('belowIndicatorString'));
   this._container = notes_container;
 }
 
-IndicatorProxy.ID = 'floatnotes-indicators';
+IndicatorProxy.ID = Util.Css.name('indicators');
 
 var FloatNotesInPageIndicator = IndicatorProxy;
 

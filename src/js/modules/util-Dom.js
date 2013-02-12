@@ -1,5 +1,6 @@
-//!#include "../header.js"
 "use strict";
+//!#include "../header.js"
+/*global LOG*/
 
 var EXPORTED_SYMBOLS = ['Dom'];
 
@@ -9,6 +10,21 @@ var Dom = {
   isReady: function(document) {
     var state = document.readyState;
     return state && (state === 'interactive' || state === 'complete');
+  },
+
+  contains: function(parent, descendant) {
+    if (typeof parent.contains === 'function') {
+      return parent.contains(descendant);
+    }
+    else {
+      while (descendant) {
+        descendant = descendant.parentNode;
+        if (descendant === parent) {
+          return true;
+        }
+      }
+      return false;
+    }
   },
 
   removeChildren: function(node) {

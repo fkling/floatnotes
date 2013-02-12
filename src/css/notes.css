@@ -8,30 +8,34 @@
 
 @media screen,print {
 
-#floatnotes-container {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 0px;
-    height: 0px;
-    z-index: 99999;
+#floatnotes-container@U@ {
+    position: absolute !important;
+    top: 0px !important;
+    left: 0px !important;
+    width: 0px !important;
+    height: 0px !important;
+    z-index: 99999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-#floatnotes-container.overlay {
-    width: 100%;
-    height: 100%;
+#floatnotes-container@U@.overlay@U@ {
+    width: 100% !important;
+    height: 100% !important;
 }
 
-.floatnotes-note {
+#floatnotes-container@U@ .note@U@ {
   border: none !important;
   position: absolute !important;
   -moz-border-radius: 5px !important;
   border-radius: 5px !important;
   min-height: 130px !important;
   min-width: 60px !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.floatnotes-note.small {
+#floatnotes-container@U@ .note@U@.small@U@ {
     min-height: 16px !important;
     min-width: 24px !important;
     max-height: 16px !important;
@@ -49,19 +53,19 @@
     margin-top: -12px !important;
 }
 
-.floatnotes-note.small > * {
+#floatnotes-container@U@ .note@U@.small@U@ > * {
     display:none !important;
 }
 
-.floatnotes-note.fixed {
+#floatnotes-container@U@ .note@U@.fixed@U@ {
     position: fixed !important;
 }
 
-.floatnotes-note.over:not(.edit) {
-  margin-left: -22px;
+#floatnotes-container@U@ .note@U@.over@U@:not(.edit@U@) {
+  margin-left: -22px !important;
 }
 
-.floatnotes-note .floatnotes-drag {
+#floatnotes-container@U@ .note@U@ .drag@U@ {
     height: 20px !important;
     cursor: move !important;
     top: -12px !important;
@@ -71,20 +75,29 @@
     border-bottom: none !important;
     display: none;
     -moz-box-shadow: 0px -3px 2px #CCC !important;
-    -moz-border-radius: 5px 5px 0px 0px;
+    -moz-border-radius: 5px 5px 0px 0px !important;
     box-shadow: 0px -3px 2px #CCC !important;
-    border-radius: 5px 5px 0px 0px;
+    border-radius: 5px 5px 0px 0px !important;
     text-align: right !important;
     vertical-align: middle !important;
     position: absolute !important;
     z-index: 100 !important;
 }
 
-.floatnotes-note.over:not(.edit) .floatnotes-drag {
+#floatnotes-container@U@ .note@U@.edit@U@ .drag@U@ {
+    border-color: red !important;
+    border-width: 2px !important;
+}
+
+#floatnotes-container@U@ .note@U@.fixed@U@ .drag@U@ {
+    border-width: 2px !important;
+}
+
+#floatnotes-container@U@ .note@U@.over@U@:not(.edit@U@) .drag@U@ {
   left: 27px !important;
 }
 
-.floatnotes-note .floatnotes-drag-handler {
+#floatnotes-container@U@ .note@U@ .drag-handler@U@ {
     background-color: #222 !important;
     opacity: 0.5 !important;
     height: 15px !important;
@@ -93,24 +106,15 @@
     margin-left: auto !important;
     margin-right: auto !important;
     width: 90% !important;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
+    -moz-border-radius: 5px !important;
+    border-radius: 5px !important;
 }
 
-.floatnotes-note.edit .floatnotes-drag {
-    border-color: red !important;
-    border-width: 2px !important;
-}
-
-.floatnotes-note.fixed .floatnotes-drag {
-    border-width: 2px !important;
-}
-
-.floatnotes-note.dark .floatnotes-drag .floatnotes-drag-handler {
+#floatnotes-container@U@ .note@U@.dark@U@ .drag@U@ .drag-handler @U@ {
    background-color: white !important;
 }
 
-.floatnotes-note .floatnotes-resize {
+#floatnotes-container@U@ .note@U@ .resize@U@ {
     bottom: 6px !important;
     right: 6px !important;
     width: 16px !important;
@@ -122,12 +126,12 @@
     z-index: 100 !important;
 }
 
-.floatnotes-note.dark .floatnotes-resize {
+#floatnotes-container@U@ .note@U@.dark@U@ .resize@U@ {
   background-image: url('chrome://floatnotes/skin/resize_white.png') !important;
 }
 
-.floatnotes-note .floatnotes-frame,
-.floatnotes-note .iframe-fix {
+#floatnotes-container@U@ .note@U@ .frame@U@,
+#floatnotes-container@U@ .note@U@ .iframe-fix@U@ {
   width: 100% !important;
   height: 100% !important;
   position: absolute !important;
@@ -135,23 +139,23 @@
   overflow: hidden !important;
 }
 
-.floatnotes-note .iframe-fix {
+#floatnotes-container@U@ .note@U@ .iframe-fix@U@ {
   display: none !important;
 }
 
-.floatnotes-note.ifix .iframe-fix {
+#floatnotes-container@U@ .note@U@.ifix@U@ .iframe-fix@U@ {
   display: block !important;
   z-index: 10 !important;
 }
 
 
-#floatnotes-container.moving .iframe-fix {
+#floatnotes-container@U@.moving@U@ .iframe-fix@U@ {
   display: block !important;
 }
 
 /*  ----- Indicator styles ----- */
 
-.floatnotes-indicator {
+#floatnotes-container@U@  .indicator@U@ {
     font-family: Verdana,Arial,sans-serif !important;
     text-align: left !important;
     max-width: 200px !important;
@@ -166,25 +170,25 @@
     -moz-border-radius: 5px !important;
 }
 
-.floatnotes-indicator:hover {
+#floatnotes-container@U@ .indicator@U@:hover {
   opacity: .9 !important;
 }
 
-.floatnotes-above.floatnotes-indicator {
+#floatnotes-container@U@ .indicator@U@.above@U@ {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     margin-top: 10px !important;
 }
 
-.floatnotes-below.floatnotes-indicator {
+#floatnotes-container@U@ .indicator@U@.below@U@ {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     margin-bottom: 10px !important;
 }
 
-.floatnotes-indicator * {
+#floatnotes-container@U@ .indicator@U@ * {
     color: white !important;
     font-family: inherit !important;
     font-size: 1em !important;
@@ -196,39 +200,30 @@
     text-align: left !important;
     text-transform: none !important;
     text-decoration: none !important;
-    padding-left: 0px !important;
-    padding-top: 0px !important;
-    padding-right: 0px !important;
-    padding-bottom: 0px !important;
-    margin-left: 0px !important;
-    margin-top: 0px !important;
-    margin-right: 0px !important;
-    margin-bottom: 0px !important;
+    padding: 0px !important;
+    margin: 0px !important;
     background: none !important;
     background-color: transparent !important;
-    border-top: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
-    border-left: none !important;
+    border: none !important;
     vertical-align: baseline !important;
 }
 
 
-.floatnotes-indicator .floatnotes-indicator-container {
+#floatnotes-container@U@ .indicator@U@ .indicator-container@U@ {
     padding: 5px 0 5px 0 !important;	
 }
 
-.floatnotes-above.floatnotes-indicator:hover .floatnotes-indicator-container {
+#floatnotes-container@U@ .indicator@U@.above@U@:hover .indicator-container@U@ {
   margin-top: 5px !important;
   border-top: 1px solid white !important;
 }
 
-.floatnotes-below.floatnotes-indicator:hover .floatnotes-indicator-container {
+#floatnotes-container@U@ .indicator@U@.below@U@:hover .indicator-container@U@ {
   margin-bottom: 5px !important;
   border-bottom: 1px solid white !important;
 }
 
-.floatnotes-indicator .floatnotes-indicator-text {
+#floatnotes-container@U@ .indicator@U@ .indicator-text@U@ {
     max-height: 50px !important;
     overflow: hidden !important;
     padding: 5px !important;	
@@ -237,7 +232,7 @@
     -moz-border-radius: 3px !important;
 }
 
-.floatnotes-indicator .floatnotes-indicator-text:hover {
+#floatnotes-container@U@ .indicator@U@ .indicator-text@U@:hover {
     background-color: white !important;
     color: black !important;
     opacity: 0.9 !important;
@@ -246,28 +241,27 @@
 
 @media print {
 
-    .floatnotes-note {
-        opacity: 1 !important;
-        display: block !important;
-        z-index: auto !important;
+#floatnotes-container@U@ .note@U@ {
+  opacity: 1 !important;
+  display: block !important;
+  z-index: auto !important;
 }
 
-.floatnotes-note * {
-    color: black !important;
+#floatnotes-container@U@ .note@U@ * {
+  color: black !important;
 }
 
-.floatnotes-note.fixed {
+#floatnotes-container@U@ .note@U@.fixed@U@ {
     position: absolute !important;
 }
 
-.floatnotes-indicator {
+#floatnotes-container@U@ .indicator@U@ {
     display: none !important;
 }
 
-.floatnotes-note .floatnotes-menu, 
-.floatnotes-note .floatnotes-drag, 
-.floatnotes-note .floatnotes-resize {
-    display: none !important;
+#floatnotes-container@U@ .note@U@ .drag@U@,
+#floatnotes-container@U@ .note@U@ .resize@U@ {
+  display: none !important;
 }
 }
 

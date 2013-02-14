@@ -33,9 +33,31 @@ InPageNoteUI.createInstance = function(note_data, container, document) {
 InPageNoteUI.prototype.setText = function(text) {
   this.__super__.prototype.setText.call(this, text);
   if (this._domElements && this._domElements.content) {
-    this._domElements.content.innerHTML = this._markdownParser.makeHtml(text);
+    this._setText(text);
   }
 };
+
+InPageNoteUI.prototype._setText = function(text) {
+  
+  this._domElements.content.innerHTML = this._markdownParser.makeHtml(text);
+  var tmp = this._document.createElement('div');
+  tmp.innerHTML = this._markdownParser.makeHtml(text);
+  var links = tmp.getElementsByTagName('a');
+  for (var i = 0, l = links.length; i < l; i++) {
+    var link = links[i];
+    if (link.getAttribute('href').indexOf('#') !== 1) {
+      link.target = '_top';
+    }
+  }
+  var target = this._domElements.content;
+  var nodes = Array.prototype.slice.call(tmp.childNodes);
+  Util.Dom.removeChildren(target);
+  for (i = 0, l = nodes.length; i < l; i++) {
+    target.appendChild(nodes[i]);
+  }
+  tmp = null;
+};
+  
 
 InPageNoteUI.prototype.getElementNode = function() {
   return this._elementNode;
@@ -182,22 +204,11 @@ InPageNoteUI.prototype._attachEventHandlers = function(elements) {
     true
   ));
 
-  //FIXME: Open new tab on middle click or ctrl/cmd + click
   event_handlers.push(Util.Js.addEventListener(
     elements.content,
     'click',
     function(e) {
-      if (e.target.nodeName === 'A') {
-        e.preventDefault();
-        if (e.ctrlKey || e.metaKey) {
-          // open in new tab
-          Util.Mozilla.openAndReuseOneTabPerURL(e.target.href);
-        }
-        else {
-          frame.ownerDocument.defaultView.location = e.target.href;
-        }
-      }
-      else {
+      if (e.target.nodeName !== 'A') {
         this.unminimizeAndSave();
       }
     }.bind(this),
@@ -680,8 +691,7 @@ InPageNoteUI.prototype._updateDOMElements = function() {
     fontSize: Preferences.fontSize + 'px',
     backgroundColor: this._noteData.color
   });
-  elements.content.innerHTML =
-    this._markdownParser.makeHtml(this._noteData.content);
+  this._setText(this._noteData.content);
   elements.content.title = Util.Locale.get(
     'note.last_modified',
     [this._noteData.modification_date.toLocaleString()]

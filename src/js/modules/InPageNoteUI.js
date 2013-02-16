@@ -38,7 +38,6 @@ InPageNoteUI.prototype.setText = function(text) {
 };
 
 InPageNoteUI.prototype._setText = function(text) {
-  
   this._domElements.content.innerHTML = this._markdownParser.makeHtml(text);
   var tmp = this._document.createElement('div');
   tmp.innerHTML = this._markdownParser.makeHtml(text);
@@ -57,7 +56,7 @@ InPageNoteUI.prototype._setText = function(text) {
   }
   tmp = null;
 };
-  
+
 
 InPageNoteUI.prototype.getElementNode = function() {
   return this._elementNode;
@@ -376,6 +375,10 @@ LOG('end edit');
 
     Util.Css.removeClass(this._elementNode, Util.Css.name('edit'));
     Util.Css.removeClass(this._domElements.inner_container, 'edit');
+    // If the mouse is still over the note, we have to increase the width again
+    if (Util.Css.hasClass(this._elementNode, Util.Css.name('over'))) {
+      this._elementNode.style.width = this._noteData.w + NOTE_OFFSET + 'px';
+    }
     this.unsetStatus(FloatNotesNoteUI.STATUS.EDITING);
     Util.Mozilla.notifyObserver('floatnotes-note-edit', false);
 
@@ -701,7 +704,7 @@ InPageNoteUI.prototype._updateDOMElements = function() {
 
   var darkColor = Util.Css.isDarkColor(this._noteData.color);
   Util.Css.toggleClass(elements.inner_container, 'dark', darkColor);
-  Util.Css.toggleClass(elements.container, 'dark', darkColor);
+  Util.Css.toggleClass(elements.container, Util.Css.name('dark'), darkColor);
 
   // set meta data
   this._elementNode.setAttribute('data-ref', this.getRef());

@@ -40,6 +40,8 @@ textarea {
   background-color: inherit !important;
   display: none;
   color: inherit;
+  border-radius: 5px;
+  -moz-border-radius: 5px !important;
 }
 
 .note {

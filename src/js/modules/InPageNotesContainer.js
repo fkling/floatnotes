@@ -112,8 +112,8 @@ InPageNotesContainer.prototype._createContainer = function(document) {
       var note = self._notes[getRefFrom(target)] || self._newNote;
       note.raiseToTop();
       if (isDragHandler(target) || isResizeHandler(target)) {
-        Util.Css.addClass(container, 'overlay');
-        Util.Css.addClass(container, 'moving');
+        Util.Css.addClass(container, Util.Css.name('overlay'));
+        Util.Css.addClass(container, Util.Css.name('moving'));
         Util.Css.css(container, {
           width: document.body.clientWidth + "px",
           height: document.body.clientHeight + "px"
@@ -135,8 +135,8 @@ InPageNotesContainer.prototype._createContainer = function(document) {
     LOG('mouseup');
     if (moving || resizing) {
       moving = resizing = false;
-      Util.Css.removeClass(container, 'moving');
-      Util.Css.removeClass(container, 'overlay');
+      Util.Css.removeClass(container, Util.Css.name('moving'));
+      Util.Css.removeClass(container, Util.Css.name('overlay'));
       Util.Css.css(container, {
         width: 0,
         height: 0

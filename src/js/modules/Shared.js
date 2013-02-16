@@ -1,5 +1,5 @@
-const EXPORTED_SYMBOLS = ['Shared'];
+var EXPORTED_SYMBOLS = ['FloatNotesShared'];
 
-let Shared = {
+var FloatNotesShared = {
     focusNote: null
 };

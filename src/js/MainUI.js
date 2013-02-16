@@ -1,13 +1,13 @@
 /*jshint browser:true, es5:true*/
 /*global gBrowser,XULDocument*/
 //!#include "header.js"
-/*global Cu, LOG, Util, Shared, when*/
+/*global Cu, LOG, Util, FloatNotesShared, when*/
 Cu['import']('resource://floatnotes/URLHandler.js');
 Cu['import']('resource://floatnotes/preferences.js');
 Cu['import']('resource://floatnotes/Mediator.js');
 Cu['import']('resource://floatnotes/LocationListBuilder.js');
 Cu['import']('resource://floatnotes/CompatibilityTester.js');
-/*global URLHandler, Preferences, FloatNotesMediator,
+/*global URLHandler, FloatNotesPreferences, FloatNotesMediator,
  FloatNotesLocationListBuilder, FloatNotesCompatibilityTester*/
 
 function MainUI(note_manager, note_container) {
@@ -42,7 +42,7 @@ function MainUI(note_manager, note_container) {
     document.getElementById('floatnotes-toolbar-button');
   this._popupElement = document.getElementById('floatnotes-edit-popup');
 
-  this.onPreferenceChange('showMenu', Preferences.showMenu);
+  this.onPreferenceChange('showMenu', FloatNotesPreferences.showMenu);
 
   this._isLocationListGenerated = false;
   FloatNotesMediator.setCurrentMainUI(this);
@@ -143,7 +143,7 @@ MainUI.prototype._registerObserver = function() {
     }
   }, true);
 
-  Preferences.addObserver(this, 'showMenu', 'fontSize');
+  FloatNotesPreferences.addObserver(this, 'showMenu', 'fontSize');
 };
 
 MainUI.prototype.observe = function(subject, topic, value) {
@@ -197,7 +197,7 @@ MainUI.prototype._onWindowActivated = function() {
 
 MainUI.prototype._onHashChange = function() {
   "use strict";
-  if (Preferences.updateOnHashChange) {
+  if (FloatNotesPreferences.updateOnHashChange) {
     this.reload();
   }
 };
@@ -234,9 +234,9 @@ MainUI.prototype.loadNotes = function() {
           this._noteContainer.setNotes(notes_data);
           this._updateVisibility(URL);
           this._updateBroadcaster();
-          if (Shared.focusNote) {
-            this._noteContainer.focusNote(Shared.focusNote);
-            Shared.focusNote = null;
+          if (FloatNotesShared.focusNote) {
+            this._noteContainer.focusNote(FloatNotesShared.focusNote);
+            FloatNotesShared.focusNote = null;
           }
         }.bind(this)
       );
@@ -260,7 +260,7 @@ MainUI.prototype.loadNotes = function() {
 
 MainUI.prototype._showNotification = function(msg) {
   "use strict";
-  if (Preferences.showSiteNotSupported === true) {
+  if (FloatNotesPreferences.showSiteNotSupported === true) {
     Util.Dialog.showNotSupportedNotification(msg);
   }
 };
@@ -336,7 +336,7 @@ MainUI.prototype.deleteNote = function(guid) {
   }
   else if (guid) {
     var del = true;
-    if (Preferences.confirmDelete) {
+    if (FloatNotesPreferences.confirmDelete) {
       del = Util.Dialog.confirmDeletion();
     }
 
@@ -405,7 +405,7 @@ MainUI.prototype._updateContextMenu = function() {
   this._menuEntryElements.deleteNote.hidden =
     !this._contextNote ||
     editNoteBroadcaster.hidden ||
-    !Preferences.showContextDelete;
+    !FloatNotesPreferences.showContextDelete;
   this._menuEntryElements.newNote.hidden =
     this._contextNote ||
     editNoteBroadcaster.hidden ||
@@ -414,7 +414,7 @@ MainUI.prototype._updateContextMenu = function() {
   this._menuEntryElements.hideNotes.hidden =
     editNoteBroadcaster.hidden ||
     this._noteContainer.getLength() === 0 ||
-    !Preferences.showContextHide;
+    !FloatNotesPreferences.showContextHide;
 };
 
 MainUI.prototype.openEditPopup = function(note, anchor, cb) {
@@ -451,15 +451,15 @@ MainUI.prototype.openNotesManager = function(event) {
   if (event) {
     event.stopPropagation();
   }
-  if (!('notemanager' in Shared) || Shared.notemanager.closed) {
-    Shared.notemanager = window.open(
+  if (!('notemanager' in FloatNotesShared) || FloatNotesShared.notemanager.closed) {
+    FloatNotesShared.notemanager = window.open(
       'chrome://floatnotes/content/notelist.xul',
       'FloatNotes',
       'chrome,resizable,centerscreen'
     );
   }
   else {
-    Shared.notemanager.focus();
+    FloatNotesShared.notemanager.focus();
   }
 };
 
@@ -468,13 +468,13 @@ MainUI.prototype.openPreferences = function(event) {
   if (event) {
     event.stopPropagation();
   }
-  if (!('preferences' in Shared) || Shared.preferences.closed) {
-    Shared.preferences = window.openDialog(
+  if (!('preferences' in FloatNotesShared) || FloatNotesShared.preferences.closed) {
+    FloatNotesShared.preferences = window.openDialog(
       'chrome://floatnotes/content/preferences.xul',
       'FloatNotes Preferences'
     );
   }
   else {
-    Shared.preferences.focus();
+    FloatNotesShared.preferences.focus();
   }
 };

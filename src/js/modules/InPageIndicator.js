@@ -4,7 +4,7 @@
 
 Cu['import']("resource://floatnotes/preferences.js");
 Cu['import']("resource://gre/modules/PluralForm.jsm");
-/*global Preferences, PluralForm*/
+/*global FloatNotesPreferences, PluralForm*/
 
 
 var EXPORTED_SYMBOLS = ["FloatNotesInPageIndicator"];
@@ -122,7 +122,7 @@ Indicator.prototype._createDOMElements = function(container) {
   Util.Css.css(
     indicator,
     'fontSize',
-     Preferences.fontSize + 'px'
+     FloatNotesPreferences.fontSize + 'px'
   );
 
   indicator.addEventListener('mouseover', function(e) {
@@ -162,7 +162,7 @@ Indicator.prototype.redraw = function() {
   Util.Css.css(
     this._domElements.indicator,
     'fontSize',
-     Preferences.fontSize + 'px'
+     FloatNotesPreferences.fontSize + 'px'
   );
 };
 
@@ -186,7 +186,7 @@ IndicatorProxy.prototype.invalidate = function() {
 };
 
 IndicatorProxy.prototype.updateAndShow = function() {
-  if (Preferences.showIndicator && this._container.getLength()) {
+  if (FloatNotesPreferences.showIndicator && this._container.getLength()) {
     var buckets = this._splitNotes();
     this._above.buildList(buckets[0]);
     this._below.buildList(buckets[1]);
@@ -257,7 +257,7 @@ IndicatorProxy.prototype._addScrollHandler = function(document) {
   var remover = Util.Js.addEventListener(
     document,
     'scroll',
-    Util.Js.debounce(this.updateAndShow.bind(this), Preferences.scrolltimer)
+    Util.Js.debounce(this.updateAndShow.bind(this), FloatNotesPreferences.scrolltimer)
   );
     
   document.defaultView.addEventListener('unload', function handler() {
@@ -277,14 +277,14 @@ IndicatorProxy.prototype.hide = function() {
 };
 
 IndicatorProxy.prototype.startTimeout = function() {
-  if (Preferences.fadeOutAfter > 0) {
+  if (FloatNotesPreferences.fadeOutAfter > 0) {
     this._timer.initWithCallback(
       {
         notify: Util.Js.bind(function(){
           this.hide();
         }, this)
       },
-      Preferences.fadeOutAfter*1000,
+      FloatNotesPreferences.fadeOutAfter*1000,
       this._timer.TYPE_ONE_SHOT
     );
   }

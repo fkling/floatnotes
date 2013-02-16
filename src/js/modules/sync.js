@@ -11,10 +11,10 @@ try {
     Cu['import']("resource://services-sync/util.js");
 
     Cu['import']("resource://floatnotes/SQLiteDatabase.js");
-    Cu['import']("resource://floatnotes/manager.js");
+    Cu['import']("resource://floatnotes/Manager.js");
     /*global FloatNotesSQLiteDatabase, FloatNotesManager, Utils, CryptoWrapper,
              Store, Tracker, Weave*/
-    
+
     // These methods moved to `async.js`
     if(Utils.makeSyncCallback) {
         var Async = Utils;
@@ -28,7 +28,6 @@ try {
           Cu['import']("resource://services-sync/async.js");
         }
     }
-    
 
     var _db = FloatNotesSQLiteDatabase.getInstance();
     var _manager = FloatNotesManager.getInstance();

@@ -2,7 +2,7 @@
 /*jshint browser:true*/
 /*global Components*/
 Components.utils['import']("resource://floatnotes/SQLiteDatabase.js");
-Components.utils['import']("resource://floatnotes/manager.js");
+Components.utils['import']("resource://floatnotes/Manager.js");
 Components.utils['import']("resource://floatnotes/preferences.js");
 Components.utils['import']("resource://floatnotes/util-Locale.js");
 Components.utils['import']("resource://floatnotes/util-Dialog.js");
@@ -11,8 +11,8 @@ Components.utils['import']("resource://floatnotes/URLHandler.js");
 Components.utils['import']("resource://floatnotes/Shared.js");
 Components.utils['import']("resource://floatnotes/when.js");
 Components.utils['import']("resource://gre/modules/PluralForm.jsm");
-/*global FloatNotesSQLiteDatabase, FloatNotesManager, Preferences, Locale,
-  Dialog, Mozilla, FloatNotesURLHandler, Shared, PluralForm, FloatNotesWhen*/
+/*global FloatNotesSQLiteDatabase, FloatNotesManager, FloatNotesPreferences, Locale,
+  Dialog, Mozilla, FloatNotesURLHandler, FloatNotesShared, PluralForm, FloatNotesWhen*/
 
 // DOM elements
 var textBox = document.getElementById('text');
@@ -26,7 +26,7 @@ var searchMsg = document.getElementById('searchMsg');
 var tree = document.getElementById('notes');
 
 // Global vars
-var pref = Preferences;
+var pref = FloatNotesPreferences;
 var PromptService =
   Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
   .getService(Components.interfaces.nsIPromptService);
@@ -295,7 +295,7 @@ var NoteManager = {
           );
           return;
         }
-        Shared.focusNote = note.guid;
+        FloatNotesShared.focusNote = note.guid;
         Mozilla.openAndReuseOneTabPerURL(url);
       }
     }

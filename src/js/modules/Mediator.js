@@ -1,8 +1,9 @@
 "use strict";
 Components.utils['import']("resource://floatnotes/URLHandler.js");
 Components.utils['import']("resource://floatnotes/util-Mozilla.js");
-Components.utils['import']("resource://floatnotes/manager.js");
-/*global URLHandler, Mozilla, FloatNotesManager, FloatNotesURLHandler*/
+Components.utils['import']("resource://floatnotes/Manager.js");
+/*global Mozilla, FloatNotesManager, FloatNotesURLHandler*/
+
 
 var EXPORTED_SYMBOLS = ["FloatNotesMediator"];
 

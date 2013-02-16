@@ -3,7 +3,7 @@
 /*global Cu, Utils*/
 Cu['import']("resource://floatnotes/URLParser.js");
 Cu['import']("resource://floatnotes/preferences.js");
-/*global FloatNotesURLParser, Preferences*/
+/*global FloatNotesURLParser, FloatNotesPreferences*/
 
 var EXPORTED_SYMBOLS = ['FloatNotesHTTPURLParser'];
 
@@ -29,7 +29,7 @@ HTTPURLParser.prototype.getPageQueryUrl = function(location) {
 };
 
 HTTPURLParser.prototype.getPageAnchorUrl = function(location, force) {
-  if(location.hash && (force || Preferences.updateOnHashChange)) {
+  if(location.hash && (force || FloatNotesPreferences.updateOnHashChange)) {
     return location.host + location.pathname + location.hash;
   }
   return '';
@@ -39,7 +39,7 @@ HTTPURLParser.prototype.getPageQueryAnchorUrl = function(location, force) {
   if(
     location.hash &&
     location.search &&
-    (force || Preferences.updateOnHashChange)
+    (force || FloatNotesPreferences.updateOnHashChange)
   ) {
     return location.host + location.pathname + location.search + location.hash;
   }
@@ -71,8 +71,8 @@ HTTPURLParser.prototype.getSearchUrls = function(location) {
   urls.push(this.getAllSitesUrl(location));
   urls.push(this.getSiteUrl(location));
   var includePageUrl = !location.hash ||
-    !Preferences.updateOnHashChange ||
-    Preferences.includePageForHashURLs;
+    !FloatNotesPreferences.updateOnHashChange ||
+    FloatNotesPreferences.includePageForHashURLs;
 
   if(includePageUrl) {
     urls.push(this.getPageUrl(location));

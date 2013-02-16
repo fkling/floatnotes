@@ -5,7 +5,7 @@
 Cu['import']("resource://floatnotes/URLHandler.js");
 Cu['import']("resource://floatnotes/SQLiteDatabase.js");
 Cu['import']("resource://floatnotes/preferences.js");
-/*global FloatNotesURLHandler, FloatNotesSQLiteDatabase, Preferences*/
+/*global FloatNotesURLHandler, FloatNotesSQLiteDatabase, FloatNotesPreferences*/
 
 var EXPORTED_SYMBOLS = ['FloatNotesManager'];
 
@@ -112,12 +112,12 @@ FloatNotesManager.prototype.createNote = function(location, x, y) {
   var note = {
     x: x,
     y: y,
-    w: Preferences.width,
-    h: Preferences.height,
+    w: FloatNotesPreferences.width,
+    h: FloatNotesPreferences.height,
     content: "",
     url: domain,
     protocol: FloatNotesURLHandler.getProtocol(location),
-    color: Preferences.color,
+    color: FloatNotesPreferences.color,
     status: 0
   };
   note.creation_date = note.modification_date = new Date();

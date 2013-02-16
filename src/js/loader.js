@@ -18,8 +18,9 @@ var Loader = {
       var observer = {
         notify: function() {
           LOG('Floatnotes is loading...');
-          Cu['import']('resource://floatnotes/init.js'); /*global Init:true*/
-          Init.init().then(self.createFloatNotesView.bind(self));
+          Cu['import']('resource://floatnotes/Init.js'); 
+          /*global FloatNotesInit:true*/
+          FloatNotesInit.init().then(self.createFloatNotesView.bind(self));
         }
       };
       timer.initWithCallback(observer, 100, timer.TYPE_ONE_SHOT);
@@ -37,7 +38,7 @@ var Loader = {
 
   createFloatNotesView: function(firstrun) {
     "use strict";
-    Cu['import']('resource://floatnotes/manager.js');
+    Cu['import']('resource://floatnotes/Manager.js');
     Cu['import']('resource://floatnotes/SQLiteDatabase.js');
     Cu['import']('resource://floatnotes/InPageNotesContainer.js');
     /*global FloatNotesManager, FloatNotesSQLiteDatabase,

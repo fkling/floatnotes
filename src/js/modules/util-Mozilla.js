@@ -1,6 +1,8 @@
+"use strict";
 //!#include "../header.js"
+/*global Cc, Ci, window*/
 
-EXPORTED_SYMBOLS = ['Mozilla'];
+var EXPORTED_SYMBOLS = ['Mozilla'];
 
 var Mozilla = {
 
@@ -53,7 +55,8 @@ var Mozilla = {
     registerObserver: function(observer) {
         var events = Array.prototype.slice.call(arguments, 1);
         if(!this._observerService) {
-             this._observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+             this._observerService =  Cc["@mozilla.org/observer-service;1"]
+              .getService(Ci.nsIObserverService);
         }
         for(var i = events.length; i--; ) {
             this._observerService.addObserver(observer, events[i], false);
@@ -62,7 +65,8 @@ var Mozilla = {
 
     notifyObserver: function(event, data) {
         if(!this._observerService) {
-             this._observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+             this._observerService = Cc["@mozilla.org/observer-service;1"]
+               .getService(Ci.nsIObserverService);
         }
         this._observerService.notifyObservers(null, event, data);
     },

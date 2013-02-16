@@ -4,18 +4,18 @@
 
 Cu['import']("resource://floatnotes/preferences.js");
 Cu['import']("resource://floatnotes/SQLiteDatabase.js");
-/*global Preferences, FloatNotesSQLiteDatabase */
+/*global FloatNotesPreferences, FloatNotesSQLiteDatabase */
 
-var EXPORTED_SYMBOLS = ['Init'];
+var EXPORTED_SYMBOLS = ['FloatNotesInit'];
 
-var Init = {
+var FloatNotesInit = {
   init: function() {
     this.loadCSS();
     var deferred = Util.Platform.getCurrentVersion().then(function(version) {
       var URL = 'http://www.floatnotes.org/thankyou';
       this.init = function() {return deferred;};
-      var lastVersion = Preferences.version;
-      var firstrun = Preferences.firstrun;
+      var lastVersion = FloatNotesPreferences.version;
+      var firstrun = FloatNotesPreferences.firstrun;
       if (firstrun){
         LOG('First run, version ' + version);
         this.runOnFirstRun();
@@ -47,9 +47,9 @@ var Init = {
 
   runOnFirstRun: function() {
     FloatNotesSQLiteDatabase.getInstance().createTable();
-    Preferences.firstrun = false;
+    FloatNotesPreferences.firstrun = false;
     Util.Platform.getCurrentVersion().then(function(version) {
-        Preferences.version = version;
+        FloatNotesPreferences.version = version;
     });
   },
 
@@ -101,7 +101,7 @@ var Init = {
         );
         upgraded = true;
     }
-    Preferences.version = to;
+    FloatNotesPreferences.version = to;
     return upgraded;
   }
 };

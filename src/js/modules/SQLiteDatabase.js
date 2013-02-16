@@ -3,7 +3,7 @@
 "use strict";
 
 Cu['import']("resource://floatnotes/preferences.js");
-/*global Preferences:true*/
+/*global FloatNotesPreferences:true*/
 
 var EXPORTED_SYMBOLS = ['FloatNotesSQLiteDatabase'];
 
@@ -72,13 +72,13 @@ SQLiteDatabase.prototype.db_ = null;
  */
 SQLiteDatabase.prototype.setDatabase = function(file) {
     if(!file) {
-        if(Preferences.dbLocation === 0 || !Preferences.dbDir) {
+        if(FloatNotesPreferences.dbLocation === 0 || !FloatNotesPreferences.dbDir) {
             file = this.getDefaultStorageFile();
         }
         else {
             file = Cc["@mozilla.org/file/local;1"]
                 .createInstance(Ci.nsILocalFile);
-            file.initWithPath(Preferences.dbDir);
+            file.initWithPath(FloatNotesPreferences.dbDir);
         }
     }
     LOG(file.path);

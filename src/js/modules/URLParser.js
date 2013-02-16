@@ -3,7 +3,7 @@
 /*global Cu*/
 
 Cu['import']("resource://floatnotes/preferences.js");
-/*global Preferences*/
+/*global FloatNotesPreferences*/
 
 var EXPORTED_SYMBOLS = ['FloatNotesURLParser']; 
 
@@ -51,7 +51,7 @@ URLParser.prototype.getStartsWithUrls = function(location) {
 };
 
 URLParser.prototype.getDefaultUrl = function(location) {
-    var def = Preferences.location;
+    var def = FloatNotesPreferences.location;
     var url = '';
     switch(def) {
        case  URLParser.PAGE_QUERY_ANCHOR_URL:

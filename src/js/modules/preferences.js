@@ -1,8 +1,8 @@
 //!#include "../header.js"
 
-const EXPORTED_SYMBOLS = ['Preferences'];
+var EXPORTED_SYMBOLS = ['FloatNotesPreferences'];
 
-let Preferences = {
+var FloatNotesPreferences = {
     _observers: {},
     _do_observe: true,
 
@@ -142,4 +142,4 @@ function getSetter(pref, type) {
     };
 }
 
-Preferences.register();
+FloatNotesPreferences.register();

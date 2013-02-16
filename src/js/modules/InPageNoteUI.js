@@ -5,7 +5,7 @@
 Cu['import']('resource://floatnotes/preferences.js');
 Cu['import']('resource://floatnotes/NoteUI.js');
 
-/*global Preferences: true, FloatNotesNoteUI: true */
+/*global FloatNotesPreferences: true, FloatNotesNoteUI: true */
 
 var EXPORTED_SYMBOLS = ['FloatNotesInPageNoteUI'];
 
@@ -394,7 +394,7 @@ InPageNoteUI.prototype.startMove = function(e) {
   var y = this._noteData.y - e.pageY;
   var opacity = this._elementNode.style.opacity || 1;
   
-  this._elementNode.style.opacity = Preferences.draggingTransparency;
+  this._elementNode.style.opacity = FloatNotesPreferences.draggingTransparency;
   this.setStatus(FloatNotesNoteUI.STATUS.DRAGGING);
   Util.Css.addClass(this._elementNode, Util.Css.name('ifix'));
 
@@ -490,7 +490,7 @@ InPageNoteUI.prototype.startResize = function(e) {
   var height = this._noteData.h - e.pageY;
   var opacity = this._elementNode.style.opacity || 1;
 
-  this._elementNode.style.opacity = Preferences.draggingTransparency;
+  this._elementNode.style.opacity = FloatNotesPreferences.draggingTransparency;
 
   this.setStatus(FloatNotesNoteUI.STATUS.RESIZE);
 
@@ -685,10 +685,10 @@ InPageNoteUI.prototype._updateDOMElements = function() {
     'width:' + this._noteData.w + 'px',
     'height:' + this._noteData.h + 'px',
     'z-index:' + ZINDEX,
-    'opacity:' + Preferences.transparency
+    'opacity:' + FloatNotesPreferences.transparency
   ].join(';');
   Util.Css.css(elements.inner_container, {
-    fontSize: Preferences.fontSize + 'px',
+    fontSize: FloatNotesPreferences.fontSize + 'px',
     backgroundColor: this._noteData.color
   });
   this._setText(this._noteData.content);

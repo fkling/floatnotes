@@ -34,6 +34,14 @@
 <!ENTITY preferences.notifications.note_deletion "Potwierdź usunięcie notatki" >
 <!ENTITY preferences.notifications.site_not_supported "Ostrzegaj, jeśli strona nie jest obsługiwana" >
 
+<!ENTITY preferences.storage.title "Magazyn" >
+<!ENTITY preferences.storage.default_location "Domyślna ścieżka dostępu (folder profilowy)" >
+<!ENTITY preferences.storage.custom_location "Ścieżka dostępu" >
+<!ENTITY preferences.storage.choose "Wybierz..." >
+<!ENTITY preferences.storage.file_exists_message "Nowa docelowa ścieżka dostępu już istnieje. Co chcesz zrobić?" >
+<!ENTITY preferences.storage.overwrite "Nadpisz istniejący plik" >
+<!ENTITY preferences.storage.merge "Scal notatki" >
+<!ENTITY preferences.storage.abort "Przerwij (zachowaj teraźniejszą ścieżkę dostępu)" >
 
 <!ENTITY preferences.sync.title "Synchronizacja" >
 <!ENTITY preferences.sync.enable "Włącz synchronizację (wymagany Firefox Sync)" >

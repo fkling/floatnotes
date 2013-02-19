@@ -11,9 +11,9 @@ var EXPORTED_SYMBOLS = ['FloatNotesInit'];
 var FloatNotesInit = {
   init: function() {
     this.loadCSS();
-    var deferred = Util.Platform.getCurrentVersion().then(function(version) {
+    var promise = Util.Platform.getCurrentVersion().then(function(version) {
       var URL = 'http://www.floatnotes.org/thankyou';
-      this.init = function() {return deferred;};
+      this.init = function() {return promise;};
       var lastVersion = FloatNotesPreferences.version;
       var firstrun = FloatNotesPreferences.firstrun;
       if (firstrun){
@@ -29,7 +29,7 @@ var FloatNotesInit = {
       }
       return firstrun;
     }.bind(this));
-    return deferred;
+    return promise;
   },
 
   loadCSS: function() {
@@ -46,9 +46,13 @@ var FloatNotesInit = {
   },
 
   runOnFirstRun: function() {
-    FloatNotesSQLiteDatabase.getInstance().createTable();
+    LOG('Run first run stuff');
+    FloatNotesSQLiteDatabase.getInstance().createTables();
+    LOG('Created table');
     FloatNotesPreferences.firstrun = false;
+    LOG('Updated preferences');
     Util.Platform.getCurrentVersion().then(function(version) {
+        LOG('Set new version ' + version);
         FloatNotesPreferences.version = version;
     });
   },

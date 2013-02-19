@@ -116,8 +116,17 @@
   <target name="debug">
     <antcall target="build">
       <param name="cpp.debug" value="1" />
-        </antcall>
-    </target>
+    </antcall>
+  </target>
+
+  <target name="ddist">
+    <antcall target="build">
+      <param name="cpp.debug" value="1" />
+    </antcall>
+    <mkdir dir="${dist.dir}" />
+    <zip destfile="${dist.dir}/floatnotes-${version}.xpi" basedir="${build.dir}" excludes="**/.*" />
+    <delete dir="${tmp.dir}" failonerror="false" />
+  </target>
 
   <target name="dist" depends="build">
     <mkdir dir="${dist.dir}" />

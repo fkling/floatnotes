@@ -16,6 +16,7 @@ var NOTE_CLASS_NAME = Util.Css.name('note');
 var DRAG_CLASS_NAME = Util.Css.name('drag');
 var DRAG_HANDLER_CLASS_NAME = Util.Css.name('drag-handler');
 var RESIZE_CLASS_NAME = Util.Css.name('resize');
+var INDICATOR_CLASS_NAME = Util.Css.name('indicator');
 
 // Some helper functions
 var getRefFrom = function getNoteFrom(element) {
@@ -27,7 +28,7 @@ var getRefFrom = function getNoteFrom(element) {
 };
 
 var isIndicator = function isIndicator(element) {
-  return Util.Css.isOrIsContained(element, 'indicator');
+  return Util.Css.isOrIsContained(element, INDICATOR_CLASS_NAME);
 };
 
 var isDragHandler = function isDragHandler(element) {
@@ -90,7 +91,7 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   }, true);
 
   container.addEventListener('mouseover', function(event) {
-    if (!(moving || resizing || options_open || isIndicator(event.target))) {
+    if (!(moving || resizing || options_open || isIndicator(event.target) || event.target === container)) {
       event.stopPropagation();
       var note = self._notes[getRefFrom(event.target)] || self._newNote;
       note.mouseenter();
@@ -98,7 +99,7 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   }, false);
 
   container.addEventListener('mouseout', function(event) {
-    if (!(moving || resizing || options_open || isIndicator(event.target))) {
+    if (!(moving || resizing || options_open || isIndicator(event.target) || event.target === container)) {
       event.stopPropagation();
       var note = self._notes[getRefFrom(event.target)] || self._newNote;
       note.mouseleave();
@@ -108,7 +109,7 @@ InPageNotesContainer.prototype._createContainer = function(document) {
   container.addEventListener('mousedown', function(event) {
     LOG('mousedown');
     var target = event.target;
-    if (!isIndicator(target)) {
+    if (!isIndicator(target) && target !== container) {
       var note = self._notes[getRefFrom(target)] || self._newNote;
       note.raiseToTop();
       if (isDragHandler(target) || isResizeHandler(target)) {

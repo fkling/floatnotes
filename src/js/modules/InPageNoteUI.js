@@ -465,7 +465,6 @@ InPageNoteUI.prototype.onMove = function(
 
 InPageNoteUI.prototype.endMove = function(opacity, e) {
   e.preventDefault();
-  //e.stopPropagation();
 
   this.setStatus(FloatNotesNoteUI.STATUS.NEEDS_SAVE);
   this.unsetStatus(FloatNotesNoteUI.STATUS.DRAGGING);
@@ -562,7 +561,6 @@ InPageNoteUI.prototype.onResize = function(
 InPageNoteUI.prototype.endResize = function(opacity, e) {
   LOG('EndResize');
   e.preventDefault();
-  e.stopPropagation();
 
   var style = this._elementNode.style;
 

@@ -155,6 +155,7 @@ NotesContainer.prototype.detachNotes = function(notes_data){
       note.detach();
       delete this._notes[note.getRef()];
     }
+    this._currentNotes.splice(0);
   }
   else {
     for (var guid in notes_data) {
@@ -168,8 +169,12 @@ NotesContainer.prototype.detachNotes = function(notes_data){
  */
 NotesContainer.prototype.detachNote = function(guid) {
   var ref = this._getRefFor(guid);
-  this._notes[ref].detach();
-  delete this._notes[ref];
+  if (ref) {
+    var note = this._notes[ref];
+    note.detach();
+    delete this._notes[ref];
+    Util.Js.removeObjectFromArray(note, this._currentNotes);
+  }
 };
 
 NotesContainer.prototype.persistNewNote = function(guid) {

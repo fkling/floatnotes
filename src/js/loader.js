@@ -28,7 +28,7 @@ var Loader = {
 
     try {
       LOG('Import sync...');
-      Cu['import']('resource://floatnotes/sync.js');
+      Cu['import']('resource://floatnotes/sync.js', {});
       LOG('Import sync successful');
     }
     catch (e) {

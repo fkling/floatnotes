@@ -173,7 +173,7 @@ InPageNoteUI.prototype._attachEventHandlers = function(elements) {
   var fire = function(event) {
     fireEvent(frame.ownerDocument, frame, event);
   };
-  
+
   var event_handlers = [];
   // Handle and propagate events
   event_handlers.push(Util.Js.addEventListener(
@@ -212,15 +212,6 @@ InPageNoteUI.prototype._attachEventHandlers = function(elements) {
       }
     }.bind(this),
     true
-  ));
-
-  event_handlers.push(Util.Js.addEventListener(
-    elements.text,
-    'click',
-    function(e) {
-      e.stopPropagation();
-    },
-    false
   ));
 
   event_handlers.push(Util.Js.addEventListener(
@@ -285,6 +276,10 @@ InPageNoteUI.prototype._attachEventHandlers = function(elements) {
 
 InPageNoteUI.prototype._detach = function() {
   if (this._elementNode) {
+    // if in edit mode, finish edit mode first
+    if (this.hasStatus(FloatNotesNoteUI.STATUS.EDITING)) {
+      this.endEdit(false);
+    }
     Util.Dom.detach(this._elementNode);
     this._document = null;
     this._container = null;
@@ -329,7 +324,7 @@ InPageNoteUI.prototype.startEdit = function() {
   // listen for edit end
   var event_handlers = [
     Util.Js.addEventListener(window, 'keydown', this.endEdit.bind(this), true),
-    Util.Js.addEventListener(window, 'click', this.endEdit.bind(this), false)
+    Util.Js.addEventListener(window, 'mouseup', this.endEdit.bind(this), true)
   ];
   this._removeEditHandlers = function() {
     event_handlers.forEach(function(remove) { remove(); });
@@ -338,39 +333,56 @@ InPageNoteUI.prototype.startEdit = function() {
 };
 
 InPageNoteUI.prototype.endEdit = function(e) {
-LOG('end edit');
-  var finish = false,
-  abort = false;
+  var finish = false;
+  var abort = false;
 
-  if (e.type === 'keydown' &&
+  if (e === false) { // force abort
+    finish = true;
+    abort = true;
+  }
+  else if (e.type === 'keydown' &&
       e.keyCode === e.DOM_VK_ESCAPE) { //escape was pressed
     finish = true;
     abort = true;
   }
   else if ((e.type === 'keydown' && e.keyCode === 13 && e.ctrlKey) ||
-           (e.type === 'click' && (e.button === undefined || e.button !== 2))) {
-    // If a context menu item is clicked, don't trigger end of edit
-    var target = e.target;
-    do {
-      if (target.id === 'contentAreaContextMenu') {
-        return true;
-      }
-    } while ((target = target.parentNode));
+           (e.type === 'mouseup' && (e.button === undefined || e.button !== 2))) {
 
+    // Handle some mouse event targets separately
+    if (e.type === 'mouseup') {
+      var target = e.target;
+      // don't end edit if note is moved or resized or click was inside textarea
+      if (target === this._domElements.text ||
+        this.hasStatus(FloatNotesNoteUI.STATUS.DRAGGING) ||
+        this.hasStatus(FloatNotesNoteUI.STATUS.RESIZING)) {
+          return true;
+      }
+
+      // If a context menu item is clicked, don't trigger end of edit
+      do {
+        if (target.id === 'contentAreaContextMenu') {
+          return true;
+        }
+      } while ((target = target.parentNode));
+    }
 
     finish = true;
-    var text = this._domElements.text.value;
-    if (!text) {
-      abort = true;
-    }
-    else {
-      this.setText(this._domElements.text.value);
-      this.unsetStatus(FloatNotesNoteUI.STATUS.EDITING);
-      this.save();
-    }
   }
 
   if (finish) {
+    LOG('end edit');
+    var text = this._domElements.text.value;
+
+    // Don't do anything if text didn't change
+    if (this._noteData.content === text) {
+      abort = true;
+    }
+
+    if (!abort) {
+      this.setText(text);
+      this.unsetStatus(FloatNotesNoteUI.STATUS.EDITING);
+      this.save();
+    }
     this._removeEditHandlers();
 
     Util.Css.removeClass(this._elementNode, Util.Css.name('edit'));
@@ -383,7 +395,7 @@ LOG('end edit');
     Util.Mozilla.notifyObserver('floatnotes-note-edit', false);
 
     // if the node was new and no text was entered, remove it
-    if (abort && !this._noteData.id && this._domElements.text.value === '') {
+    if (abort && !this._noteData.id) {
       this.detach();
     }
   }
@@ -396,7 +408,7 @@ InPageNoteUI.prototype.startMove = function(e) {
   var x = this._noteData.x - e.pageX;
   var y = this._noteData.y - e.pageY;
   var opacity = this._elementNode.style.opacity || 1;
-  
+
   this._elementNode.style.opacity = FloatNotesPreferences.draggingTransparency;
   this.setStatus(FloatNotesNoteUI.STATUS.DRAGGING);
   Util.Css.addClass(this._elementNode, Util.Css.name('ifix'));
@@ -407,7 +419,7 @@ InPageNoteUI.prototype.startMove = function(e) {
       window,
       'mouseup',
       this.endMove.bind(this, opacity),
-      true
+      false
     ),
     Util.Js.addEventListener(
       window,
@@ -494,7 +506,12 @@ InPageNoteUI.prototype.startResize = function(e) {
 
   this._elementNode.style.opacity = FloatNotesPreferences.draggingTransparency;
 
-  this.setStatus(FloatNotesNoteUI.STATUS.RESIZE);
+  this.setStatus(FloatNotesNoteUI.STATUS.RESIZING);
+
+  // if we are not editing, we have to adjust the width
+  if (!this.hasStatus(FloatNotesNoteUI.STATUS.EDITING)) {
+    width += NOTE_OFFSET;
+  }
 
   Util.Css.addClass(this._elementNode, Util.Css.name('ifix'));
   var window = this.getWindow();
@@ -503,7 +520,7 @@ InPageNoteUI.prototype.startResize = function(e) {
       window,
       'mouseup',
       this.endResize.bind(this, opacity),
-      true
+      false
     ),
     Util.Js.addEventListener(
       window,
@@ -511,7 +528,7 @@ InPageNoteUI.prototype.startResize = function(e) {
       this.onResize.bind(
         this,
         this.getWindow(),
-        width + NOTE_OFFSET, // add NOTE_OFFSET because of hovering over the note
+        width,
         height,
         this._noteData.x,
         this._noteData.y,
@@ -569,8 +586,12 @@ InPageNoteUI.prototype.endResize = function(opacity, e) {
   Util.Css.removeClass(this._elementNode, Util.Css.name('ifix'));
 
   style.opacity = opacity;
+  var width = parseInt(style.width, 10);
   // -NOTE_OFFSET to compensate hovering
-  this._noteData.w = Math.max(parseInt(style.width, 10) - NOTE_OFFSET, 60);
+  if (!this.hasStatus(FloatNotesNoteUI.STATUS.EDITING)) {
+    width -= NOTE_OFFSET;
+  }
+  this._noteData.w = Math.max(width, 60);
   this._noteData.h = Math.max(parseInt(style.height, 10), 80);
   this.save();
 
@@ -628,6 +649,11 @@ InPageNoteUI.prototype.calculateNewPosition_ = function() {
 };
 
 InPageNoteUI.prototype.mouseenter = function() {
+  LOG('mouseenter');
+  this.setStatus(FloatNotesNoteUI.STATUS.OVER);
+  if (this._editPopupOpen) {
+    return;
+  }
   var elements = this._domElements;
 
   if (this.hasStatus(FloatNotesNoteUI.STATUS.MINIMIZED)) {
@@ -643,6 +669,8 @@ InPageNoteUI.prototype.mouseenter = function() {
 };
 
 InPageNoteUI.prototype.mouseleave = function() {
+  LOG('mouseleave');
+  this.unsetStatus(FloatNotesNoteUI.STATUS.OVER);
   if (!this._editPopupOpen) {
     var elements = this._domElements;
 

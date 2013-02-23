@@ -138,14 +138,16 @@ NoteUI.prototype.updateStatus = function() {
 
 };
 
-
 NoteUI.prototype.update = function(note_data) {
+  // Don't make any changes if we are editing
+  if (this.hasStatus(NoteUI.STATUS.EDITING)) {
+    return;
+  }
   if (note_data) {
     this._noteData = note_data;
   }
   this._update();
   this.updateStatus();
-  //this.setText(this._noteData.content);
 };
 
 

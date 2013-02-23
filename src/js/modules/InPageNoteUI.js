@@ -242,8 +242,9 @@ InPageNoteUI.prototype._attachEventHandlers = function(elements) {
           this.setColor(color);
         }
         this.save();
-        this.update();
-        this.mouseleave();
+        if (!this.hasStatus(FloatNotesNoteUI.STATUS.OVER)) {
+          this.mouseleave();
+        }
       }.bind(this));
     }.bind(this),
     false
@@ -401,6 +402,7 @@ InPageNoteUI.prototype.endEdit = function(e) {
   }
 };
 
+
 InPageNoteUI.prototype.startMove = function(e) {
   e.preventDefault();
   e.stopPropagation();
@@ -442,6 +444,7 @@ InPageNoteUI.prototype.startMove = function(e) {
   };
 };
 
+
 InPageNoteUI.prototype.onMove = function(
   window,
   startX,
@@ -474,7 +477,6 @@ InPageNoteUI.prototype.onMove = function(
 };
 
 
-
 InPageNoteUI.prototype.endMove = function(opacity, e) {
   e.preventDefault();
 
@@ -495,6 +497,7 @@ InPageNoteUI.prototype.endMove = function(opacity, e) {
     Util.Dom.fireEvent(this.getDocument(), this._elementNode, 'mouseup');
   }
 };
+
 
 InPageNoteUI.prototype.startResize = function(e) {
   e.preventDefault();
@@ -611,10 +614,7 @@ InPageNoteUI.prototype.save = function() {
       this._elementNode.id = Util.Css.name('note-' + result.noteData.id);
       this._elementNode.setAttribute('rel', result.noteData.guid);
     }
-    this._domElements.content.title = Util.Locale.get(
-      'note.last_modified',
-      [this._noteData.modification_date.toLocaleString()]
-    );
+    this._setTitle(result.noteData.modification_date);
   }.bind(this));
 };
 
@@ -705,32 +705,57 @@ InPageNoteUI.prototype.raiseToTop  = function() {
 };
 
 
+/**
+ * @override
+ */
+InPageNoteUI.prototype.setColor = function(color) {
+  this.__super__.prototype.setColor.call(this, color);
+  this._setColor(color);
+};
+
+InPageNoteUI.prototype._setColor = function(color) {
+  var elements = this._domElements;
+  Util.Css.css(elements.menu, 'backgroundColor', color);
+  Util.Css.css(elements.drag, 'backgroundColor', color);
+  Util.Css.css(elements.inner_container, 'backgroundColor', color);
+  var darkColor = Util.Css.isDarkColor(color);
+  Util.Css.toggleClass(elements.inner_container, 'dark', darkColor);
+  Util.Css.toggleClass(elements.container, Util.Css.name('dark'), darkColor);
+};
+
+
+InPageNoteUI.prototype._setTitle = function(date) {
+  this._domElements.content.title = Util.Locale.get(
+    'note.last_modified',
+    [date.toLocaleString()]
+  );
+};
+
+
 InPageNoteUI.prototype._updateDOMElements = function() {
+  LOG('Update note UI');
   var elements = this._domElements;
   elements.container.setAttribute('rel', (this._noteData.guid || 'new'));
+  var width = this.hasStatus(FloatNotesNoteUI.STATUS.OVER) ?
+    this._noteData.w + NOTE_OFFSET :
+    this._noteData.w;
+
   elements.container.style.cssText = [
     'left:' + this._noteData.x + 'px',
     'top:' + this._noteData.y + 'px',
-    'width:' + this._noteData.w + 'px',
+    'width:' + width + 'px',
     'height:' + this._noteData.h + 'px',
     'z-index:' + ZINDEX,
     'opacity:' + FloatNotesPreferences.transparency
   ].join(';');
-  Util.Css.css(elements.inner_container, {
-    fontSize: FloatNotesPreferences.fontSize + 'px',
-    backgroundColor: this._noteData.color
-  });
-  this._setText(this._noteData.content);
-  elements.content.title = Util.Locale.get(
-    'note.last_modified',
-    [this._noteData.modification_date.toLocaleString()]
-  );
-  elements.menu.style.backgroundColor = this._noteData.color;
-  elements.drag.style.backgroundColor = this._noteData.color;
 
-  var darkColor = Util.Css.isDarkColor(this._noteData.color);
-  Util.Css.toggleClass(elements.inner_container, 'dark', darkColor);
-  Util.Css.toggleClass(elements.container, Util.Css.name('dark'), darkColor);
+  Util.Css.css(elements.inner_container, {
+    fontSize: FloatNotesPreferences.fontSize + 'px'
+  });
+
+  this._setText(this._noteData.content);
+  this._setColor(this._noteData.color);
+  this._setTitle(this._noteData.modification_date);
 
   // set meta data
   this._elementNode.setAttribute('data-ref', this.getRef());

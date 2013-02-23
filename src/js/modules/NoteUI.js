@@ -22,7 +22,8 @@ NoteUI.STATUS = {
   RESIZING: 8,
   NEEDS_SAVE: 16,
   MINIMIZED: 32,
-  FIXED: 64
+  FIXED: 64,
+  OVER: 128
 };
 
 NoteUI._ref = 1;
@@ -246,7 +247,15 @@ NoteUI.prototype.save = function() {
   if (!this.hasStatus(NoteUI.STATUS.EDITING) &&
       this.hasStatus(NoteUI.STATUS.NEEDS_SAVE)) {
     this.unsetStatus(NoteUI.STATUS.NEEDS_SAVE);
-    return this._container.saveNote(this._noteData);
+    var data = Util.Js.clone(this._noteData);
+    // unset all status that should not be stored
+    data.status &= ~(NoteUI.STATUS.RESIZING |
+                     NoteUI.STATUS.DRAGGING |
+                     NoteUI.STATUS.OVER |
+                     NoteUI.STATUS.EDITING |
+                     NoteUI.STATUS.SAVED
+                    );
+    return this._container.saveNote(data);
   }
   return when.defer().promise;
 };

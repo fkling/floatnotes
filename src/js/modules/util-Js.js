@@ -1,4 +1,5 @@
 //!#include "../header.js"
+/*global Util*/
 "use strict";
 var EXPORTED_SYMBOLS = ['Js'];
 
@@ -33,6 +34,16 @@ var Js = {
         object[attr] = value;
       }
     }
+  },
+
+  clone: function(obj) {
+    var clone = {};
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        clone[prop] = obj[prop];
+      }
+    }
+    return clone;
   },
 
   toArray: function(arrayOrObject) {

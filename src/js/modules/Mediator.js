@@ -12,11 +12,11 @@ var manager = FloatNotesManager.getInstance();
 var FloatNotesMediator = (function() {
 
   var current_main_ui;
-  var observe_changes = true;
+  var locks = 0;
 
   var observer = {
     observe: function(subject, topic, guid) {
-      if(current_main_ui && observe_changes) {
+      if(current_main_ui && locks === 0) {
         switch(topic) {
           case 'floatnotes-note-update':
             manager.getNote(guid).then(function(note_data) {
@@ -63,9 +63,10 @@ var FloatNotesMediator = (function() {
       },
       setCurrentMainUI: function(main_ui) {
         current_main_ui = main_ui;
+        locks = 0;
       },
       observe: function(observe) {
-        observe_changes = !!observe;
+        locks += observe ? 1 : -1;
       }
     };
 }());

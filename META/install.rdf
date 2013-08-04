@@ -14,6 +14,7 @@
     <em:translator>Ivan Grigorov</em:translator>
     <em:translator>Katarzyna Siła-Nowicka</em:translator>
     <em:translator>Regmos</em:translator>
+    <em:translator>Hiroshi Hasebe</em:translator>
     <em:homepageURL>http://thoughts.felix-kling.de/floatnotes</em:homepageURL>
     <em:optionsURL>chrome://floatnotes/content/preferences.xul</em:optionsURL>
     <em:targetApplication>
@@ -51,6 +52,12 @@
       <Description>
         <em:locale>da-DK</em:locale>
         <em:description>Gem noter på websider.</em:description> 
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>ja</em:locale>
+        <em:description>ウェブ・ページに注釈を記入</em:description>
       </Description>
     </em:localized>
   </Description>

@@ -1,0 +1,47 @@
+<!ENTITY preferences.title "FloatNotesの設定" >
+
+<!ENTITY preferences.note.title "ノート" >
+<!ENTITY preferences.note.default_val "既定値" >
+<!ENTITY preferences.note.width "横幅" >
+<!ENTITY preferences.note.height "縦幅" >
+<!ENTITY preferences.note.color "配色:" >
+<!ENTITY preferences.note.font-size.text "フォント・サイズ:" >
+<!ENTITY preferences.note.font-size.unit "px" >
+
+<!ENTITY preferences.location.title "対象" >
+<!ENTITY preferences.location.default_loc "既定値" >
+<!ENTITY preferences.location.query "... クエリ引数を認識 例: www.example.com/page?s=query" >
+<!ENTITY preferences.location.hash "... アンカーを認識 例: www.example.com/page#anchor" >
+<!ENTITY preferences.location.query_hash "... クエリ引数とアンカーを認識 例: www.example.com/page?s=query#anchor" >
+<!ENTITY preferences.location.page "表示中のページ 例: www.example.com/page" >
+<!ENTITY preferences.location.wild_page "表示中のページとその配下のページ 例: 起点がwww.example.com/page" >
+<!ENTITY preferences.location.website "サイト全体 例: www.example.comの全ページ" >
+<!ENTITY preferences.location.updateHash "アンカーの変化に追従" >
+<!ENTITY preferences.location.includePageHash "ページを基準にノートを表示 (クエリ文字列を認識)" >
+
+<!ENTITY preferences.view.title "表示" >
+<!ENTITY preferences.view.show_indicator "表示領域外のノートの存在を通知" >
+<!ENTITY preferences.view.indicator_timeout "通知表示時間:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = 常時表示)" >
+<!ENTITY preferences.view.indicator_timeout_unit "秒" >
+<!ENTITY preferences.view.show_toolbar_button "ツール・バーにボタンを表示" >
+<!ENTITY preferences.view.show_menu "ツール・メニューからFloatNotesを操作" >
+<!ENTITY preferences.view.show_context_delete "コンテキスト・メニューに「ノートを削除」を表示" >
+<!ENTITY preferences.view.show_context_locations "コンテキスト・メニューに「適用範囲の編集」を表示" >
+<!ENTITY preferences.view.show_context_hide "コンテキスト・メニューに「ノートを隠す」を表示" >
+
+<!ENTITY preferences.notifications.title "通知" >
+<!ENTITY preferences.notifications.note_deletion "ノート削除時に確認を求める" >
+<!ENTITY preferences.notifications.site_not_supported "ウェブ・コンテンツが未対応の場合に通知する" >
+
+<!ENTITY preferences.storage.title "記録" >
+<!ENTITY preferences.storage.default_location "保存場所 (プロファイル・フォルダ)" >
+<!ENTITY preferences.storage.custom_location "保存場所を変更" >
+<!ENTITY preferences.storage.choose "選択..." >
+<!ENTITY preferences.storage.file_exists_message "指定されたフォルダは既に存在します. ご確認ください." >
+<!ENTITY preferences.storage.overwrite "既存のデータを上書き" >
+<!ENTITY preferences.storage.merge "ノートをマージ" >
+<!ENTITY preferences.storage.abort "中止 (現行の保存場所を継続使用)" >
+
+<!ENTITY preferences.sync.title "Sync" >
+<!ENTITY preferences.sync.enable "ノートの同期を行う (要Firefox Sync)" >

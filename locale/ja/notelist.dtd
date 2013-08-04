@@ -1,0 +1,18 @@
+<!ENTITY manager.title "FloatNotesマネージャ" >
+
+<!ENTITY button.edit "編集" >
+<!ENTITY button.remove "削除" >
+<!ENTITY button.save "保存" >
+
+<!ENTITY searchtext "検索語を入力 / 左から過去の検索歴を選択..." >
+
+<!ENTITY list.title "タイトル" >
+<!ENTITY list.url "URL" >
+<!ENTITY list.created "作成日時" >
+<!ENTITY list.modified "更新日時" >
+
+<!ENTITY color "配色:" >
+
+<!ENTITY editsearch.title "検索条件を編集" >
+<!ENTITY editsearch.name "名称:" >
+<!ENTITY editsearch.keywords "キーワード:" >

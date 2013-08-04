@@ -1,0 +1,11 @@
+<!ENTITY floatnotes.new "ノートを付加..." >
+<!ENTITY floatnotes.edit "ノートを編集" >
+<!ENTITY floatnotes.delete "ノートを削除" >
+<!ENTITY floatnotes.hide "ノートを隠す" >
+<!ENTITY floatnotes "FloatNotes" >
+<!ENTITY floatnotes.notelist "ノートの管理..." >
+<!ENTITY floatnotes.preferences "設定..." >
+<!ENTITY floatnotes.reload "ノートを再読込" >
+
+<!ENTITY edit_popup.color "配色:" >
+<!ENTITY edit_popup.location "対象" >

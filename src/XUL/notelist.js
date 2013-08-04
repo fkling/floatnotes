@@ -1,18 +1,30 @@
 "use strict";
+var Cu = Components.utils;
 /*jshint browser:true*/
 /*global Components*/
-Components.utils['import']("resource://floatnotes/SQLiteDatabase.js");
-Components.utils['import']("resource://floatnotes/Manager.js");
-Components.utils['import']("resource://floatnotes/preferences.js");
-Components.utils['import']("resource://floatnotes/util-Locale.js");
-Components.utils['import']("resource://floatnotes/util-Dialog.js");
-Components.utils['import']("resource://floatnotes/util-Mozilla.js");
-Components.utils['import']("resource://floatnotes/URLHandler.js");
-Components.utils['import']("resource://floatnotes/Shared.js");
-Components.utils['import']("resource://floatnotes/when.js");
-Components.utils['import']("resource://gre/modules/PluralForm.jsm");
-/*global FloatNotesSQLiteDatabase, FloatNotesManager, FloatNotesPreferences, Locale,
-  Dialog, Mozilla, FloatNotesURLHandler, FloatNotesShared, PluralForm, FloatNotesWhen*/
+Cu['import']("resource://floatnotes/SQLiteDatabase.js");
+Cu['import']("resource://floatnotes/Manager.js");
+Cu['import']("resource://floatnotes/preferences.js");
+Cu['import']("resource://floatnotes/util-Locale.js");
+Cu['import']("resource://floatnotes/util-Dialog.js");
+Cu['import']("resource://floatnotes/util-Mozilla.js");
+Cu['import']("resource://floatnotes/URLHandler.js");
+Cu['import']("resource://floatnotes/Shared.js");
+Cu['import']("resource://floatnotes/when.js");
+Cu['import']("resource://gre/modules/PluralForm.jsm");
+/*global FloatNotesSQLiteDatabase, FloatNotesManager, FloatNotesPreferences, Locale, Dialog, Mozilla, FloatNotesURLHandler, FloatNotesShared, PluralForm, FloatNotesWhen*/
+var Async;
+
+try {
+  Cu['import']("resource://services-common/async.js");
+}
+catch(e) {
+  try { 
+    // If not found, try old location
+    Cu['import']("resource://services-sync/async.js");
+  }
+  catch(ex) {}
+}
 
 // DOM elements
 var textBox = document.getElementById('text');
@@ -641,25 +653,35 @@ var TreeView = {
   getImageSrc: function(row, column){
     var note = NoteManager.getNoteAtIndex(row);
     if (column.id === "content") {
+      faviconService.QueryInterface(Components.interfaces.nsIFaviconService);
+      return faviconService.defaultFavicon.spec;
+      /*
+      * Firefox crashes when the sync callback is used to get the favicon
+      * Use the default favicon for now until we found a solution
       var url = FloatNotesURLHandler.getNoteUrl(note);
       if(url.charAt(url.length - 1) === '*') {
           url = url.substring(0, url.length);
       }
       try {
-        // Some URLs appear to be invalid, e.g. file: URLs
-        return faviconService.getFaviconImageForPage(
-          ioService.newURI(url, null, null)
-        ).spec;
+        if (Async) {
+          var scb = Async.makeSyncCallback();
+          faviconService.QueryInterface(Components.interfaces.mozIAsyncFavicons);
+          // Some URLs appear to be invalid, e.g. file: URLs
+          faviconService.getFaviconURLForPage(
+            ioService.newURI(url, null, null),
+            scb
+          );
+          return Async.waitForSyncCallback(scb).spec;
+        }
       }
-      catch(e) {
-        return null;
-      }
+      catch(e) {}
+      */
     }
     return null;
   },
-  getRowProperties: function(row,props){},
-  getCellProperties: function(row,col,props){},
-  getColumnProperties: function(colid,col,props){},
+  getRowProperties: function(row) { return ''; },
+  getCellProperties: function(row){ return ''; },
+  getColumnProperties: function(colid){ return ''; },
   selectionChanged: function() {
     NoteManager.updateForm();
   },

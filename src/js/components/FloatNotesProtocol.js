@@ -9,7 +9,7 @@ function FloatnotesAboutHandler() { }
 FloatnotesAboutHandler.prototype = {
     scheme: 'floatnotes',
     defaultPort: -1,
-    protocolFlags: ph.URI_LOADABLE_BY_ANYONE,
+    protocolFlags: ph.URI_NOAUTH | ph.URI_NORELATIVE | ph.URI_IS_LOCAL_RESOURCE,
     newChannel : function(aURI) {
         var path = "chrome://floatnotes_note/content/note.html";
         var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);

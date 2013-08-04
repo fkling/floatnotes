@@ -1,0 +1,18 @@
+<!ENTITY manager.title "Administrer FloatNotes" >
+
+<!ENTITY button.edit "Rediger" >
+<!ENTITY button.remove "Fjern" >
+<!ENTITY button.save "Gem" >
+
+<!ENTITY searchtext "Skriv for at søge, eller vælg en gemt søgning fra venstre..." >
+
+<!ENTITY list.title "Titel" >
+<!ENTITY list.url "URL" >
+<!ENTITY list.created "Oprettet" >
+<!ENTITY list.modified "Ændret" >
+
+<!ENTITY color "Farve:" >
+
+<!ENTITY editsearch.title "Rediger søgning" >
+<!ENTITY editsearch.name "Navn:" >
+<!ENTITY editsearch.keywords "Nøgleord:" >

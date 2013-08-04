@@ -1,0 +1,11 @@
+<!ENTITY floatnotes.new "Opret note..." >
+<!ENTITY floatnotes.edit "Redigér note" >
+<!ENTITY floatnotes.delete "Slet note" >
+<!ENTITY floatnotes.hide "Skjul note" >
+<!ENTITY floatnotes "FloatNotes" >
+<!ENTITY floatnotes.notelist "Administrer noter..." >
+<!ENTITY floatnotes.preferences "Indstillinger..." >
+<!ENTITY floatnotes.reload "Genindlæs noter" >
+
+<!ENTITY edit_popup.color "Farve:" >
+<!ENTITY edit_popup.location "Placering" >

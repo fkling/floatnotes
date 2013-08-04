@@ -1,0 +1,47 @@
+<!ENTITY preferences.title "Floatnotes Indstillinger" >
+
+<!ENTITY preferences.note.title "Noter" >
+<!ENTITY preferences.note.default_val "Standardværdier" >
+<!ENTITY preferences.note.width "Bredde:" >
+<!ENTITY preferences.note.height "Højde:" >
+<!ENTITY preferences.note.color "Farve:" >
+<!ENTITY preferences.note.font-size.text "Skrift:" >
+<!ENTITY preferences.note.font-size.unit "px" >
+
+<!ENTITY preferences.location.title "Placering" >
+<!ENTITY preferences.location.default_loc "Standardplacering" >
+<!ENTITY preferences.location.query "... med parameter (www.eksempel.org/side?s=parameter)" >
+<!ENTITY preferences.location.hash "... med anker (www.eksempel.org/side#anker)" >
+<!ENTITY preferences.location.query_hash "... med parameter og anker (www.eksempel.org/side?s=parameter#anker)" >
+<!ENTITY preferences.location.page "Aktuel side (www.eksempel.org/side)" >
+<!ENTITY preferences.location.wild_page "Aktuel side og undersider (www.eksempel.org/side)" >
+<!ENTITY preferences.location.website "Hele websider (www.eksempel.org)" >
+<!ENTITY preferences.location.updateHash "Opdater noter når anker ændres" >
+<!ENTITY preferences.location.includePageHash "Vis note fra side (med parameter)" >
+
+<!ENTITY preferences.view.title "Vis" >
+<!ENTITY preferences.view.show_indicator "Vis besked om noter uden for aktuel sidevisning">
+<!ENTITY preferences.view.indicator_timeout "Nedton efter:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = vis altid)" >
+<!ENTITY preferences.view.indicator_timeout_unit "sekunder" >
+<!ENTITY preferences.view.show_toolbar_button "Vis ikon på værktøjslinie" >
+<!ENTITY preferences.view.show_menu "Vis i menuen 'Funktioner'" >
+<!ENTITY preferences.view.show_context_delete "Vis 'Slet note' i højrekliksmenuen" >
+<!ENTITY preferences.view.show_context_locations "Vis 'Rediger placering' i højrekliksmenuen" >
+<!ENTITY preferences.view.show_context_hide "Vis 'Skjul noter' i højrekliksmenuen" >
+
+<!ENTITY preferences.notifications.title "Beskeder" >
+<!ENTITY preferences.notifications.note_deletion "Bekræft sletning af noter" >
+<!ENTITY preferences.notifications.site_not_supported "Vis advarsel hvis websider ikke understøttes" >
+
+<!ENTITY preferences.storage.title "Datamappe" >
+<!ENTITY preferences.storage.default_location "Standard (profilmappen)" >
+<!ENTITY preferences.storage.custom_location "Tilpasset" >
+<!ENTITY preferences.storage.choose "Vælg..." >
+<!ENTITY preferences.storage.file_exists_message "Den valgte placering findes allerede. Hvad vil du gøre?" >
+<!ENTITY preferences.storage.overwrite "Overskriv" >
+<!ENTITY preferences.storage.merge "Flet noter" >
+<!ENTITY preferences.storage.abort "Annuller (behold aktuel placering)" >
+
+<!ENTITY preferences.sync.title "Synk" >
+<!ENTITY preferences.sync.enable "Aktiver synkronisering (kræver Firefox synk)" >

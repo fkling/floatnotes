@@ -219,13 +219,13 @@ var SearchManager = {
 
   buildList: function() {
     // memorize selected index
-    var selected_index =
-      searchList.selectedIndex > 0 ? searchList.selectedIndex : 0;
     this.emptyList();
     for (var i = 0, l = this.searches.length; i<l; i++) {
       searchList.appendItem.apply(searchList, this.searches[i]);
     }
-    searchList.selectedIndex = selected_index;
+    setTimeout(function() {
+      searchList.selectItem(searchList.getItemAtIndex(0));
+    }, 1);
   },
 
   addSearch: function(name, keywords) {

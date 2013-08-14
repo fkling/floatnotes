@@ -613,6 +613,9 @@ InPageNoteUI.prototype.save = function() {
     if (result['new']) {
       this._elementNode.id = Util.Css.name('note-' + result.noteData.id);
       this._elementNode.setAttribute('rel', result.noteData.guid);
+      if(!this._noteData.id) {
+        this._noteData.id = result.noteData.id;
+      }
     }
     this._setTitle(result.noteData.modification_date);
   }.bind(this));

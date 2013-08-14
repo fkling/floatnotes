@@ -128,7 +128,7 @@
     <delete dir="${tmp.dir}" failonerror="false" />
   </target>
 
-  <target name="dist" depends="build">
+  <target name="dist" depends="clean,build">
     <mkdir dir="${dist.dir}" />
     <zip destfile="${dist.dir}/floatnotes-${version}.xpi" basedir="${build.dir}" excludes="**/.*" />
     <delete dir="${tmp.dir}" failonerror="false" />

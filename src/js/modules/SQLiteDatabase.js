@@ -7,6 +7,23 @@ Cu['import']("resource://floatnotes/preferences.js");
 
 var EXPORTED_SYMBOLS = ['FloatNotesSQLiteDatabase'];
 
+// Columns
+var COLUMNS = {
+  id: true,
+  guid: true,
+  url: true,
+  protocol: true,
+  content: true,
+  h: true,
+  w: true,
+  x: true,
+  y: true,
+  status: true,
+  color: true,
+  modification_date: true,
+  creation_date: true,
+};
+
 // SQL statements
 var SELECT_NOTE = 'SELECT * FROM floatnotes WHERE guid = :guid';
 var SELECT_URLS = 'SELECT DISTINCT url FROM floatnotes ORDER BY url DESC';
@@ -30,6 +47,7 @@ var EXISTS = 'SELECT COUNT(*) as counter FROM floatnotes WHERE guid = :guid';
 var OK = 0;
 var ERROR = 1;
 var CANCELED = 2;
+
 
 /**
  * Provides low level methods to retrieve and store notes to a SQLite database.
@@ -171,7 +189,7 @@ SQLiteDatabase.prototype.clearTables = function() {
  * @return {when.Promise}
  */
 SQLiteDatabase.prototype.getURLs = function() {
-    var statement = this.db_.createStatement(SELECT_URLS);
+    var statement = this.createStatement_(SELECT_URLS);
     var urls = [];
     var deferred = when.defer();
 
@@ -203,7 +221,7 @@ SQLiteDatabase.prototype.getURLs = function() {
  * @return {when.Promise}
  */
 SQLiteDatabase.prototype.getAllNotes = function() {
-    var statement = this.db_.createStatement(SELECT_ALL);
+    var statement = this.createStatement_(SELECT_ALL);
     var notes = [];
     var self = this;
     var deferred = when.defer();
@@ -245,7 +263,7 @@ SQLiteDatabase.prototype.getNotesContaining = function(word_list) {
         ands.push('uc LIKE :w' + i + " ESCAPE '~'");
     }
 
-    var statement = this.db_.createStatement(
+    var statement = this.createStatement_(
         sprintf(SELECT_CONTAINS, ands.join(' AND '))
     );
 
@@ -295,7 +313,7 @@ SQLiteDatabase.prototype.getNotesContaining = function(word_list) {
  */
 SQLiteDatabase.prototype.getNotesForURLs = function(urls) {
     LOG('DB: load notes for urls ' + urls);
-    var statement = this.db_.createStatement(SELECT_FOR_URLS);
+    var statement = this.createStatement_(SELECT_FOR_URLS);
     var params = statement.newBindingParamsArray();
     var notes = [];
     var self = this;
@@ -344,14 +362,9 @@ SQLiteDatabase.prototype.createNoteAndGetId = function(note) {
         note.guid ? ':guid' :  'hex(randomblob(16))'
     );
     LOG('Generated statment: ' + sql);
-    var statement = this.db_.createStatement(sql);
+    var statement = this.createStatement_(sql, note);
     var self = this;
     var deferred = when.defer();
-    for (var param in statement.params) {
-        LOG(param +': ' + note[param]);
-        // .valueOf solves a NS_UNEXPECTED_ERROR for Date values
-        statement.params[param] = note[param].valueOf();
-    }
     statement.executeAsync({
         handleCompletion: function(reason) {
             if (reason === OK) {
@@ -361,10 +374,10 @@ SQLiteDatabase.prototype.createNoteAndGetId = function(note) {
                 // if this is a new note, we have to fetch the auto-
                 // generated guid
                 if(!guid) {
-                    var statement = self.db_.createStatement(
-                        "SELECT guid FROM floatnotes WHERE id = :id"
+                    var statement = self.createStatement_(
+                        "SELECT guid FROM floatnotes WHERE id = :id",
+                        {id: id}
                     );
-                    statement.params.id = id;
                     statement.executeStep();
                     guid = statement.row.guid;
                 }
@@ -389,11 +402,7 @@ SQLiteDatabase.prototype.createNoteAndGetId = function(note) {
  */
 SQLiteDatabase.prototype.updateNote = function(note) {
     LOG('Update note ' + note.guid);
-    var statement = this.db_.createStatement(UPDATE);
-    for (var param in statement.params) {
-        // .valueOf solves a NS_UNEXPECTED_ERROR for Date values
-        statement.params[param] = note[param].valueOf();
-    }
+    var statement = this.createStatement_(UPDATE, note);
     var deferred = when.defer();
     statement.executeAsync({
         handleCompletion: function(reason) {
@@ -418,8 +427,7 @@ SQLiteDatabase.prototype.updateNote = function(note) {
  */
 SQLiteDatabase.prototype.deleteNote = function(guid) {
     LOG('DB:DELETE note with GUID:' + guid);
-    var statement = this.db_.createStatement(DELETE);
-    statement.params.guid = guid;
+    var statement = this.createStatement_(DELETE, {guid: guid});
 
     var deferred = when.defer();
     statement.executeAsync({
@@ -455,10 +463,9 @@ SQLiteDatabase.prototype.executeSimpleSQL = function(statement) {
  * @return {when.Promise}
  */
 SQLiteDatabase.prototype.noteExistsWithId = function(guid) {
-    var statement = this.db_.createStatement(EXISTS),
+    var statement = this.createStatement_(EXISTS, {guid: guid}),
         count = 0,
         deferred = when.defer();
-    statement.params.guid = guid;
 
     statement.executeAsync({
         handleResult: function(result_set) {
@@ -492,8 +499,7 @@ SQLiteDatabase.prototype.noteExistsWithId = function(guid) {
  */
 SQLiteDatabase.prototype.getNote = function(guid) {
     LOG('Get note with GUID ' + guid);
-    var statement = this.db_.createStatement(SELECT_NOTE);
-    statement.params.guid = guid;
+    var statement = this.createStatement_(SELECT_NOTE, {guid: guid});
     var note;
     var self = this;
     var deferred = when.defer();
@@ -527,7 +533,7 @@ SQLiteDatabase.prototype.getNote = function(guid) {
  */
 SQLiteDatabase.prototype.getAllIds = function() {
     LOG('Get all IDs');
-    var statement = this.db_.createStatement("SELECT guid FROM floatnotes");
+    var statement = this.createStatement_("SELECT guid FROM floatnotes");
     var ids = [];
     var deferred = when.defer();
 
@@ -551,6 +557,27 @@ SQLiteDatabase.prototype.getAllIds = function() {
 
     return deferred.promise;
 };
+
+/**
+ * Creates a statement and optionally setting parameters.
+ *
+ * @param {string} sql
+ * @param {Object} parameters
+ * @return {Statement}
+ */
+SQLiteDatabase.prototype.createStatement_ = function(sql, parameters) {
+  var statement = this.db_.createStatement(sql);
+  if (parameters) {
+    var params = statement.params;
+    for (var param in params) {
+      if (COLUMNS[param]) {
+        // .valueOf solves a NS_UNEXPECTED_ERROR for Date values
+        params[param] = parameters[param].valueOf();
+      }
+    }
+  }
+  return statement;
+}
 
 
 /**

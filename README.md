@@ -1,8 +1,16 @@
+### Maintenance mode
 
-FloatNotes
+This addon/project is not actively developed anymore! I will try to provide bug
+fixes in case it breaks in future FF versions, but I'm not planning to
+implement any new features.
 
-Summary
--------
+However, I'm happy to review PRs for new or improved features.
+
+----
+
+# FloatNotes
+
+## Summary
 
 This extension makes it possible to create small notes on any web site. It is basic
 in functionality and design but has some valuable features:
@@ -24,16 +32,15 @@ in functionality and design but has some valuable features:
 For more information, please see [www.floatnotes.org](http://www.floatnotes.org).
 
 
-Libraries
----------
+## Libraries
 
 This extension uses the following libraries:
 
-- [Showdown](http://attacklab.net/showdown/): A JavaScript Markdown parser
+- [Showdown](https://github.com/showdownjs/showdown): A JavaScript Markdown parser
+- [when](https://github.com/cujojs/when): A Promise implementation
 
 
-Usage instructions
-------------------
+## Usage instructions
 
 1. Create a note  
   To create a note, right-click at the location where the note should show up
@@ -54,8 +61,7 @@ Usage instructions
 4. Delete a note
   Select "Delete" from the note's menu  
 
-About "locations" / scope
--------------------------
+## About "locations" / scope
  
  A web site might exist of several sub pages. By default, a note only exists on
  the page it was created. But this can be changed and a note show up on any page

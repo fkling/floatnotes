@@ -1,0 +1,47 @@
+<!ENTITY preferences.title "Préférences de Floatnotes" >
+
+<!ENTITY preferences.note.title "Notes" >
+<!ENTITY preferences.note.default_val "Valeurs par défault" >
+<!ENTITY preferences.note.width "Largeur:" >
+<!ENTITY preferences.note.height "Hauteur:" >
+<!ENTITY preferences.note.color "Couleur:" >
+<!ENTITY preferences.note.font-size.text "Taille de police:" >
+<!ENTITY preferences.note.font-size.unit "pixels" >
+
+<!ENTITY preferences.location.title "Emplacement" >
+<!ENTITY preferences.location.default_loc "Emplacement par défaut" >
+<!ENTITY preferences.location.query "... incluant la requête, par ex.: www.example.com/page?s=requete" >
+<!ENTITY preferences.location.hash "... incluant l'ancre, par ex.: www.example.com/page#ancre" >
+<!ENTITY preferences.location.query_hash "... incluant la requête et l'ancre, par ex.: www.example.com/page?s=requete#ancre" >
+<!ENTITY preferences.location.page "Page courante, e.g.: www.example.com/page" >
+<!ENTITY preferences.location.wild_page "Page courante et sous-pages, par ex.: Pages commencant par www.example.com/page" >
+<!ENTITY preferences.location.website "Site entier, par ex.: Pages commencant par www.example.com" >
+<!ENTITY preferences.location.updateHash "Actualiser les notes quand l'ancre change" >
+<!ENTITY preferences.location.includePageHash "Afficher les notes de la page (incluant la requête)" >
+
+<!ENTITY preferences.view.title "Vue" >
+<!ENTITY preferences.view.show_indicator "Afficher des indicateurs pour les notes hors de la vue courante" >
+<!ENTITY preferences.view.indicator_timeout "Cacher après:" >
+<!ENTITY preferences.view.indicator_timeout_0 "(0 = ne pas cacher)" >
+<!ENTITY preferences.view.indicator_timeout_unit "secondes" >
+<!ENTITY preferences.view.show_toolbar_button "Afficher un boutton dans la barre d'outils" >
+<!ENTITY preferences.view.show_menu "Afficher une entrée dans le menu 'Outils'" >
+<!ENTITY preferences.view.show_context_delete "Afficher 'Supprimer la note' dans le menu contextuel" >
+<!ENTITY preferences.view.show_context_locations "Afficher 'Editer l'emplacement' dans le menu contextuel" >
+<!ENTITY preferences.view.show_context_hide "Afficher 'Cacher les notes' dans le menu contextuel" >
+
+<!ENTITY preferences.notifications.title "Notifications" >
+<!ENTITY preferences.notifications.note_deletion "Confirmer la suppression de notes" >
+<!ENTITY preferences.notifications.site_not_supported "Afficher un avertissement si le site n'est pas supporté" >
+
+<!ENTITY preferences.storage.title "Stockage" >
+<!ENTITY preferences.storage.default_location "Emplacement par défaut (dossier de profile)" >
+<!ENTITY preferences.storage.custom_location "Emplacement personnalisé" >
+<!ENTITY preferences.storage.choose "Choisir..." >
+<!ENTITY preferences.storage.file_exists_message "Le nouvel emplacement existe déjà. Que voulez-vous faire?" >
+<!ENTITY preferences.storage.overwrite "Remplacer le fichier existant" >
+<!ENTITY preferences.storage.merge "Fusionner les notes" >
+<!ENTITY preferences.storage.abort "Annuler (conserver l'emplacement courant)" >
+
+<!ENTITY preferences.sync.title "Sync" >
+<!ENTITY preferences.sync.enable "Activer la synchronisation (nécessite Firefox Sync)" >

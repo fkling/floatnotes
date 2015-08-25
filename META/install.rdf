@@ -15,6 +15,7 @@
     <em:translator>Katarzyna Siła-Nowicka</em:translator>
     <em:translator>Regmos</em:translator>
     <em:translator>Hiroshi Hasebe</em:translator>
+    <em:translator>Dominique Faure</em:translator>
     <em:homepageURL>http://floatnotes.org</em:homepageURL>
     <em:optionsURL>chrome://floatnotes/content/preferences.xul</em:optionsURL>
     <em:targetApplication>
@@ -58,6 +59,12 @@
       <Description>
         <em:locale>ja</em:locale>
         <em:description>ウェブ・ページに注釈を記入</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>fr-FR</em:locale>
+        <em:description>Creation de notes volantes sur n'importe quel site web.</em:description>
       </Description>
     </em:localized>
   </Description>

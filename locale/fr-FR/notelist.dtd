@@ -11,7 +11,7 @@
 <!ENTITY list.created "Création" >
 <!ENTITY list.modified "Modification" >
 
-<!ENTITY color "Coleur:" >
+<!ENTITY color "Couleur:" >
 
 <!ENTITY editsearch.title "Editer la recherche" >
 <!ENTITY editsearch.name "Nom:" >

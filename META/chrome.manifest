@@ -17,6 +17,7 @@ locale floatnotes pl locale/pl/
 locale floatnotes bg locale/bg/
 locale floatnotes da-DK locale/da-DK/
 locale floatnotes ja locale/ja/
+locale floatnotes fr-FR locale/fr-FR/
 
 EXTRA_PP_COMPONENTS = \
       FloatNotesProtocol.js \

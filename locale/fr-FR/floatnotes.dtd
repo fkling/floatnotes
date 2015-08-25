@@ -1,7 +1,7 @@
-<!ENTITY floatnotes.new "Créer note..." >
-<!ENTITY floatnotes.edit "Editer note" >
+<!ENTITY floatnotes.new "Créer une note..." >
+<!ENTITY floatnotes.edit "Editer la note" >
 <!ENTITY floatnotes.delete "Supprimer note" >
-<!ENTITY floatnotes.hide "Cacher notes" >
+<!ENTITY floatnotes.hide "Cacher les notes" >
 <!ENTITY floatnotes "FloatNotes" >
 <!ENTITY floatnotes.notelist "Gestionnaire de Notes..." >
 <!ENTITY floatnotes.preferences "Préferences..." >

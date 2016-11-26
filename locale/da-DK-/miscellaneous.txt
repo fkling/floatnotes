@@ -1,0 +1,7 @@
+locale floatnotes da-DK locale/da-DK/
+
+<em:translator>Regmos</em:translator>
+  
+<Description>
+<em:locale>da-DK</em:locale>
+<em:description>Gem noter på websider.</em:description>
